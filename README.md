@@ -101,6 +101,32 @@ This guide covers features from **Java 8 through Java 21+**, with emphasis on:
 
 ---
 
+## Bonus Content
+
+In addition to the 215 interview questions, this guide includes comprehensive bonus materials to support your preparation:
+
+### Quick Reference Materials
+- **[Cheat Sheets](./bonus/cheat-sheets/README.md)** - 10 quick reference guides (Collections, Concurrency, Streams, JVM Flags, Testing, Design Patterns)
+- **[Glossary](./bonus/glossary/README.md)** - 600+ Java terminology definitions with examples
+- **[Code Templates](./bonus/code-templates/README.md)** - 13 production-ready code templates (Thread Pool, LRU Cache, Rate Limiter, Design Patterns)
+
+### Learning Resources
+- **[Resources](./bonus/resources/README.md)** - 250+ curated resources (books, courses, tools, communities, blogs)
+- **[Study Plans](./bonus/study-plans/README.md)** - 10 structured study plans (2-week to 12-week, career progression)
+
+### Interview Preparation
+- **[Interview Tips](./bonus/interview-tips/README.md)** - 11 interview guides (Technical, Coding, System Design, Behavioral, Time Management)
+- **[Mock Interview Schedule](./bonus/study-plans/mock-interview-schedule.md)** - Structured mock interview practice
+
+### Advanced Topics (Senior/Staff Level)
+- **[Advanced Topics](./bonus/advanced-topics/README.md)** - 10 deep dives (Generics, Concurrency, JVM Tuning, Microservices, Security)
+- **[Case Studies](./bonus/case-studies/README.md)** - 10 real-world production scenarios (Migration, Performance, Security, Scaling)
+- **[Architecture Patterns](./bonus/architecture-patterns/README.md)** - 10 architecture patterns (DDD, CQRS, Event Sourcing, Clean Architecture)
+- **[Database Patterns](./bonus/database-patterns/README.md)** - 10 database patterns (Connection Pooling, Transactions, Sharding)
+- **[Testing Strategies](./bonus/testing-strategies/README.md)** - 10 testing strategies (TDD, Mutation Testing, Chaos Engineering, Load Testing)
+
+---
+
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
