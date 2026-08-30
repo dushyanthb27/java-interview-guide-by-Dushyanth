@@ -1,29 +1,27 @@
 # Q4: What Are Weak References in Java?
 
-[← Back to Memory Management](./README.md)
+## 📋 Question
+What are Weak References in Java? When should you use them, and what are the common use cases?
+
+## Difficulty: 🟠 Intermediate
 
 ---
 
-## Overview
+## 💡 Answer
 
 A `WeakReference<T>` is a reference type that does **not** prevent its referent from being garbage collected. An object that is only weakly reachable will be collected at the **next GC cycle**, regardless of available memory.
 
----
-
-## Reference Strength Hierarchy
+### Reference Strength Hierarchy
 
 ```
-Strong  >  Soft  >  Weak  >  Phantom
-  │          │        │         │
-  │          │        │         └── get() always null; for cleanup scheduling
-  │          │        └──────────── Collected at next GC
-  │          └───────────────────── Collected under memory pressure
-  └──────────────────────────────── Never collected while reachable
+Strong  >  Weak  >  Phantom
+  │          │         │
+  │          │         └── get() always null; for cleanup scheduling
+  │          └──────────── Collected at next GC
+  └──────────────────────── Never collected while reachable
 ```
 
----
-
-## Basic Usage
+### Basic Usage
 
 ```java
 import java.lang.ref.WeakReference;
@@ -50,43 +48,7 @@ public class WeakReferenceDemo {
 }
 ```
 
----
-
-## WeakReference with ReferenceQueue
-
-A `ReferenceQueue` lets you detect when a weakly referenced object has been collected:
-
-```java
-import java.lang.ref.WeakReference;
-import java.lang.ref.ReferenceQueue;
-
-public class WeakRefQueueDemo {
-
-    public static void main(String[] args) throws InterruptedException {
-        ReferenceQueue<Object> queue = new ReferenceQueue<>();
-        Object obj = new Object();
-
-        WeakReference<Object> weakRef = new WeakReference<>(obj, queue);
-
-        System.out.println("Before GC: " + weakRef.get());   // Not null
-
-        obj = null;    // Remove strong reference
-        System.gc();
-        Thread.sleep(100);
-
-        System.out.println("After GC: " + weakRef.get());    // null
-
-        // Check if the reference was enqueued
-        if (queue.poll() == weakRef) {
-            System.out.println("WeakReference was enqueued — object collected");
-        }
-    }
-}
-```
-
----
-
-## WeakHashMap
+### WeakHashMap
 
 `WeakHashMap<K, V>` is a `Map` implementation where **keys** are held via weak references. When a key is garbage collected, the entry is automatically removed.
 
@@ -118,20 +80,7 @@ public class WeakHashMapDemo {
 }
 ```
 
-### ⚠️ Important: String literal keys don't work
-
-```java
-// ❌ Anti-pattern: String literals are always strongly referenced from the pool
-Map<String, Object> map = new WeakHashMap<>();
-map.put("key", someValue);   // "key" is interned — never collected!
-
-// ✅ Use new String() to avoid the string pool (for demonstration)
-map.put(new String("key"), someValue);   // This key CAN be collected
-```
-
----
-
-## Use Case 1: Metadata/Annotation Cache
+### Use Case 1: Metadata/Annotation Cache
 
 Attach extra data to objects without preventing their collection:
 
@@ -155,70 +104,10 @@ public class MetadataCache {
         Map<String, Object> attrs = metadata.get(target);
         return attrs != null ? attrs.get(key) : null;
     }
-
-    public int size() {
-        return metadata.size();
-    }
 }
 ```
 
-```java
-// Usage
-MetadataCache cache = new MetadataCache();
-Object widget = new Object();
-
-cache.setMetadata(widget, "color", "blue");
-System.out.println(cache.size());   // 1
-
-widget = null;
-System.gc();
-Thread.sleep(100);
-
-System.out.println(cache.size());   // 0 — metadata auto-cleaned
-```
-
----
-
-## Use Case 2: Canonical Mapping (Interning)
-
-Ensure only one instance of equivalent objects exists, without preventing collection:
-
-```java
-import java.lang.ref.WeakReference;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-public class CanonicalMap<T> {
-
-    private final Map<T, WeakReference<T>> map = new ConcurrentHashMap<>();
-
-    /**
-     * Returns the canonical instance equal to the given value.
-     * If no canonical instance exists (or was collected), the given value becomes canonical.
-     */
-    public T canonicalize(T value) {
-        WeakReference<T> existingRef = map.get(value);
-        if (existingRef != null) {
-            T existing = existingRef.get();
-            if (existing != null) {
-                return existing;   // Return the canonical instance
-            }
-        }
-
-        // Register this value as canonical
-        map.put(value, new WeakReference<>(value));
-        return value;
-    }
-
-    public int size() {
-        return map.size();
-    }
-}
-```
-
----
-
-## Use Case 3: Observer Pattern Without Leaks
+### Use Case 2: Observer Pattern Without Leaks
 
 ```java
 import java.lang.ref.WeakReference;
@@ -243,8 +132,6 @@ public class EventEmitter<T> {
             if (listener != null) {
                 listener.onEvent(event);
             }
-            // Note: CopyOnWriteArrayList doesn't support iterator.remove()
-            // Cleanup stale refs periodically or on emit
         }
     }
 
@@ -259,21 +146,7 @@ interface EventListener<T> {
 }
 ```
 
----
-
-## Weak vs Strong Reference Comparison
-
-| Aspect              | Strong Reference       | WeakReference                        |
-|---------------------|------------------------|--------------------------------------|
-| **Prevents GC**     | Yes                    | No                                   |
-| **Collected when**  | Never (while reachable)| Next GC cycle                        |
-| **get() returns**   | Always the object      | Object or null                       |
-| **Use case**        | Normal references      | Caches, metadata, observer patterns  |
-| **Thread-safety**   | N/A                    | get() is atomic; map access isn't    |
-
----
-
-## Common Pitfalls
+### Common Pitfalls
 
 ```java
 // ❌ Anti-pattern: creating a weak reference while also holding a strong reference
@@ -294,9 +167,7 @@ if (d != null) {
 }
 ```
 
----
-
-## Best Practices
+### Best Practices
 
 ```java
 // ✅ Always null-check the result of get()
@@ -320,4 +191,7 @@ if (d != null) {
 
 ---
 
-[← Q3: Memory Leaks](./q03-memory-leaks.md) | [Next: Q5 - Soft References →](./q05-soft-references.md)
+## 📚 Related Topics
+- [Memory Leaks](./03-memory-leaks.md)
+- [Object Lifecycle](./02-object-lifecycle.md)
+- [Stack vs Heap](../07-jvm-internals/09-stack-vs-heap.md)

@@ -287,9 +287,6 @@ record DigitalWallet(String provider, String email) implements PaymentMethod {
 ### ⚡ Performance Tip
 Sealed classes enable the JVM to perform **exhaustive type checking at compile time**, which means `switch` expressions over sealed types don't need a `default` branch. This eliminates dead-code paths and allows the JIT compiler to optimize the type dispatch more aggressively. Record patterns combined with sealed types enable the JIT to perform **scalar replacement** — decomposing record objects into their component values on the stack, avoiding heap allocation entirely. In performance-critical path processing (like AST evaluation or protocol parsing), sealed hierarchies with records can be as fast as manual `if-else instanceof` chains while being dramatically more maintainable.
 
-### 🔧 JVM Internals
-At the bytecode level, sealed classes use the `PermittedSubclasses` attribute (introduced in class file version 61.0, Java 17) to list the fully qualified names of permitted subtypes. The JVM verifier checks this attribute during class loading: if a class attempts to extend a sealed class without being listed in `PermittedSubclasses`, a `VerifyError` is thrown. The `sealed`, `non-sealed`, and `permits` keywords are purely source-level constructs — they compile to the `ACC_FINAL` flag (for final), the `PermittedSubclasses` attribute (for sealed), or nothing special (for non-sealed, which is a normal class). Pattern matching over sealed types compiles to a series of `instanceof` checks followed by casts, but the compiler can omit the `default` branch because the type hierarchy is closed. Future JVM optimizations may use the `PermittedSubclasses` information to implement switch over sealed types using **type-indexed jump tables** rather than sequential type checks.
-
 ---
 
 ## 🎯 Interviewer Insight
@@ -301,6 +298,6 @@ Sealed classes test a candidate's knowledge of **modern Java type system design*
 3. How would you model a binary tree using sealed classes and records?
 
 ## 📚 Related Topics
-- [Records in Java 14+](./q14-records-java14.md)
-- [Enums in Java](./q12-enums-in-java.md)
-- [Control Flow — Switch Expressions](./q05-control-flow-statements.md)
+- [Records in Java 14+](./14-records-java14.md)
+- [Enums in Java](./12-enums-in-java.md)
+- [Control Flow — Switch Expressions](./05-control-flow-statements.md)

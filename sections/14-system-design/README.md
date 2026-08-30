@@ -15,16 +15,16 @@ System design questions in Java interviews test your ability to apply Java conce
 ## Question Index
 | # | Question | Difficulty | File |
 |---|----------|------------|------|
-| 1 | Design a Thread Pool | 🟠 | [q01](./q01-design-thread-pool.md) |
-| 2 | Design a Cache (LRU) | 🟠 | [q02](./q02-design-cache.md) |
-| 3 | Design a Connection Pool | 🟠 | [q03](./q03-design-connection-pool.md) |
-| 4 | Design a Message Queue | 🔴 | [q04](./q04-design-message-queue.md) |
-| 5 | Design a Rate Limiter | 🟠 | [q05](./q05-design-rate-limiter.md) |
-| 6 | Design a Simple File System | 🟠 | [q06](./q06-design-file-system.md) |
-| 7 | Design a URL Shortener | 🟡 | [q07](./q07-design-url-shortener.md) |
-| 8 | Design a Distributed Counter | 🔴 | [q08](./q08-design-distributed-counter.md) |
-| 9 | Design a Leaderboard | 🟠 | [q09](./q09-design-leaderboard.md) |
-| 10 | Design a Chat System | 🔴 | [q10](./q10-design-chat-system.md) |
+| 1 | Design a Thread Pool | 🟠 | [01-design-thread-pool.md](./01-design-thread-pool.md) |
+| 2 | Design a Cache (LRU) | 🟠 | [02-design-cache.md](./02-design-cache.md) |
+| 3 | Design a Connection Pool | 🟠 | [03-design-connection-pool.md](./03-design-connection-pool.md) |
+| 4 | Design a Message Queue | 🔴 | [04-design-message-queue.md](./04-design-message-queue.md) |
+| 5 | Design a Rate Limiter | 🟠 | [05-design-rate-limiter.md](./05-design-rate-limiter.md) |
+| 6 | Design a Simple File System | 🟠 | [06-design-file-system.md](./06-design-file-system.md) |
+| 7 | Design a URL Shortener | 🟡 | [07-design-url-shortener.md](./07-design-url-shortener.md) |
+| 8 | Design a Distributed Counter | 🔴 | [08-design-distributed-counter.md](./08-design-distributed-counter.md) |
+| 9 | Design a Leaderboard | 🟠 | [09-design-leaderboard.md](./09-design-leaderboard.md) |
+| 10 | Design a Chat System | 🔴 | [10-design-chat-system.md](./10-design-chat-system.md) |
 
 ## Key Takeaways
 - System design questions test your ability to apply concurrency, collections, and patterns

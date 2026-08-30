@@ -1,9 +1,9 @@
 # Q7: Design a URL Shortener
 
-## Question
-Design and implement a URL Shortener service in Java. Use base62 encoding, HashMap storage, counter-based ID generation, collision handling, redirection, and statistics tracking.
+## 📋 Question
+Design a URL shortener service like bit.ly. Discuss the data structures, encoding scheme, and scalability considerations.
 
-## Difficulty: Easy
+## Difficulty: Medium
 
 ---
 
@@ -12,387 +12,310 @@ Design and implement a URL Shortener service in Java. Use base62 encoding, HashM
 ### Requirements
 
 **Functional Requirements:**
-- Shorten a long URL to a short URL (e.g., `http://short.ly/abc123`)
-- Redirect a short URL to the original long URL
-- Custom alias support (optional vanity URLs)
-- Link expiration (TTL)
-- Click statistics tracking (total clicks, clicks by date)
+- Generate short URLs from long URLs
+- Redirect short URLs to original URLs
+- Custom short URLs
+- Analytics (click tracking)
+- Expiration dates
 
 **Non-Functional Requirements:**
-- Thread-safe for concurrent shortening and redirection
-- O(1) lookup for redirection
-- Collision-free short URL generation
-- Unique short codes guaranteed
+- Low latency (< 100ms for redirect)
+- High availability
+- Scalable to billions of URLs
+- Unique short URL generation
 
-### API Design
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Client Browser                        │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                  Load Balancer                            │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+        ▼              ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│  API Server  │ │  API Server  │ │  API Server  │
+└──────┬───────┘ └──────┬───────┘ └──────┬───────┘
+       │               │               │
+       └───────────────┼───────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                  Database Cluster                       │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐  │
+│  │  Primary DB  │ │  Replica DB  │ │  Replica DB  │  │
+│  └──────────────┘ └──────────────┘ └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### URL Encoding
 
 ```java
-public interface UrlShortenerService {
-    ShortenResult shorten(String longUrl);
-    ShortenResult shorten(String longUrl, String customAlias);
-    ShortenResult shorten(String longUrl, long ttlMillis);
-    String resolve(String shortCode);
-    UrlStats getStats(String shortCode);
-    boolean delete(String shortCode);
-}
+public class URLEncoder {
+    private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int BASE = ALPHABET.length();
 
-public class ShortenResult {
-    private final String shortCode;
-    private final String shortUrl;
-    private final String longUrl;
-    private final long createdAt;
-    private final long expiresAt;
-    // constructor, getters ...
-}
+    public static String encode(long id) {
+        StringBuilder shortUrl = new StringBuilder();
+        
+        while (id > 0) {
+            shortUrl.append(ALPHABET.charAt((int) (id % BASE)));
+            id /= BASE;
+        }
+        
+        return shortUrl.reverse().toString();
+    }
 
-public class UrlStats {
-    private final String shortCode;
-    private final String longUrl;
-    private final long totalClicks;
-    private final Map<String, Long> clicksByDate; // "2024-01-15" -> count
-    private final long createdAt;
-    // constructor, getters ...
+    public static long decode(String shortUrl) {
+        long id = 0;
+        
+        for (int i = 0; i < shortUrl.length(); i++) {
+            char c = shortUrl.charAt(i);
+            id = id * BASE + ALPHABET.indexOf(c);
+        }
+        
+        return id;
+    }
 }
 ```
 
-### Implementation
+### Database Schema
 
-#### Base62 Encoder
+```sql
+CREATE TABLE url_mappings (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    long_url VARCHAR(2048) NOT NULL,
+    short_code VARCHAR(10) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NULL,
+    user_id VARCHAR(50),
+    click_count INT DEFAULT 0
+);
 
-```java
-public class Base62Encoder {
-
-    private static final String BASE62_CHARS =
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    public static String encode(long number) {
-        if (number == 0) return String.valueOf(BASE62_CHARS.charAt(0));
-
-        StringBuilder sb = new StringBuilder();
-        while (number > 0) {
-            sb.append(BASE62_CHARS.charAt((int) (number % 62)));
-            number /= 62;
-        }
-        return sb.reverse().toString();
-    }
-
-    public static long decode(String encoded) {
-        long result = 0;
-        for (char c : encoded.toCharArray()) {
-            result = result * 62 + BASE62_CHARS.indexOf(c);
-        }
-        return result;
-    }
-}
+CREATE INDEX idx_short_code ON url_mappings(short_code);
+CREATE INDEX idx_user_id ON url_mappings(user_id);
 ```
 
-#### URL Entry
+### Service Implementation
 
 ```java
-import java.time.LocalDate;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UrlEntry {
+public class URLShortenerService {
+    private final Map<String, URLMapping> urlMap;
+    private final AtomicLong idGenerator;
+    private final URLEncoder urlEncoder;
 
-    private final String shortCode;
-    private final String longUrl;
-    private final long createdAt;
-    private final long expiresAt; // 0 = never expires
-    private final AtomicLong totalClicks = new AtomicLong(0);
-    private final ConcurrentHashMap<String, AtomicLong> clicksByDate = new ConcurrentHashMap<>();
-
-    public UrlEntry(String shortCode, String longUrl, long ttlMillis) {
-        this.shortCode = shortCode;
-        this.longUrl = longUrl;
-        this.createdAt = System.currentTimeMillis();
-        this.expiresAt = (ttlMillis > 0) ? createdAt + ttlMillis : 0;
+    public URLShortenerService() {
+        this.urlMap = new ConcurrentHashMap<>();
+        this.idGenerator = new AtomicLong(1);
+        this.urlEncoder = new URLEncoder();
     }
 
-    public boolean isExpired() {
-        return expiresAt > 0 && System.currentTimeMillis() > expiresAt;
+    public String shortenURL(String longUrl) {
+        return shortenURL(longUrl, null, null);
     }
 
-    public void recordClick() {
-        totalClicks.incrementAndGet();
-        String today = LocalDate.now().toString();
-        clicksByDate.computeIfAbsent(today, k -> new AtomicLong(0)).incrementAndGet();
-    }
-
-    public String getShortCode() { return shortCode; }
-    public String getLongUrl() { return longUrl; }
-    public long getCreatedAt() { return createdAt; }
-    public long getExpiresAt() { return expiresAt; }
-    public long getTotalClicks() { return totalClicks.get(); }
-    public ConcurrentHashMap<String, AtomicLong> getClicksByDate() { return clicksByDate; }
-}
-```
-
-#### URL Shortener Service
-
-```java
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-public class InMemoryUrlShortener implements UrlShortenerService {
-
-    private static final String BASE_URL = "http://short.ly/";
-    private static final int MIN_CODE_LENGTH = 6;
-
-    private final ConcurrentHashMap<String, UrlEntry> shortCodeToEntry = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, String> longUrlToShortCode = new ConcurrentHashMap<>();
-    private final AtomicLong counter = new AtomicLong(100_000); // start above 0 for longer codes
-
-    @Override
-    public ShortenResult shorten(String longUrl) {
-        return shorten(longUrl, 0);
-    }
-
-    @Override
-    public ShortenResult shorten(String longUrl, String customAlias) {
-        validateUrl(longUrl);
-
-        if (customAlias == null || customAlias.isEmpty()) {
-            return shorten(longUrl);
+    public String shortenURL(String longUrl, String customCode, String userId) {
+        // Validate URL
+        if (!isValidURL(longUrl)) {
+            throw new IllegalArgumentException("Invalid URL");
         }
 
-        // Check alias availability
-        if (shortCodeToEntry.containsKey(customAlias)) {
-            throw new IllegalArgumentException("Alias already taken: " + customAlias);
+        long id = idGenerator.getAndIncrement();
+        String shortCode = customCode != null ? customCode : urlEncoder.encode(id);
+
+        // Check for collision
+        if (urlMap.containsKey(shortCode)) {
+            throw new IllegalArgumentException("Short code already exists");
         }
 
-        UrlEntry entry = new UrlEntry(customAlias, longUrl, 0);
-        shortCodeToEntry.put(customAlias, entry);
-        longUrlToShortCode.put(longUrl, customAlias);
-
-        return new ShortenResult(customAlias, BASE_URL + customAlias, longUrl,
-                                  entry.getCreatedAt(), entry.getExpiresAt());
+        URLMapping mapping = new URLMapping(id, longUrl, shortCode, userId);
+        urlMap.put(shortCode, mapping);
+        
+        return shortCode;
     }
 
-    @Override
-    public ShortenResult shorten(String longUrl, long ttlMillis) {
-        validateUrl(longUrl);
-
-        // Deduplication: return existing short URL if already shortened
-        String existing = longUrlToShortCode.get(longUrl);
-        if (existing != null) {
-            UrlEntry existingEntry = shortCodeToEntry.get(existing);
-            if (existingEntry != null && !existingEntry.isExpired()) {
-                return new ShortenResult(existing, BASE_URL + existing, longUrl,
-                                          existingEntry.getCreatedAt(), existingEntry.getExpiresAt());
-            }
+    public String getLongURL(String shortCode) {
+        URLMapping mapping = urlMap.get(shortCode);
+        if (mapping == null) {
+            throw new IllegalArgumentException("Short URL not found");
         }
 
-        // Generate unique short code
-        String shortCode = generateShortCode();
+        // Check expiration
+        if (mapping.isExpired()) {
+            urlMap.remove(shortCode);
+            throw new IllegalArgumentException("Short URL has expired");
+        }
 
-        UrlEntry entry = new UrlEntry(shortCode, longUrl, ttlMillis);
-        shortCodeToEntry.put(shortCode, entry);
-        longUrlToShortCode.put(longUrl, shortCode);
-
-        return new ShortenResult(shortCode, BASE_URL + shortCode, longUrl,
-                                  entry.getCreatedAt(), entry.getExpiresAt());
+        // Increment click count
+        mapping.incrementClickCount();
+        
+        return mapping.getLongUrl();
     }
 
-    @Override
-    public String resolve(String shortCode) {
-        UrlEntry entry = shortCodeToEntry.get(shortCode);
-
-        if (entry == null) {
-            return null; // 404
+    public URLStats getStats(String shortCode) {
+        URLMapping mapping = urlMap.get(shortCode);
+        if (mapping == null) {
+            throw new IllegalArgumentException("Short URL not found");
         }
 
-        if (entry.isExpired()) {
-            shortCodeToEntry.remove(shortCode);
-            longUrlToShortCode.remove(entry.getLongUrl());
-            return null; // expired
-        }
-
-        // Record click for statistics
-        entry.recordClick();
-        return entry.getLongUrl();
+        return new URLStats(
+            mapping.getLongUrl(),
+            mapping.getClickCount(),
+            mapping.getCreatedAt(),
+            mapping.getUserId()
+        );
     }
 
-    @Override
-    public UrlStats getStats(String shortCode) {
-        UrlEntry entry = shortCodeToEntry.get(shortCode);
-        if (entry == null) {
-            throw new IllegalArgumentException("Short code not found: " + shortCode);
-        }
-
-        Map<String, Long> dailyClicks = entry.getClicksByDate().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get()));
-
-        return new UrlStats(shortCode, entry.getLongUrl(), entry.getTotalClicks(),
-                            dailyClicks, entry.getCreatedAt());
-    }
-
-    @Override
-    public boolean delete(String shortCode) {
-        UrlEntry entry = shortCodeToEntry.remove(shortCode);
-        if (entry != null) {
-            longUrlToShortCode.remove(entry.getLongUrl());
+    private boolean isValidURL(String url) {
+        try {
+            new java.net.URL(url).toURI();
             return true;
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
-    // --- Internal helpers ---
+    static class URLMapping {
+        private final long id;
+        private final String longUrl;
+        private final String shortCode;
+        private final String userId;
+        private final long createdAt;
+        private final Long expiresAt;
+        private final AtomicInteger clickCount;
 
-    private String generateShortCode() {
-        // Counter-based ID ensures uniqueness — no collision possible
-        long id = counter.incrementAndGet();
-        String code = Base62Encoder.encode(id);
-
-        // Pad to minimum length
-        while (code.length() < MIN_CODE_LENGTH) {
-            code = "0" + code;
+        URLMapping(long id, String longUrl, String shortCode, String userId) {
+            this.id = id;
+            this.longUrl = longUrl;
+            this.shortCode = shortCode;
+            this.userId = userId;
+            this.createdAt = System.currentTimeMillis();
+            this.expiresAt = null;
+            this.clickCount = new AtomicInteger(0);
         }
-        return code;
+
+        URLMapping(long id, String longUrl, String shortCode, String userId, long expiresAt) {
+            this.id = id;
+            this.longUrl = longUrl;
+            this.shortCode = shortCode;
+            this.userId = userId;
+            this.createdAt = System.currentTimeMillis();
+            this.expiresAt = expiresAt;
+            this.clickCount = new AtomicInteger(0);
+        }
+
+        String getLongUrl() { return longUrl; }
+        String getShortCode() { return shortCode; }
+        String getUserId() { return userId; }
+        long getCreatedAt() { return createdAt; }
+        Long getExpiresAt() { return expiresAt; }
+        int getClickCount() { return clickCount.get(); }
+        
+        boolean isExpired() {
+            return expiresAt != null && System.currentTimeMillis() > expiresAt;
+        }
+        
+        void incrementClickCount() {
+            clickCount.incrementAndGet();
+        }
     }
 
-    private void validateUrl(String url) {
-        if (url == null || url.isEmpty()) {
-            throw new IllegalArgumentException("URL cannot be null or empty");
+    static class URLStats {
+        private final String longUrl;
+        private final int clickCount;
+        private final long createdAt;
+        private final String userId;
+
+        URLStats(String longUrl, int clickCount, long createdAt, String userId) {
+            this.longUrl = longUrl;
+            this.clickCount = clickCount;
+            this.createdAt = createdAt;
+            this.userId = userId;
         }
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            throw new IllegalArgumentException("URL must start with http:// or https://");
-        }
+
+        // Getters
+        public String getLongUrl() { return longUrl; }
+        public int getClickCount() { return clickCount; }
+        public long getCreatedAt() { return createdAt; }
+        public String getUserId() { return userId; }
     }
 }
 ```
 
-### Why Counter-Based IDs Avoid Collisions
-
-| Approach | Collision Risk | Thread Safety | Notes |
-|----------|---------------|---------------|-------|
-| Counter + Base62 | None (monotonic) | `AtomicLong` | Simple, predictable |
-| Random + Check | Low, but possible | Needs CAS loop | Unpredictable codes |
-| MD5/SHA hash | Very low, but possible | Stateless | Wasted bits (truncation) |
-| UUID | None | Built-in | Too long for short URLs |
-
-The counter approach is ideal because `AtomicLong.incrementAndGet()` guarantees a unique value per call — no collision handling needed.
-
-### Concurrency Considerations
-
-| Concern | Solution |
-|---------|----------|
-| Short code generation | `AtomicLong` counter — lock-free, unique |
-| URL lookup | `ConcurrentHashMap` — lock-free reads |
-| Click statistics | `AtomicLong` per counter — no locking |
-| Daily click tracking | `ConcurrentHashMap` with `AtomicLong` values |
-| Deduplication | `longUrlToShortCode` reverse map |
-| Expiration | Lazy cleanup on `resolve()` |
-
-### Performance Analysis
-
-| Operation | Complexity | Notes |
-|-----------|-----------|-------|
-| `shorten()` | O(1) | Counter increment + map put |
-| `resolve()` | O(1) | HashMap lookup |
-| `getStats()` | O(D) | D = number of distinct days with clicks |
-| `delete()` | O(1) | Map remove |
-
-### Testing Strategy
+### API Endpoint
 
 ```java
-public class UrlShortenerTest {
+import org.springframework.web.bind.annotation.*;
 
-    @Test
-    void testShortenAndResolve() {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        ShortenResult result = shortener.shorten("https://www.example.com/very/long/url");
+@RestController
+@RequestMapping("/api")
+public class URLShortenerController {
+    private final URLShortenerService urlShortener;
 
-        assertNotNull(result.getShortCode());
-        assertTrue(result.getShortUrl().startsWith("http://short.ly/"));
-
-        String resolved = shortener.resolve(result.getShortCode());
-        assertEquals("https://www.example.com/very/long/url", resolved);
+    public URLShortenerController(URLShortenerService urlShortener) {
+        this.urlShortener = urlShortener;
     }
 
-    @Test
-    void testCustomAlias() {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        ShortenResult result = shortener.shorten("https://example.com", "my-link");
+    @PostMapping("/shorten")
+    public Map<String, String> shortenURL(@RequestBody Map<String, String> request) {
+        String longUrl = request.get("longUrl");
+        String customCode = request.get("customCode");
+        String userId = request.get("userId");
 
-        assertEquals("my-link", result.getShortCode());
-        assertEquals("https://example.com", shortener.resolve("my-link"));
+        String shortCode = urlShortener.shortenURL(longUrl, customCode, userId);
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("shortCode", shortCode);
+        response.put("shortUrl", "https://short.ly/" + shortCode);
+        return response;
     }
 
-    @Test
-    void testDuplicateAlias() {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        shortener.shorten("https://example.com", "taken");
-
-        assertThrows(IllegalArgumentException.class,
-            () -> shortener.shorten("https://other.com", "taken"));
+    @GetMapping("/{shortCode}")
+    public Map<String, String> redirect(@PathVariable String shortCode) {
+        String longUrl = urlShortener.getLongURL(shortCode);
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("longUrl", longUrl);
+        return response;
     }
 
-    @Test
-    void testExpiration() throws InterruptedException {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        ShortenResult result = shortener.shorten("https://example.com", 200); // 200ms TTL
-
-        assertNotNull(shortener.resolve(result.getShortCode()));
-        Thread.sleep(300);
-        assertNull(shortener.resolve(result.getShortCode()));
-    }
-
-    @Test
-    void testClickStatistics() {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        ShortenResult result = shortener.shorten("https://example.com");
-
-        shortener.resolve(result.getShortCode());
-        shortener.resolve(result.getShortCode());
-        shortener.resolve(result.getShortCode());
-
-        UrlStats stats = shortener.getStats(result.getShortCode());
-        assertEquals(3, stats.getTotalClicks());
-    }
-
-    @Test
-    void testDeduplication() {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        ShortenResult r1 = shortener.shorten("https://example.com");
-        ShortenResult r2 = shortener.shorten("https://example.com");
-
-        assertEquals(r1.getShortCode(), r2.getShortCode()); // same URL returns same code
-    }
-
-    @Test
-    void testConcurrentShortening() throws Exception {
-        InMemoryUrlShortener shortener = new InMemoryUrlShortener();
-        ExecutorService exec = Executors.newFixedThreadPool(10);
-        Set<String> codes = ConcurrentHashMap.newKeySet();
-
-        for (int i = 0; i < 1000; i++) {
-            final int idx = i;
-            exec.submit(() -> {
-                ShortenResult r = shortener.shorten("https://example.com/page/" + idx);
-                codes.add(r.getShortCode());
-            });
-        }
-
-        exec.shutdown();
-        exec.awaitTermination(10, TimeUnit.SECONDS);
-        assertEquals(1000, codes.size()); // all codes unique
+    @GetMapping("/stats/{shortCode}")
+    public URLStats getStats(@PathVariable String shortCode) {
+        return urlShortener.getStats(shortCode);
     }
 }
 ```
+
+### Scalability Considerations
+
+| Aspect | Solution | Impact |
+|--------|----------|--------|
+| Database | Master-slave replication | Read scalability |
+| Caching | Redis for hot URLs | Reduced database load |
+| Encoding | Base62 encoding | Compact short URLs |
+| Load Balancing | Round-robin DNS | High availability |
+| Analytics | Async processing | Non-blocking redirects |
 
 ---
 
 ## Interviewer Insight
-This is often a warm-up system design question. Interviewers want to see Base62 encoding knowledge, a clear uniqueness strategy (counter vs. hash), and awareness of edge cases (expiration, deduplication, collision). For senior candidates, discuss scaling: distributed ID generation (Snowflake IDs), database sharding, caching hot URLs, and analytics pipelines.
+Interviewers want to see that you understand URL shortener design: encoding schemes, database schema, and scalability. Strong candidates discuss base62 encoding, collision handling, and caching strategies.
 
 ## Follow-up Questions
-1. How would you generate unique IDs in a distributed system with multiple servers?
-2. How would you handle analytics at scale (millions of clicks per second)?
-3. How would you prevent abuse (e.g., someone shortening millions of spam URLs)?
+1. How do you handle collisions in short URL generation?
+2. What encoding scheme would you use and why?
+3. How do you handle custom short URLs?
 
-## Related Topics
-- [Collections Framework](../03-collections-framework/README.md)
-- [Performance Optimization](../12-performance-optimization/README.md)
+## 📚 Related Topics
+- [Cache Design](./02-design-cache.md)
+- [Database Patterns](../../bonus/06-database-patterns/README.md)
+- [System Design Principles](../12-performance-optimization/README.md)

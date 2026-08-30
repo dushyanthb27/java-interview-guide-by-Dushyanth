@@ -6,15 +6,11 @@ This section contains advanced, senior/staff level content that goes beyond the 
 
 | Topic | Description | Difficulty |
 |-------|-------------|------------|
-| [Advanced Generics](./advanced-generics-deep-dive.md) | Variance, F-bounded polymorphism, type tokens | 🔴 Expert |
-| [Advanced Concurrency Patterns](./advanced-concurrency-patterns.md) | StampedLock, LongAdder, custom synchronization | 🔴 Expert |
-| [Advanced JVM GC Tuning](./advanced-jvm-gc-tuning.md) | G1 vs ZGC vs Shenandoah tuning strategies | 🔴 Expert |
-| [Advanced Stream Optimization](./advanced-stream-optimization.md) | Stream performance, parallel vs sequential | 🔴 Expert |
-| [Advanced Spring Internals](./advanced-spring-internals.md) | Bean lifecycle, AOP proxy mechanisms | 🔴 Expert |
-| [Advanced Database Optimization](./advanced-database-optimization.md) | Connection pooling, query optimization, indexing | 🔴 Expert |
-| [Advanced Microservices Patterns](./advanced-microservices-patterns.md) | Saga pattern, CQRS, event sourcing | 🔴 Expert |
-| [Advanced Observability](./advanced-observability.md) | Distributed tracing, metrics, logging patterns | 🔴 Expert |
-| [Advanced Security Patterns](./advanced-security-patterns.md) | OAuth2, JWT, security best practices | 🔴 Expert |
+| [Advanced JVM GC Tuning](./01-advanced-jvm-gc-tuning.md) | G1 vs ZGC vs Shenandoah tuning strategies | 🔴 Expert |
+| [Advanced Stream Optimization](./02-advanced-stream-optimization.md) | Stream performance, parallel vs sequential | 🔴 Expert |
+| [Advanced Concurrency Patterns](./03-advanced-concurrency-patterns.md) | StampedLock, LongAdder, custom synchronization | 🔴 Expert |
+| [Advanced Database Optimization](./04-advanced-database-optimization.md) | Connection pooling, query optimization, indexing | 🔴 Expert |
+| [Advanced Generics Deep-Dive](./05-advanced-generics-deep-dive.md) | Variance, F-bounded polymorphism, type tokens | 🔴 Expert |
 
 ## 🎯 Who Should Read This?
 

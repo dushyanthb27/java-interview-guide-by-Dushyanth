@@ -1,9 +1,9 @@
 # Q4: Design a Message Queue
 
-## Question
-Design and implement an in-memory Message Queue in Java. Support topics, pub/sub, consumer groups, message ordering, acknowledgment, and dead letter queues.
+## 📋 Question
+Design a message queue system. Discuss the data structures, message ordering, and delivery guarantees.
 
-## Difficulty: Hard
+## Difficulty: Medium
 
 ---
 
@@ -12,414 +12,341 @@ Design and implement an in-memory Message Queue in Java. Support topics, pub/sub
 ### Requirements
 
 **Functional Requirements:**
-- Create/delete topics
-- Producers publish messages to a topic
-- Consumers subscribe to topics and receive messages
-- Consumer groups — each message delivered to one consumer per group
-- Message ordering within a topic partition
-- Acknowledgment — messages redelivered if not acknowledged
-- Dead letter queue for repeatedly failed messages
+- Publish and subscribe to messages
+- Message ordering guarantees
+- At-least-once and at-most-once delivery
+- Dead letter queue for failed messages
+- Message persistence
 
 **Non-Functional Requirements:**
-- Thread-safe publish and consume
-- High throughput with minimal lock contention
-- At-least-once delivery guarantee
-- Configurable retry count before dead-lettering
+- High throughput (1M+ messages/sec)
+- Low latency (< 100ms)
+- Horizontal scalability
+- Fault tolerance
 
-### API Design
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  Producers                             │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                 Message Broker (Kafka-style)             │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │  Topic/Exchange                                     │  │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐        │  │
+│  │  │ Partition│ │ Partition│ │ Partition│        │  │
+│  │  │    0     │ │    1     │ │    2     │        │  │
+│  │  └──────────┘ └──────────┘ └──────────┘        │  │
+│  └──────────────────────────────────────────────────┘  │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+        ▼              ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│  Consumer 1  │ │  Consumer 2  │ │  Consumer 3  │
+│  (Consumer   │ │  (Consumer   │ │  (Consumer   │
+│   Group A)    │ │   Group B)    │ │   Group C)    │
+└──────────────┘ └──────────────┘ └──────────────┘
+```
+
+### Message Structure
 
 ```java
-public interface MessageQueue {
-    void createTopic(String topicName, int partitions);
-    void deleteTopic(String topicName);
-    void publish(String topic, String key, byte[] payload);
-    String subscribe(String topic, String consumerGroup, MessageHandler handler);
-    void unsubscribe(String subscriptionId);
-    void acknowledge(String subscriptionId, String messageId);
-}
-
-@FunctionalInterface
-public interface MessageHandler {
-    void onMessage(Message message);
-}
-
 public class Message {
     private final String id;
     private final String topic;
-    private final String key;
     private final byte[] payload;
     private final long timestamp;
-    private int deliveryAttempts;
-    // constructor, getters ...
+    private final Map<String, String> headers;
+    private final int partitionKey;
+
+    public Message(String id, String topic, byte[] payload, 
+                   int partitionKey, Map<String, String> headers) {
+        this.id = id;
+        this.topic = topic;
+        this.payload = payload;
+        this.partitionKey = partitionKey;
+        this.headers = headers;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    // Getters
+    public String getId() { return id; }
+    public String getTopic() { return topic; }
+    public byte[] getPayload() { return payload; }
+    public long getTimestamp() { return timestamp; }
+    public Map<String, String> getHeaders() { return headers; }
+    public int getPartitionKey() { return partitionKey; }
 }
 ```
 
-### Implementation
+### Partitioning Strategy
+
+```java
+public class Partitioner {
+    private final int numPartitions;
+
+    public Partitioner(int numPartitions) {
+        this.numPartitions = numPartitions;
+    }
+
+    public int partition(String key, int numPartitions) {
+        if (key == null) {
+            return (int) (Math.random() * numPartitions);
+        }
+        return Math.abs(key.hashCode() % numPartitions);
+    }
+
+    // Consistent hashing for better distribution
+    public int consistentHashPartition(String key) {
+        if (key == null) {
+            return (int) (Math.random() * numPartitions);
+        }
+        
+        // Use consistent hashing
+        int hash = key.hashCode();
+        return ((hash & Integer.MAX_VALUE) % numPartitions);
+    }
+}
+```
+
+### Consumer Group Management
+
+```java
+public class ConsumerGroup {
+    private final String groupId;
+    private final String topic;
+    private final Map<Integer, ConsumerPartition> partitions;
+    private final int numConsumers;
+
+    public ConsumerGroup(String groupId, String topic, int numPartitions, int numConsumers) {
+        this.groupId = groupId;
+        this.topic = topic;
+        this.numConsumers = numConsumers;
+        this.partitions = new HashMap<>();
+        
+        // Assign partitions to consumers
+        for (int i = 0; i < numPartitions; i++) {
+            int consumerId = i % numConsumers;
+            partitions.put(i, new ConsumerPartition(consumerId, i));
+        }
+    }
+
+    public int getPartitionForConsumer(int consumerId) {
+        return partitions.entrySet().stream()
+            .filter(entry -> entry.getValue().getConsumerId() == consumerId)
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(-1);
+    }
+
+    static class ConsumerPartition {
+        private final int consumerId;
+        private final int partitionId;
+        private long offset;
+
+        ConsumerPartition(int consumerId, int partitionId) {
+            this.consumerId = consumerId;
+            this.partitionId = partitionId;
+            this.offset = 0;
+        }
+
+        int getConsumerId() { return consumerId; }
+        int getPartitionId() { return partitionId; }
+        long getOffset() { return offset; }
+        void setOffset(long offset) { this.offset = offset; }
+    }
+}
+```
+
+### Message Queue Implementation
 
 ```java
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryMessageQueue implements MessageQueue {
+public class MessageQueue {
+    private final String topic;
+    private final int numPartitions;
+    private final List<Partition> partitions;
+    private final Partitioner partitioner;
+    private final Map<String, ConsumerGroup> consumerGroups;
 
-    private final ConcurrentHashMap<String, Topic> topics = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Subscription> subscriptions = new ConcurrentHashMap<>();
-    private final AtomicLong subscriptionIdGen = new AtomicLong(0);
-    private final ScheduledExecutorService redeliveryScheduler;
-    private final int maxRetries;
+    public MessageQueue(String topic, int numPartitions) {
+        this.topic = topic;
+        this.numPartitions = numPartitions;
+        this.partitions = new ArrayList<>();
+        this.partitioner = new Partitioner(numPartitions);
+        this.consumerGroups = new ConcurrentHashMap<>();
 
-    public InMemoryMessageQueue(int maxRetries) {
-        this.maxRetries = maxRetries;
-        this.redeliveryScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "mq-redelivery");
-            t.setDaemon(true);
-            return t;
-        });
-        // Check for unacknowledged messages every 5 seconds
-        redeliveryScheduler.scheduleAtFixedRate(this::redeliverUnacked, 5, 5, TimeUnit.SECONDS);
-    }
-
-    // --- Topic ---
-
-    static class Topic {
-        final String name;
-        final int partitionCount;
-        final List<Partition> partitions;
-        final ConcurrentHashMap<String, ConsumerGroup> consumerGroups = new ConcurrentHashMap<>();
-        final BlockingQueue<Message> deadLetterQueue = new LinkedBlockingQueue<>();
-
-        Topic(String name, int partitionCount) {
-            this.name = name;
-            this.partitionCount = partitionCount;
-            this.partitions = new ArrayList<>(partitionCount);
-            for (int i = 0; i < partitionCount; i++) {
-                partitions.add(new Partition(i));
-            }
-        }
-
-        int partitionFor(String key) {
-            if (key == null) return ThreadLocalRandom.current().nextInt(partitionCount);
-            return Math.abs(key.hashCode() % partitionCount);
+        for (int i = 0; i < numPartitions; i++) {
+            partitions.add(new Partition(i));
         }
     }
 
-    // --- Partition ---
+    public void publish(Message message) {
+        int partitionIndex = partitioner.partition(
+            String.valueOf(message.getPartitionKey()), 
+            numPartitions
+        );
+        partitions.get(partitionIndex).append(message);
+    }
+
+    public void subscribe(String groupId, int numConsumers) {
+        ConsumerGroup group = new ConsumerGroup(groupId, topic, numPartitions, numConsumers);
+        consumerGroups.put(groupId, group);
+    }
+
+    public Message poll(String groupId, int consumerId) {
+        ConsumerGroup group = consumerGroups.get(groupId);
+        if (group == null) return null;
+
+        int partitionId = group.getPartitionForConsumer(consumerId);
+        if (partitionId == -1) return null;
+
+        return partitions.get(partitionId).poll();
+    }
 
     static class Partition {
-        final int id;
-        final BlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+        private final int partitionId;
+        private final BlockingQueue<Message> messages;
+        private final AtomicLong offset = new AtomicLong(0);
 
-        Partition(int id) { this.id = id; }
-    }
-
-    // --- Consumer Group ---
-
-    static class ConsumerGroup {
-        final String name;
-        final List<Subscription> members = new CopyOnWriteArrayList<>();
-        private int roundRobinIndex = 0;
-
-        ConsumerGroup(String name) { this.name = name; }
-
-        synchronized Subscription nextConsumer() {
-            if (members.isEmpty()) return null;
-            Subscription sub = members.get(roundRobinIndex % members.size());
-            roundRobinIndex++;
-            return sub;
+        Partition(int partitionId) {
+            this.partitionId = partitionId;
+            this.messages = new LinkedBlockingQueue<>(10000);
         }
-    }
 
-    // --- Subscription ---
-
-    static class Subscription {
-        final String id;
-        final String topicName;
-        final String consumerGroup;
-        final MessageHandler handler;
-        final ConcurrentHashMap<String, Message> pendingAcks = new ConcurrentHashMap<>();
-        volatile boolean active = true;
-
-        Subscription(String id, String topicName, String consumerGroup, MessageHandler handler) {
-            this.id = id;
-            this.topicName = topicName;
-            this.consumerGroup = consumerGroup;
-            this.handler = handler;
+        void append(Message message) {
+            messages.offer(message);
+            offset.incrementAndGet();
         }
-    }
 
-    // --- Core Operations ---
-
-    @Override
-    public void createTopic(String topicName, int partitions) {
-        if (partitions <= 0) throw new IllegalArgumentException("Partitions must be > 0");
-        topics.computeIfAbsent(topicName, name -> new Topic(name, partitions));
-    }
-
-    @Override
-    public void deleteTopic(String topicName) {
-        Topic topic = topics.remove(topicName);
-        if (topic != null) {
-            topic.consumerGroups.values().forEach(group ->
-                group.members.forEach(sub -> sub.active = false));
+        Message poll() {
+            return messages.poll();
         }
-    }
 
-    @Override
-    public void publish(String topicName, String key, byte[] payload) {
-        Topic topic = topics.get(topicName);
-        if (topic == null) throw new IllegalArgumentException("Topic not found: " + topicName);
-
-        String messageId = UUID.randomUUID().toString();
-        Message message = new Message(messageId, topicName, key, payload, System.currentTimeMillis());
-
-        // Route to partition based on key
-        int partitionIdx = topic.partitionFor(key);
-        Partition partition = topic.partitions.get(partitionIdx);
-        partition.messages.offer(message);
-
-        // Dispatch to consumer groups
-        dispatchMessages(topic, partition);
-    }
-
-    @Override
-    public String subscribe(String topicName, String consumerGroupName, MessageHandler handler) {
-        Topic topic = topics.get(topicName);
-        if (topic == null) throw new IllegalArgumentException("Topic not found: " + topicName);
-
-        String subId = "sub-" + subscriptionIdGen.incrementAndGet();
-        Subscription sub = new Subscription(subId, topicName, consumerGroupName, handler);
-
-        ConsumerGroup group = topic.consumerGroups.computeIfAbsent(
-            consumerGroupName, ConsumerGroup::new);
-        group.members.add(sub);
-        subscriptions.put(subId, sub);
-
-        return subId;
-    }
-
-    @Override
-    public void unsubscribe(String subscriptionId) {
-        Subscription sub = subscriptions.remove(subscriptionId);
-        if (sub == null) return;
-        sub.active = false;
-
-        Topic topic = topics.get(sub.topicName);
-        if (topic != null) {
-            ConsumerGroup group = topic.consumerGroups.get(sub.consumerGroup);
-            if (group != null) {
-                group.members.remove(sub);
-            }
-        }
-    }
-
-    @Override
-    public void acknowledge(String subscriptionId, String messageId) {
-        Subscription sub = subscriptions.get(subscriptionId);
-        if (sub != null) {
-            sub.pendingAcks.remove(messageId);
-        }
-    }
-
-    // --- Internal dispatch ---
-
-    private void dispatchMessages(Topic topic, Partition partition) {
-        Message msg;
-        while ((msg = partition.messages.poll()) != null) {
-            final Message message = msg;
-
-            for (ConsumerGroup group : topic.consumerGroups.values()) {
-                Subscription consumer = group.nextConsumer();
-                if (consumer != null && consumer.active) {
-                    deliverMessage(consumer, message, topic);
-                }
-            }
-        }
-    }
-
-    private void deliverMessage(Subscription sub, Message message, Topic topic) {
-        sub.pendingAcks.put(message.getId(), message);
-        try {
-            sub.handler.onMessage(message);
-        } catch (Exception e) {
-            System.err.println("Handler failed for message " + message.getId() + ": " + e.getMessage());
-            // Message stays in pendingAcks for redelivery
-        }
-    }
-
-    // --- Redelivery of unacknowledged messages ---
-
-    private void redeliverUnacked() {
-        for (Subscription sub : subscriptions.values()) {
-            if (!sub.active) continue;
-
-            Topic topic = topics.get(sub.topicName);
-            if (topic == null) continue;
-
-            for (Map.Entry<String, Message> entry : sub.pendingAcks.entrySet()) {
-                Message msg = entry.getValue();
-                msg.incrementDeliveryAttempts();
-
-                if (msg.getDeliveryAttempts() > maxRetries) {
-                    // Move to dead letter queue
-                    sub.pendingAcks.remove(entry.getKey());
-                    topic.deadLetterQueue.offer(msg);
-                    System.err.println("Message " + msg.getId() + " moved to DLQ after "
-                        + maxRetries + " attempts");
-                } else {
-                    // Redeliver
-                    try {
-                        sub.handler.onMessage(msg);
-                    } catch (Exception e) {
-                        // will retry again next cycle
-                    }
-                }
-            }
-        }
+        long getOffset() { return offset.get(); }
     }
 }
 ```
 
-#### Message Class
+### Delivery Guarantees
+
+#### At-Least-Once Delivery
 
 ```java
-public class Message {
-    private final String id;
-    private final String topic;
-    private final String key;
-    private final byte[] payload;
-    private final long timestamp;
-    private volatile int deliveryAttempts = 0;
+public class AtLeastOnceConsumer {
+    private final Set<String> processedMessages = new HashSet<>();
+    private final MessageQueue queue;
+    private final String groupId;
+    private final int consumerId;
 
-    public Message(String id, String topic, String key, byte[] payload, long timestamp) {
-        this.id = id;
-        this.topic = topic;
-        this.key = key;
-        this.payload = payload;
-        this.timestamp = timestamp;
+    public AtLeastOnceConsumer(MessageQueue queue, String groupId, int consumerId) {
+        this.queue = queue;
+        this.groupId = groupId;
+        this.consumerId = consumerId;
     }
 
-    public String getId() { return id; }
-    public String getTopic() { return topic; }
-    public String getKey() { return key; }
-    public byte[] getPayload() { return payload; }
-    public long getTimestamp() { return timestamp; }
-    public int getDeliveryAttempts() { return deliveryAttempts; }
-    public void incrementDeliveryAttempts() { deliveryAttempts++; }
+    public void consume() {
+        Message message = queue.poll(groupId, consumerId);
+        if (message != null) {
+            if (!processedMessages.contains(message.getId())) {
+                processMessage(message);
+                processedMessages.add(message.getId());
+            }
+        }
+    }
 
-    @Override
-    public String toString() {
-        return "Message{id='" + id + "', topic='" + topic + "', key='" + key +
-               "', size=" + (payload != null ? payload.length : 0) +
-               ", attempts=" + deliveryAttempts + "}";
+    private void processMessage(Message message) {
+        // Process the message
+        System.out.println("Processing: " + message.getId());
     }
 }
 ```
 
-### Concurrency Considerations
-
-| Concern | Solution |
-|---------|----------|
-| Topic map access | `ConcurrentHashMap` — lock-free reads |
-| Partition message queue | `LinkedBlockingQueue` — thread-safe FIFO |
-| Consumer group round-robin | `synchronized` on `nextConsumer()` |
-| Consumer membership | `CopyOnWriteArrayList` — safe iteration with infrequent mutations |
-| Pending acknowledgments | `ConcurrentHashMap` per subscription |
-| Redelivery | Single-threaded `ScheduledExecutorService` — avoids concurrent redelivery |
-| Subscription cancellation | `volatile boolean active` flag |
-
-### Performance Analysis
-
-| Operation | Complexity | Notes |
-|-----------|-----------|-------|
-| `publish()` | O(G) | G = number of consumer groups per topic |
-| `subscribe()` | O(1) | ConcurrentHashMap operations |
-| `acknowledge()` | O(1) | ConcurrentHashMap remove |
-| `redeliverUnacked()` | O(S * P) | S = subscriptions, P = pending messages |
-
-**Bottlenecks:**
-- `dispatchMessages` is synchronous — for high throughput, use a dispatch thread pool
-- Partition count is fixed — consider dynamic repartitioning for scaling
-- No persistence — messages lost on JVM crash
-
-### Testing Strategy
+#### At-Most-Once Delivery
 
 ```java
-public class MessageQueueTest {
+public class AtMostOnceConsumer {
+    private final MessageQueue queue;
+    private final String groupId;
+    private final int consumerId;
 
-    @Test
-    void testPubSub() throws Exception {
-        InMemoryMessageQueue mq = new InMemoryMessageQueue(3);
-        mq.createTopic("orders", 4);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<String> received = new AtomicReference<>();
-
-        mq.subscribe("orders", "group-1", msg -> {
-            received.set(new String(msg.getPayload()));
-            latch.countDown();
-        });
-
-        mq.publish("orders", "user-1", "order-123".getBytes());
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
-        assertEquals("order-123", received.get());
+    public AtMostOnceConsumer(MessageQueue queue, String groupId, int consumerId) {
+        this.queue = queue;
+        this.groupId = groupId;
+        this.consumerId = consumerId;
     }
 
-    @Test
-    void testConsumerGroups() throws Exception {
-        InMemoryMessageQueue mq = new InMemoryMessageQueue(3);
-        mq.createTopic("events", 1);
-
-        AtomicInteger consumer1Count = new AtomicInteger();
-        AtomicInteger consumer2Count = new AtomicInteger();
-
-        String sub1 = mq.subscribe("events", "group-A", msg -> {
-            consumer1Count.incrementAndGet();
-            mq.acknowledge(/* subId */ "sub-1", msg.getId());
-        });
-
-        mq.subscribe("events", "group-A", msg -> {
-            consumer2Count.incrementAndGet();
-        });
-
-        for (int i = 0; i < 10; i++) {
-            mq.publish("events", null, ("msg-" + i).getBytes());
+    public void consume() {
+        Message message = queue.poll(groupId, consumerId);
+        if (message != null) {
+            processMessage(message);
+            // No deduplication - process immediately
         }
-
-        Thread.sleep(500);
-        // Messages should be distributed across the two consumers in the group
-        assertTrue(consumer1Count.get() + consumer2Count.get() == 10);
     }
 
-    @Test
-    void testDeadLetterQueue() throws Exception {
-        InMemoryMessageQueue mq = new InMemoryMessageQueue(2); // max 2 retries
-        mq.createTopic("failures", 1);
-
-        mq.subscribe("failures", "g1", msg -> {
-            throw new RuntimeException("Always fails");
-            // never acknowledge
-        });
-
-        mq.publish("failures", "k", "data".getBytes());
-
-        // Wait for redelivery cycles to exhaust retries
-        Thread.sleep(15000);
-        // Message should now be in DLQ (verified via logs)
+    private void processMessage(Message message) {
+        System.out.println("Processing: " + message.getId());
     }
 }
 ```
+
+### Dead Letter Queue
+
+```java
+public class DeadLetterQueue {
+    private final BlockingQueue<Message> failedMessages;
+    private final int maxRetries;
+
+    public DeadLetterQueue(int maxRetries) {
+        this.failedMessages = new LinkedBlockingQueue<>(1000);
+        this.maxRetries = maxRetries;
+    }
+
+    public void addToDLQ(Message message, int retryCount) {
+        if (retryCount >= maxRetries) {
+            failedMessages.offer(message);
+            System.out.println("Message sent to DLQ: " + message.getId());
+        }
+    }
+
+    public Message poll() {
+        return failedMessages.poll();
+    }
+
+    public int size() {
+        return failedMessages.size();
+    }
+}
+```
+
+### Performance Considerations
+
+| Metric | Target | Optimization |
+|--------|--------|--------------|
+| Throughput | 1M+ msg/sec | Batch processing, async I/O |
+| Latency | < 100ms | Zero-copy, efficient serialization |
+| Ordering | Per partition | Partition by key |
+| Durability | Configurable | Async disk writes, replication |
 
 ---
 
 ## Interviewer Insight
-Interviewers want to see that you understand the publish-subscribe pattern, consumer groups, and message delivery guarantees. The key differentiators are: message ordering (per-partition), acknowledgment-based redelivery, and dead letter queue handling. Discuss trade-offs between at-most-once, at-least-once, and exactly-once delivery.
+Interviewers want to see that you understand message queue design: partitioning, consumer groups, delivery guarantees, and ordering. Strong candidates discuss at-least-once vs at-most-once delivery, dead letter queues, and partitioning strategies.
 
 ## Follow-up Questions
-1. How would you add message persistence to survive JVM restarts?
-2. How does Kafka achieve high throughput with its log-based architecture?
-3. How would you implement exactly-once delivery semantics?
+1. How do you ensure message ordering in a distributed system?
+2. What is the difference between at-least-once and exactly-once delivery?
+3. How do you handle consumer failures?
 
-## Related Topics
-- [Multithreading & Concurrency](../04-multithreading-concurrency/README.md)
-- [Collections Framework](../03-collections-framework/README.md)
+## 📚 Related Topics
+- [Thread Pool Design](./01-design-thread-pool.md)
+- [System Design Principles](../12-performance-optimization/README.md)
+- [Concurrency Patterns](../04-multithreading-concurrency/README.md)

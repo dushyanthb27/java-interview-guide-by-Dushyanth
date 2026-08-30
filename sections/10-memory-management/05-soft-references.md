@@ -1,16 +1,17 @@
 # Q5: What Are Soft References in Java?
 
-[← Back to Memory Management](./README.md)
+## 📋 Question
+What are Soft References in Java? When should you use them, and how do they differ from Weak References?
+
+## Difficulty: 🟠 Intermediate
 
 ---
 
-## Overview
+## 💡 Answer
 
 A `SoftReference<T>` is a reference type that allows the GC to collect its referent only when the JVM is **running low on memory**. This makes soft references ideal for implementing **memory-sensitive caches** — data stays cached as long as memory permits, and is evicted gracefully under pressure.
 
----
-
-## How Soft References Differ from Weak References
+### How Soft References Differ from Weak References
 
 ```
                    Memory Available        Memory Low
@@ -28,9 +29,7 @@ WeakReference    │  Collected ♻️      │  │  Collected ♻️     │
 | **Lifetime**        | Potentially long           | Very short                     |
 | **GC guarantee**    | Cleared before OOM thrown  | Cleared eagerly                |
 
----
-
-## Basic Usage
+### Basic Usage
 
 ```java
 import java.lang.ref.SoftReference;
@@ -53,9 +52,7 @@ public class SoftReferenceDemo {
 }
 ```
 
----
-
-## Memory-Sensitive Cache Implementation
+### Memory-Sensitive Cache Implementation
 
 ```java
 import java.lang.ref.SoftReference;
@@ -108,73 +105,7 @@ public class SoftCache<K, V> {
 }
 ```
 
-```java
-// Usage: image cache
-SoftCache<String, byte[]> imageCache = new SoftCache<>();
-
-byte[] image = imageCache.get("banner.png", path -> loadImageFromDisk(path));
-// Image stays cached until memory is needed
-```
-
----
-
-## Soft References with ReferenceQueue
-
-Use a `ReferenceQueue` to detect and react to evictions:
-
-```java
-import java.lang.ref.SoftReference;
-import java.lang.ref.ReferenceQueue;
-import java.util.Map;
-import java.util.HashMap;
-
-public class TrackedSoftCache<K, V> {
-
-    private final Map<K, KeyedSoftReference<K, V>> cache = new HashMap<>();
-    private final ReferenceQueue<V> queue = new ReferenceQueue<>();
-
-    /**
-     * Custom SoftReference that remembers its key for cleanup.
-     */
-    static class KeyedSoftReference<K, V> extends SoftReference<V> {
-        final K key;
-
-        KeyedSoftReference(K key, V value, ReferenceQueue<V> queue) {
-            super(value, queue);
-            this.key = key;
-        }
-    }
-
-    public void put(K key, V value) {
-        cleanupStale();   // Purge collected entries
-        cache.put(key, new KeyedSoftReference<>(key, value, queue));
-    }
-
-    public V get(K key) {
-        cleanupStale();
-        KeyedSoftReference<K, V> ref = cache.get(key);
-        return (ref != null) ? ref.get() : null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void cleanupStale() {
-        KeyedSoftReference<K, V> ref;
-        while ((ref = (KeyedSoftReference<K, V>) queue.poll()) != null) {
-            cache.remove(ref.key);   // Remove the map entry
-            System.out.println("Evicted cache entry for key: " + ref.key);
-        }
-    }
-
-    public int size() {
-        cleanupStale();
-        return cache.size();
-    }
-}
-```
-
----
-
-## LRU Behavior of Soft References
+### LRU Behavior of Soft References
 
 The JVM considers the **time since last access** when deciding which soft references to clear. The formula used by HotSpot:
 
@@ -194,66 +125,9 @@ java -XX:SoftRefLRUPolicyMSPerMB=2000 MyApp
 
 # Soft references cleared more aggressively (less memory usage)
 java -XX:SoftRefLRUPolicyMSPerMB=0 MyApp
-
-# With 500MB free heap and default setting:
-# A soft reference last accessed 500 seconds ago MAY be cleared
-# A soft reference last accessed 1 second ago will likely survive
 ```
 
----
-
-## Practical Example: Document Cache
-
-```java
-import java.lang.ref.SoftReference;
-import java.util.concurrent.ConcurrentHashMap;
-
-public class DocumentCache {
-
-    private final ConcurrentHashMap<String, SoftReference<Document>> cache =
-            new ConcurrentHashMap<>();
-
-    private final DocumentRepository repository;
-
-    public DocumentCache(DocumentRepository repository) {
-        this.repository = repository;
-    }
-
-    public Document getDocument(String id) {
-        // Try cache first
-        SoftReference<Document> ref = cache.get(id);
-        if (ref != null) {
-            Document doc = ref.get();
-            if (doc != null) {
-                System.out.println("Cache hit for: " + id);
-                return doc;
-            }
-        }
-
-        // Cache miss — load from repository
-        System.out.println("Cache miss for: " + id);
-        Document doc = repository.findById(id);
-
-        if (doc != null) {
-            cache.put(id, new SoftReference<>(doc));
-        }
-
-        return doc;
-    }
-
-    public void invalidate(String id) {
-        cache.remove(id);
-    }
-
-    public void invalidateAll() {
-        cache.clear();
-    }
-}
-```
-
----
-
-## When NOT to Use Soft References
+### When NOT to Use Soft References
 
 ```java
 // ❌ Anti-pattern: using SoftReference for small, cheap-to-create objects
@@ -267,50 +141,9 @@ if (c == null) {
     // If your app breaks because the config was collected, don't use SoftReference!
     throw new IllegalStateException("Config was garbage collected!");
 }
-
-// ❌ Anti-pattern: soft reference in a tight loop
-for (int i = 0; i < 1_000_000; i++) {
-    SoftReference<byte[]> ref = new SoftReference<>(new byte[1024]);
-    // Creates garbage rapidly; GC thrashes clearing soft refs
-}
 ```
 
----
-
-## Soft References vs Guava/Caffeine Caches
-
-Modern cache libraries are generally preferred over manual soft references:
-
-```java
-// ✅ Using Caffeine (recommended for production)
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-
-Cache<String, Document> cache = Caffeine.newBuilder()
-        .maximumSize(1_000)
-        .softValues()                         // Uses soft references for values
-        .build();
-
-Document doc = cache.get("doc-123", id -> repository.findById(id));
-```
-
-```java
-// Comparison table
-// ┌────────────────────────┬──────────────────┬────────────────────┐
-// │ Feature                │ Manual SoftRef   │ Caffeine/Guava     │
-// ├────────────────────────┼──────────────────┼────────────────────┤
-// │ Eviction control       │ JVM decides      │ Size/time/weight   │
-// │ Statistics             │ None             │ Hit rate, evictions│
-// │ Thread safety          │ Manual           │ Built-in           │
-// │ Cleanup                │ Manual           │ Automatic          │
-// │ Loading                │ Manual           │ CacheLoader        │
-// │ Removal listener       │ ReferenceQueue   │ RemovalListener    │
-// └────────────────────────┴──────────────────┴────────────────────┘
-```
-
----
-
-## Best Practices
+### Best Practices
 
 ```java
 // ✅ Use SoftReference for expensive-to-compute, reproducible data
@@ -336,4 +169,7 @@ Document doc = cache.get("doc-123", id -> repository.findById(id));
 
 ---
 
-[← Q4: Weak References](./q04-weak-references.md) | [Next: Q6 - Phantom References →](./q06-phantom-references.md)
+## 📚 Related Topics
+- [Weak References](./04-weak-references.md)
+- [Memory Leaks](./03-memory-leaks.md)
+- [Object Lifecycle](./02-object-lifecycle.md)

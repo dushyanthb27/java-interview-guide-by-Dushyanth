@@ -155,25 +155,11 @@ public class RecordDemo {
         System.out.println(rect.area());    // 24.0
         System.out.println(rect);           // Rectangle(4.0 x 6.0, area=24.0)
 
-        // === PATTERN MATCHING WITH RECORDS (Java 21+) ===
-        printShapeDetails(circle);
-        printShapeDetails(rect);
-
         // === RECORDS AS MAP KEYS (excellent due to auto-generated equals/hashCode) ===
         var distances = new java.util.HashMap<Point, Double>();
         distances.put(new Point(0, 0), 0.0);
         distances.put(new Point(3, 4), 5.0);
         System.out.println(distances.get(new Point(3, 4)));  // 5.0 (works because of equals/hashCode)
-    }
-
-    // ✅ Record pattern matching (Java 21+) — destructure records in patterns
-    static void printShapeDetails(Shape shape) {
-        switch (shape) {
-            case Circle(var r) ->
-                System.out.printf("Circle with radius %.1f, area %.2f%n", r, shape.area());
-            case Rectangle(var w, var h) ->
-                System.out.printf("Rectangle %.1f x %.1f, area %.2f%n", w, h, shape.area());
-        }
     }
 }
 ```
@@ -273,13 +259,10 @@ record SafeTeam(String name, List<String> members) {
 ### ⚡ Performance Tip
 Records have the **same runtime performance** as equivalent hand-written classes — the compiler generates identical bytecode for constructors, accessors, equals, and hashCode. There is no reflection or proxy overhead. Records are excellent as **HashMap keys** because their auto-generated `equals()` and `hashCode()` are correct and consistent by definition, eliminating a common source of bugs. Since record components are `final`, the JVM's escape analysis and scalar replacement optimizations apply well — short-lived records may be entirely stack-allocated by the JIT compiler.
 
-### 🔧 JVM Internals
-At the bytecode level, records compile to normal classes that extend `java.lang.Record`. The `equals()`, `hashCode()`, and `toString()` methods are generated using **`invokedynamic`** bootstrapped by `java.lang.runtime.ObjectMethods` — this is the same mechanism used by lambda expressions. The `invokedynamic` approach means the JVM can optimize these methods more aggressively than manually written implementations (e.g., the JIT compiler can inline the entire equality check). The canonical constructor is generated as a normal `<init>` method with `ACC_PUBLIC` access. Accessor methods are simple field reads with no additional logic. Record pattern matching (Java 21+) generates `instanceof` checks followed by accessor method calls — the JIT compiler can eliminate redundant type checks in nested patterns.
-
 ---
 
 ## 🎯 Interviewer Insight
-Interviewers ask about records to assess your knowledge of modern Java. They want you to articulate the **trade-offs**: what records give you (conciseness, correctness, immutability) and what they restrict (no inheritance, no mutable state, no extra fields). Strong candidates know that records use `invokedynamic` for equals/hashCode/toString, understand the compact constructor syntax, and can explain when records are inappropriate (JPA entities, mutable objects). Mentioning record patterns (Java 21+) and how records combine with sealed classes for algebraic data types shows cutting-edge knowledge.
+Interviewers ask about records to assess your knowledge of modern Java. They want you to articulate the **trade-offs**: what records give you (conciseness, correctness, immutability) and what they restrict (no inheritance, no mutable state, no extra fields). Strong candidates know that records use `invokedynamic` for equals/hashCode/toString, understand the compact constructor syntax, and can explain when records are inappropriate (JPA entities, mutable objects).
 
 ## ⚡ Follow-up Questions
 1. How do records interact with serialization, and why are they considered safer than regular classes for serialization?
@@ -287,6 +270,6 @@ Interviewers ask about records to assess your knowledge of modern Java. They wan
 3. How do record patterns work in Java 21+ switch expressions?
 
 ## 📚 Related Topics
-- [Sealed Classes](./q15-sealed-classes-java15.md)
-- [Final Keyword](./q11-final-keyword.md)
-- [Enums in Java](./q12-enums-in-java.md)
+- [Sealed Classes](./15-sealed-classes-java15.md)
+- [Final Keyword](./11-final-keyword.md)
+- [Enums in Java](./12-enums-in-java.md)

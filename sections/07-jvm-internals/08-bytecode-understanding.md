@@ -93,10 +93,6 @@ Constants → Operand Stack:
   irem         Pop 2 ints, push remainder
   ineg         Negate top int
   iinc  n, k   Increment local var n by k (no stack operations)
-
-  ladd, lsub, lmul, ldiv    Long versions
-  fadd, fsub, fmul, fdiv    Float versions
-  dadd, dsub, dmul, ddiv    Double versions
 ```
 
 #### Method Invocation
@@ -151,14 +147,6 @@ public int add(int, int);
     1     a      I
     2     b      I
     3     sum    I
-
-  Operand Stack Trace:
-  Step 0: []              → iload_1  → [a]
-  Step 1: [a]             → iload_2  → [a, b]
-  Step 2: [a, b]          → iadd     → [a+b]
-  Step 3: [a+b]           → istore_3 → []         (sum = a+b)
-  Step 4: []              → iload_3  → [sum]
-  Step 5: [sum]           → ireturn  → (returned)
 ```
 
 ### Example: Object Creation
@@ -209,88 +197,6 @@ public java.lang.String greet(java.lang.String, int);
 
 // \u0001 are placeholders for arguments
 // invokedynamic generates an optimized StringBuilder at first call
-// Much faster than old bytecode which created multiple StringBuilder objects
-```
-
-### Example: Control Flow
-
-```java
-public String classify(int score) {
-    if (score >= 90) {
-        return "A";
-    } else if (score >= 80) {
-        return "B";
-    } else {
-        return "C";
-    }
-}
-```
-
-```
-public java.lang.String classify(int);
-  Code:
-     0: iload_1              // Push score
-     1: bipush    90         // Push 90
-     3: if_icmplt 9          // If score < 90, jump to line 9
-     6: ldc       #12        // Push "A"
-     8: areturn              // Return "A"
-     9: iload_1              // Push score
-    10: bipush    80         // Push 80
-    12: if_icmplt 18         // If score < 80, jump to line 18
-    15: ldc       #14        // Push "B"
-    17: areturn              // Return "B"
-    18: ldc       #16        // Push "C"
-    20: areturn              // Return "C"
-```
-
-### The Constant Pool
-
-```
-javap -v MyClass.class (verbose output includes constant pool):
-
-Constant pool:
-   #1 = Methodref    #6.#20    // java/lang/Object."<init>":()V
-   #2 = Fieldref     #21.#22   // java/lang/System.out:Ljava/io/PrintStream;
-   #3 = String       #23       // "Hello, World!"
-   #4 = Methodref    #24.#25   // java/io/PrintStream.println:(Ljava/lang/String;)V
-   #5 = Class        #26       // MyClass
-   #6 = Class        #27       // java/lang/Object
-   ...
-
-The constant pool stores:
-  - Class and interface names
-  - Field names and types
-  - Method names and signatures
-  - String literals
-  - Numeric constants
-  - Method handles (for invokedynamic)
-```
-
-### Example: invokedynamic (Lambdas)
-
-```java
-public void processNames(List<String> names) {
-    names.forEach(name -> System.out.println(name));
-}
-```
-
-```
-// The lambda is compiled using invokedynamic:
-Code:
-   0: aload_1
-   1: invokedynamic #5, 0    // InvokeDynamic #0:accept:()Ljava/util/function/Consumer;
-   6: invokeinterface #6, 2  // InterfaceMethod java/lang/Iterable.forEach:(Ljava/util/function/Consumer;)V
-  11: return
-
-// invokedynamic calls a bootstrap method (LambdaMetafactory) that:
-// 1. At first call: generates a class implementing Consumer at runtime
-// 2. Subsequent calls: reuses the generated class
-// 3. The lambda body becomes a private static method in the enclosing class
-
-// This is why lambdas are more efficient than anonymous inner classes:
-// - No separate .class file
-// - Generated on demand using invokedynamic
-// - Can be optimized by the JIT (inlined, etc.)
 ```
 
 ### Reading Bytecode — Quick Reference
@@ -310,7 +216,7 @@ Common patterns:
 ```
 
 ### ⚠️ Common Mistake
-Assuming bytecode maps 1:1 to source code. The Java compiler applies its own optimizations (constant folding, dead code elimination) before generating bytecode, and the JIT compiler applies even more optimizations at runtime. The bytecode you see in `javap` output is the **starting point**, not the final executed code. Also, `javap -c` shows bytecode — to see the actual native code the JIT generates, you need `-XX:+PrintAssembly` with the `hsdis` (HotSpot Disassembler) plugin.
+Assuming bytecode maps 1:1 to source code. The Java compiler applies its own optimizations (constant folding, dead code elimination) before generating bytecode, and the JIT compiler applies even more optimizations at runtime. The bytecode you see in `javap` output is the **starting point**, not the final executed code.
 
 ### ⚡ Performance Tip
 Short methods (< 35 bytes of bytecode by default) are automatically inlined by the JIT compiler. Keep methods small and focused — the JIT can then inline them, enabling further optimizations like escape analysis and dead code elimination across the combined inlined code. Use `javap -c` to check method bytecode sizes if you're optimizing hot paths.
@@ -326,6 +232,6 @@ Interviewers ask this to gauge low-level JVM understanding. You don't need to me
 3. What is the difference between `invokevirtual` and `invokespecial`?
 
 ## 📚 Related Topics
-- [JIT Compilation](./q07-jit-compilation.md)
-- [JVM Architecture](./q01-jvm-architecture.md)
-- [Stack vs Heap](./q09-stack-vs-heap.md)
+- [JIT Compilation](./07-jit-compilation.md)
+- [JVM Architecture](./01-jvm-architecture.md)
+- [Stack vs Heap](./09-stack-vs-heap.md)

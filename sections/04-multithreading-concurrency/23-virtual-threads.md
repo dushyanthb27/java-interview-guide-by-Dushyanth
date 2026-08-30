@@ -1,15 +1,13 @@
 # Q23: What Are Virtual Threads (Project Loom)?
 
-[← Back to Multithreading & Concurrency](./README.md)
-
----
-
-## Question
+## 📋 Question
 What are virtual threads in Java 21? How do they differ from platform threads? When should you use them?
 
+## Difficulty: 🟠 Intermediate
+
 ---
 
-## Answer
+## 💡 Answer
 
 ### Platform Threads vs Virtual Threads
 
@@ -258,45 +256,6 @@ public class VirtualThreadAntiPatterns {
 }
 ```
 
-### Performance Comparison
-
-```java
-public class PerformanceComparison {
-    static final int TASKS = 100_000;
-    static final Duration IO_DELAY = Duration.ofMillis(50);
-
-    public static void main(String[] args) throws Exception {
-        // Platform threads: ~200 concurrent, total ~25 seconds
-        long platformTime = benchmark(() ->
-            Executors.newFixedThreadPool(200));
-
-        // Virtual threads: ~100K concurrent, total ~0.1 seconds
-        long virtualTime = benchmark(() ->
-            Executors.newVirtualThreadPerTaskExecutor());
-
-        System.out.println("Platform: " + platformTime + "ms");
-        System.out.println("Virtual:  " + virtualTime + "ms");
-    }
-
-    static long benchmark(Supplier<ExecutorService> executorSupplier) throws Exception {
-        long start = System.currentTimeMillis();
-
-        try (ExecutorService executor = executorSupplier.get()) {
-            List<Future<?>> futures = new ArrayList<>();
-            for (int i = 0; i < TASKS; i++) {
-                futures.add(executor.submit(() -> {
-                    Thread.sleep(IO_DELAY); // Simulate I/O
-                    return null;
-                }));
-            }
-            for (Future<?> f : futures) f.get();
-        }
-
-        return System.currentTimeMillis() - start;
-    }
-}
-```
-
 ### Decision Guide
 
 ```
@@ -337,4 +296,15 @@ public class PerformanceComparison {
 
 ---
 
-[← CyclicBarrier & Phaser](./q22-cyclic-barrier-phaser.md) | [Next: Structured Concurrency →](./q24-structured-concurrency.md)
+## 🎯 Interviewer Insight
+Interviewers ask about virtual threads to assess your knowledge of modern Java. They want you to understand the key difference: virtual threads are **cheap to create** and **don't waste OS threads** when blocking. Strong candidates can explain mounting/unmounting, pinning issues, and when to use virtual threads vs platform threads.
+
+## ⚡ Follow-up Questions
+1. What is the difference between virtual threads and platform threads?
+2. When should you use virtual threads vs traditional thread pools?
+3. What causes pinning in virtual threads and how do you avoid it?
+
+## 📚 Related Topics
+- [Thread Pools](./05-thread-pools.md)
+- [Executor Framework](./06-executor-framework.md)
+- [CompletableFuture](./15-completable-future.md)

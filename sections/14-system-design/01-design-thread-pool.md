@@ -1,6 +1,6 @@
 # Q1: Design a Thread Pool
 
-## Question
+## 📋 Question
 Design and implement a custom Thread Pool in Java. Discuss the data structures, concurrency considerations, and optimization strategies.
 
 ## Difficulty: Medium
@@ -47,7 +47,7 @@ public interface CustomThreadFactory {
 }
 ```
 
-### Implementation
+### Implementation Overview
 
 ```java
 import java.util.concurrent.*;
@@ -73,7 +73,7 @@ public class CustomThreadPool implements CustomExecutor {
     private volatile boolean isShutdown = false;
     private final CountDownLatch terminationLatch = new CountDownLatch(1);
 
-    // --- Built-in rejection policies ---
+    // Built-in rejection policies
     public static final RejectionPolicy ABORT_POLICY = (task, pool) -> {
         throw new RejectedExecutionException("Task rejected: pool is saturated");
     };
@@ -88,7 +88,7 @@ public class CustomThreadPool implements CustomExecutor {
         // silently discard
     };
 
-    // --- Default thread factory ---
+    // Default thread factory
     public static final CustomThreadFactory DEFAULT_THREAD_FACTORY = new CustomThreadFactory() {
         private final AtomicInteger counter = new AtomicInteger(1);
         @Override
@@ -226,7 +226,7 @@ public class CustomThreadPool implements CustomExecutor {
         return terminationLatch.await(timeout, unit);
     }
 
-    // ----- Inner Worker class -----
+    // Inner Worker class
     private class Worker implements Runnable {
         final Thread thread;
         Runnable firstTask;
@@ -305,66 +305,6 @@ public class CustomThreadPool implements CustomExecutor {
 - `mainLock` is held during worker creation/removal (short critical section)
 - `BlockingQueue` contention under very high throughput — consider `LinkedTransferQueue`
 
-### Testing Strategy
-
-```java
-public class ThreadPoolTest {
-
-    @Test
-    void testBasicExecution() throws Exception {
-        CustomThreadPool pool = new CustomThreadPool(2, 4);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        for (int i = 0; i < 10; i++) {
-            pool.execute(counter::incrementAndGet);
-        }
-
-        pool.shutdown();
-        pool.awaitTermination(5, TimeUnit.SECONDS);
-        assertEquals(10, counter.get());
-    }
-
-    @Test
-    void testSubmitCallable() throws Exception {
-        CustomThreadPool pool = new CustomThreadPool(2, 4);
-        Future<String> future = pool.submit(() -> "hello");
-        assertEquals("hello", future.get(2, TimeUnit.SECONDS));
-        pool.shutdown();
-    }
-
-    @Test
-    void testRejectionPolicy() {
-        CustomThreadPool pool = new CustomThreadPool(1, 1, 60, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(1), CustomThreadPool.ABORT_POLICY,
-            CustomThreadPool.DEFAULT_THREAD_FACTORY);
-
-        // Fill the pool and queue
-        pool.execute(() -> { try { Thread.sleep(5000); } catch (Exception e) {} });
-        pool.execute(() -> {}); // fills the queue
-
-        assertThrows(RejectedExecutionException.class, () -> pool.execute(() -> {}));
-        pool.shutdownNow();
-    }
-
-    @Test
-    void testGracefulShutdown() throws Exception {
-        CustomThreadPool pool = new CustomThreadPool(2, 2);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        for (int i = 0; i < 5; i++) {
-            pool.execute(() -> {
-                try { Thread.sleep(100); } catch (Exception e) {}
-                counter.incrementAndGet();
-            });
-        }
-
-        pool.shutdown();
-        assertTrue(pool.awaitTermination(10, TimeUnit.SECONDS));
-        assertEquals(5, counter.get());
-    }
-}
-```
-
 ---
 
 ## Interviewer Insight
@@ -375,6 +315,6 @@ Interviewers want to see that you understand the lifecycle of threads in a pool:
 2. What happens if a task throws an unchecked exception — does the worker thread die?
 3. How would you implement a scheduled thread pool (like `ScheduledExecutorService`)?
 
-## Related Topics
+## 📚 Related Topics
 - [Multithreading & Concurrency](../04-multithreading-concurrency/README.md)
 - [Performance Optimization](../12-performance-optimization/README.md)
