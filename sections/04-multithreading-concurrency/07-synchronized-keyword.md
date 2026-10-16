@@ -4,12 +4,14 @@
 
 ---
 
-## Question
+## 📋 Question
 How does the `synchronized` keyword work in Java? What are monitor locks, intrinsic locks, and the happens-before guarantee?
+
+## Difficulty: 🟡 Intermediate
 
 ---
 
-## Answer
+## 💡 Answer
 
 ### What is Synchronization?
 
@@ -296,23 +298,42 @@ public class ThreadSafeCounter {
 
 ---
 
-## Anti-Patterns
+## ⚠️ Common Mistakes
 
-❌ **Synchronizing on a non-final reference** - lock object can change  
-❌ **Synchronizing on String literals or boxed primitives** - shared across JVM  
-❌ **Over-synchronization** - holding locks during I/O or CPU-intensive work  
-❌ **Inconsistent locking** - some access paths skip synchronization  
+❌ **Synchronizing on a non-final reference** - lock object can change
+❌ **Synchronizing on String literals or boxed primitives** - shared across JVM
+❌ **Over-synchronization** - holding locks during I/O or CPU-intensive work
+❌ **Inconsistent locking** - some access paths skip synchronization
 ❌ **Nested synchronized blocks** - risk of deadlock
 
-## Best Practices
+## ✅ Best Practices
 
-✅ Use `private final Object lock` for lock objects  
-✅ Keep synchronized blocks as short as possible  
-✅ Synchronize all access paths to shared mutable state  
-✅ Prefer `java.util.concurrent` utilities over raw synchronization  
-✅ Document the locking policy (which lock protects which state)  
+✅ Use `private final Object lock` for lock objects
+✅ Keep synchronized blocks as short as possible
+✅ Synchronize all access paths to shared mutable state
+✅ Prefer `java.util.concurrent` utilities over raw synchronization
+✅ Document the locking policy (which lock protects which state)
 ✅ Consider `ReentrantLock` for advanced features (tryLock, fairness)
 
 ---
 
-[← Executor Framework](./q06-executor-framework.md) | [Next: Volatile Keyword →](./q08-volatile-keyword.md)
+## 🎯 Interviewer Insight
+Interviewers want to understand your grasp of synchronization fundamentals: monitor locks, reentrancy, and the happens-before guarantee. Strong candidates explain the difference between synchronized methods and blocks, discuss common pitfalls (like non-final lock objects), and can describe when to use `ReentrantLock` instead of `synchronized`.
+
+## ⚡ Follow-up Questions
+1. When would you choose `ReentrantLock` over `synchronized`, and what are the trade-offs?
+2. How does biased locking work, and when does it revert to normal locking?
+3. Explain lock coarsening, lock elision, and escape analysis optimizations performed by the JIT.
+4. What is the difference between fair and unfair locking, and how does it impact performance?
+5. How do you implement a try-lock pattern with timeout using `ReentrantLock`?
+6. What is the difference between intrinsic lock reentrancy and ReentrantLock reentrancy?
+7. How does the wait/notify mechanism work with synchronized blocks, and what are the alternatives?
+
+## 📚 Related Topics
+- [Volatile Keyword](./08-volatile-keyword.md)
+- [Reentrant Lock](./10-reentrant-lock.md)
+- [Atomic Classes](./09-atomic-classes.md)
+
+---
+
+[← Executor Framework](./06-executor-framework.md) | [Next: Volatile Keyword →](./08-volatile-keyword.md)

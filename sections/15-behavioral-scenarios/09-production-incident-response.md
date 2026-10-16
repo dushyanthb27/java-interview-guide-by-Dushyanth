@@ -32,6 +32,13 @@
 
 ### Sample Answer
 
+> **Use this as a structure, not a story to memorize.** This is an illustrative
+> composite scenario, not a claim about the reader's experience. Replace every
+> detail with a real incident you can discuss truthfully; anonymize company and
+> customer information, and use approximate impact figures only when you can
+> explain how they were measured. If you have not led an incident, say so and
+> describe your actual role in one.
+
 > **Situation**: At 2:15 AM on a Tuesday, I received a PagerDuty alert: our order
 > processing service was returning HTTP 503 errors for 60% of requests. The service
 > was a Spring Boot application running on four instances behind an AWS ALB, handling
@@ -218,8 +225,9 @@
 - You followed a structured incident response process — triage → mitigate → diagnose
   → resolve → communicate → post-mortem
 - You communicated proactively and regularly, not just when you had answers
-- You mitigated first (rolling restart to restore service) before spending time on
-  root cause analysis — user impact reduction is priority #1
+- You assessed whether mitigation was safe and likely to reduce impact, while
+  preserving useful evidence when doing so would not delay recovery; the right order
+  depends on the incident
 - You captured diagnostic data (heap dump) before restarting — evidence preservation
 - You traced the full root cause chain, not just the immediate symptom
 - Your post-mortem was blameless and produced actionable, time-boxed improvements
@@ -231,7 +239,9 @@
 - "I spent 4 hours debugging before telling anyone" — poor communication discipline
 - "It was the other team's fault — their Kafka broker was full" — blame-oriented thinking
 - "I stayed up until 8 AM fixing everything by myself" — heroics suggest poor escalation
-- Don't describe an incident where you panicked, made it worse, or didn't communicate
+- If you made a mistake or delayed communication, explain it honestly, how you
+  corrected course, and what you changed afterward; accountability is stronger than
+  a polished but implausible story
 - "We don't do post-mortems" — suggests a team that doesn't learn from incidents
 
 ---
@@ -246,8 +256,8 @@ Production incident response reveals critical senior engineering skills:
    and make things worse?
 3. **Communication Discipline** — Do you keep stakeholders informed proactively with
    structured updates?
-4. **Mitigation vs Root Cause** — Do you know when to prioritize restoring service
-   (restart) versus finding root cause? (Always mitigate first!)
+4. **Mitigation vs Root Cause** — Can you balance restoring service with preserving
+   evidence, and explain why the chosen action was appropriate for this incident?
 5. **Post-Incident Learning** — Do incidents under your watch lead to systemic
    improvements, or just one-time fixes?
 6. **Escalation Judgment** — Do you know when to bring in help versus trying to

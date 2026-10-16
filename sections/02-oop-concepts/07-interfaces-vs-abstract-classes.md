@@ -250,10 +250,12 @@ Interface method dispatch (`invokeinterface`) involves an extra lookup compared 
 ## Interviewer Insight
 Interviewers expect you to articulate clear decision criteria, not just list differences. Show you understand when each is appropriate and can discuss the evolution of interfaces in modern Java.
 
-## Follow-up Questions
-1. Can an abstract class implement an interface without providing all methods?
-2. How do sealed interfaces (Java 17) change the design landscape?
-3. When would you use both an interface AND an abstract class together?
+## ⚡ Follow-up Questions
+1. Can an abstract class implement an interface without providing all methods, and what are the implications for subclasses?
+2. How do sealed interfaces (Java 17) change the design landscape compared to traditional interfaces?
+3. When would you use both an interface AND an abstract class together in a design pattern?
+4. How does the introduction of default methods (Java 8) affect the diamond problem resolution?
+5. What are the performance implications of interface method dispatch vs abstract class method dispatch?
 
 ## Related Topics
 - [Abstraction](./q06-abstraction.md)

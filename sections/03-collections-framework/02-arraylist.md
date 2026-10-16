@@ -302,6 +302,18 @@ String[] array = list.toArray(new String[0]);
 - Highlight RandomAccess marker interface for algorithm optimization
 - Know that `subList()` returns a view, not a copy
 
+## ⚡ Follow-up Questions
+1. Why does ArrayList use a 1.5x growth factor instead of 2x?
+2. What is the difference between `Arrays.asList()` and `List.of()` regarding mutability?
+3. How does ArrayList handle concurrent modifications, and what is `ConcurrentModificationException`?
+4. When would you choose LinkedList over ArrayList, and vice versa?
+5. How does the `trimToSize()` method affect memory and subsequent performance?
+
+## 📚 Related Topics
+- [LinkedList](./03-linkedlist.md)
+- [Vector and Stack](./04-vector-stack.md)
+- [Collection Performance](./18-collection-performance.md)
+
 ---
 
-[Prev: Q1 - Collection Hierarchy](./q01-collection-hierarchy.md) | [Next: Q3 - LinkedList](./q03-linkedlist.md)
+[Prev: Q1 - Collection Hierarchy](./01-collection-hierarchy.md) | [Next: Q3 - LinkedList](./03-linkedlist.md)

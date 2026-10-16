@@ -399,6 +399,20 @@ Set<String> concurrentSet = ConcurrentHashMap.newKeySet();
 - Be ready to implement a concurrent cache using ConcurrentHashMap
 - Mention bulk operations (forEach, reduce, search) with parallelism threshold
 
+## ⚡ Follow-up Questions
+1. How does the resizing mechanism in ConcurrentHashMap differ from HashMap, and how does it handle concurrent resizes?
+2. What is the MOVED sentinel node in ConcurrentHashMap, and how does it help with concurrent resizing?
+3. When would you choose ConcurrentHashMap over synchronizedMap or Hashtable, and what are the performance implications?
+4. How does the computeIfAbsent method guarantee atomicity, and what are the performance considerations?
+5. What are the limitations of weakly consistent iterators, and how do you handle scenarios requiring strong consistency?
+6. How does ConcurrentHashMap handle the "check-then-act" problem with atomic operations like putIfAbsent?
+7. What is the difference between the Java 7 segment-based implementation and Java 8+ CAS-based implementation?
+
+## 📚 Related Topics
+- [HashMap Internals](./07-hashmap-internals.md)
+- [Thread-Safe Collections](./19-thread-safe-collections.md)
+- [Atomic Classes](../04-multithreading-concurrency/09-atomic-classes.md)
+
 ---
 
-[Prev: Q8 - LinkedHashMap and TreeMap](./q08-linkedhashmap-treemap.md) | [Next: Q10 - Queue and Deque](./q10-queue-deque.md)
+[Prev: Q8 - LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md) | [Next: Q10 - Queue and Deque](./10-queue-deque.md)

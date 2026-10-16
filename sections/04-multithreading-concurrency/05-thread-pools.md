@@ -292,4 +292,20 @@ try {
 
 ---
 
-[← Runnable vs Callable](./q04-runnable-vs-callable.md) | [Next: Executor Framework →](./q06-executor-framework.md)
+## ⚡ Follow-up Questions
+1. How does `ThreadPoolExecutor` decide when to create a new thread vs. enqueue a task, and what are the configuration thresholds?
+2. What happens if a task throws an unchecked exception — does the worker thread die or continue processing?
+3. How would you implement a scheduled thread pool (like `ScheduledExecutorService`) from scratch?
+4. What is the difference between `shutdown()` and `shutdownNow()`, and when should you use each?
+5. How do you size a thread pool for CPU-bound vs I/O-bound workloads, and what are the formulas?
+6. What is the purpose of a custom ThreadFactory, and what configuration options should it provide?
+7. How does the ForkJoinPool differ from a standard ThreadPoolExecutor in terms of work-stealing?
+
+## 📚 Related Topics
+- [Executor Framework](./06-executor-framework.md)
+- [Runnable vs Callable](./04-runnable-vs-callable.md)
+- [CompletableFuture](./15-completable-future.md)
+
+---
+
+[← Runnable vs Callable](./04-runnable-vs-callable.md) | [Next: Executor Framework →](./06-executor-framework.md)

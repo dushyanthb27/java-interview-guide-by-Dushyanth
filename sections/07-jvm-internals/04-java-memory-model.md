@@ -307,9 +307,13 @@ while (running) { /* correctly checks each iteration */ }
 The JMM is an expert-level topic. Interviewers want to hear about happens-before rules, not just "volatile makes things visible." Strong candidates explain **why** volatile fixes double-checked locking (instruction reordering), describe memory barriers, and know the difference between visibility and atomicity. Mentioning the transitivity rule and final field semantics demonstrates deep understanding.
 
 ## ⚡ Follow-up Questions
-1. Why is double-checked locking broken without `volatile`?
-2. What's the difference between visibility and atomicity?
-3. Can `volatile` replace `synchronized`?
+1. Why is double-checked locking broken without `volatile`, and what specific reordering causes the bug?
+2. What's the difference between visibility and atomicity, and give an example where you need both?
+3. Can `volatile` replace `synchronized`? If not, explain a scenario where `volatile` is insufficient.
+4. How do final field semantics provide thread safety without synchronization?
+5. What are the four types of memory barriers, and which ones does volatile use?
+6. How does the transitivity rule in happens-before relationships work across multiple threads?
+7. What is the difference between happens-before and synchronizes-with in the JMM?
 
 ## 📚 Related Topics
 - [Stack vs Heap](./q09-stack-vs-heap.md)

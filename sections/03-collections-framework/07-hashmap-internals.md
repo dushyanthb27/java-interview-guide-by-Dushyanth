@@ -1,15 +1,17 @@
 # Q7: How Does HashMap Work Internally? (Deep Dive)
 
-[Back to Collections Framework](./README.md) | **Difficulty**: 🟠 Hard
+[Back to Collections Framework](./README.md)
 
 ---
 
-## Question
-> Explain the internal working of HashMap in detail. How does it handle hashing, collisions, and resizing?
+## 📋 Question
+Explain the internal working of HashMap in detail. How does it handle hashing, collisions, and resizing?
+
+## Difficulty: 🟠 Hard
 
 ---
 
-## Answer
+## 💡 Answer
 
 ### Internal Structure
 
@@ -405,15 +407,23 @@ map.merge("key", 1, Integer::sum);  // Increment counter
 
 ---
 
-## Interview Tips
-- This is THE most asked collection question - know every detail
-- Draw the bucket array + linked list + tree structure
-- Explain the hash spreading function: `hash ^ (hash >>> 16)`
-- Know TREEIFY_THRESHOLD (8), UNTREEIFY_THRESHOLD (6), MIN_TREEIFY_CAPACITY (64)
-- Explain why capacity must be a power of 2 (for `hash & (n-1)` optimization)
-- Know Java 7 vs Java 8 differences (head vs tail insertion, tree optimization)
-- Emphasize the equals/hashCode contract for keys
+## 🎯 Interviewer Insight
+This is THE most asked collection question - know every detail. Interviewers expect you to draw the bucket array + linked list + tree structure, explain the hash spreading function `hash ^ (hash >>> 16)`, and know the thresholds (TREEIFY_THRESHOLD=8, UNTREEIFY_THRESHOLD=6, MIN_TREEIFY_CAPACITY=64). You must explain why capacity must be a power of 2 (for `hash & (n-1)` optimization) and know Java 7 vs Java 8 differences (head vs tail insertion, tree optimization). Emphasize the equals/hashCode contract for keys.
+
+## ⚡ Follow-up Questions
+1. Why does HashMap use a power of 2 for capacity, and how does this affect the hash function?
+2. What happens if you use a mutable object as a HashMap key, and how can you detect this issue?
+3. How does ConcurrentHashMap differ from HashMap internally in terms of locking and iteration?
+4. What is the formula for calculating the threshold, and how does load factor impact performance?
+5. How does Java 8's treeification improve performance for collision-heavy scenarios?
+6. What is the difference between Java 7 and Java 8 HashMap implementations regarding collision handling?
+7. How would you implement a custom hash function for a complex key object to minimize collisions?
+
+## 📚 Related Topics
+- [LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md)
+- [HashSet Internals](./05-hashset.md)
+- [Thread-Safe Collections](./19-thread-safe-collections.md)
 
 ---
 
-[Prev: Q6 - LinkedHashSet and TreeSet](./q06-linkedhashset-treeset.md) | [Next: Q8 - LinkedHashMap and TreeMap](./q08-linkedhashmap-treemap.md)
+[Prev: Q6 - LinkedHashSet and TreeSet](./06-linkedhashset-treeset.md) | [Next: Q8 - LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md)

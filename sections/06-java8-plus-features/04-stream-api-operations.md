@@ -292,9 +292,13 @@ The Stream API uses **loop fusion** internally — multiple intermediate operati
 Interviewers love to test your understanding of **lazy evaluation** and **short-circuiting**. A strong candidate can trace through a stream pipeline and predict exactly which elements are processed and in what order. Knowing the difference between stateless (`filter`, `map`) and stateful (`sorted`, `distinct`) operations is crucial for performance discussions. Be ready to explain why `parallelStream()` isn't always faster.
 
 ## ⚡ Follow-up Questions
-1. What happens if you call two terminal operations on the same stream?
-2. When is `parallelStream()` beneficial, and when is it harmful?
-3. How does `flatMap` differ from `map` in practical usage?
+1. What happens if you call two terminal operations on the same stream, and how do you reuse stream logic?
+2. When is `parallelStream()` beneficial, and when is it harmful? What are the overhead considerations?
+3. How does `flatMap` differ from `map` in practical usage, and when would you choose one over the other?
+4. What is the difference between stateless and stateful stream operations, and how do they affect performance?
+5. How does the JVM perform loop fusion optimization on stream pipelines, and what operations prevent it?
+6. What is the difference between `findFirst()` and `findAny()` in sequential vs parallel streams?
+7. How do primitive streams (IntStream, LongStream, DoubleStream) improve performance by avoiding boxing?
 
 ## 📚 Related Topics
 - [Stream Collectors](./q05-stream-collectors.md)

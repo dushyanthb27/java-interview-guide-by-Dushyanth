@@ -36,11 +36,14 @@ public class TokenBucketRateLimiter {
     private long lastRefillTime;
 
     public TokenBucketRateLimiter(int capacity, int refillRate, long refillInterval) {
+        if (capacity <= 0 || refillRate <= 0 || refillInterval <= 0) {
+            throw new IllegalArgumentException("Capacity, refill rate, and interval must be positive");
+        }
         this.capacity = capacity;
         this.refillRate = refillRate;
         this.refillInterval = refillInterval;
         this.tokens = capacity;
-        this.lastRefillTime = System.currentTimeMillis();
+        this.lastRefillTime = System.nanoTime();
     }
 
     public synchronized boolean allowRequest() {
@@ -54,17 +57,19 @@ public class TokenBucketRateLimiter {
     }
 
     private void refillTokens() {
-        long now = System.currentTimeMillis();
-        long timeSinceLastRefill = now - lastRefillTime;
-        
-        if (timeSinceLastRefill >= refillInterval) {
-            int tokensToAdd = (int) (timeSinceLastRefill / refillInterval) * refillRate;
-            tokens = Math.min(capacity, tokens + tokensToAdd);
-            lastRefillTime = now;
+        long now = System.nanoTime();
+        long elapsed = now - lastRefillTime;
+        long intervalNanos = java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(refillInterval);
+        if (elapsed >= intervalNanos) {
+            long intervals = elapsed / intervalNanos;
+            long replenished = Math.min((long) capacity, (long) tokens + intervals * refillRate);
+            tokens = (int) replenished;
+            // Keep the fractional interval so frequent calls do not slow token refill.
+            lastRefillTime += intervals * intervalNanos;
         }
     }
 
-    public int getAvailableTokens() {
+    public synchronized int getAvailableTokens() {
         refillTokens();
         return tokens;
     }
@@ -82,17 +87,20 @@ public class SlidingWindowRateLimiter {
     private final Queue<Long> requestTimestamps;
 
     public SlidingWindowRateLimiter(int maxRequests, long windowSize) {
+        if (maxRequests <= 0 || windowSize <= 0) {
+            throw new IllegalArgumentException("Request limit and window size must be positive");
+        }
         this.maxRequests = maxRequests;
         this.windowSize = windowSize;
         this.requestTimestamps = new LinkedList<>();
     }
 
     public synchronized boolean allowRequest() {
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime();
         
         // Remove timestamps outside the window
         while (!requestTimestamps.isEmpty() && 
-               now - requestTimestamps.peek() > windowSize) {
+               now - requestTimestamps.peek() >= java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(windowSize)) {
             requestTimestamps.poll();
         }
         
@@ -103,10 +111,10 @@ public class SlidingWindowRateLimiter {
         return false;
     }
 
-    public int getCurrentRequestCount() {
-        long now = System.currentTimeMillis();
+    public synchronized int getCurrentRequestCount() {
+        long now = System.nanoTime();
         while (!requestTimestamps.isEmpty() && 
-               now - requestTimestamps.peek() > windowSize) {
+               now - requestTimestamps.peek() >= java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(windowSize)) {
             requestTimestamps.poll();
         }
         return requestTimestamps.size();
@@ -117,32 +125,34 @@ public class SlidingWindowRateLimiter {
 #### 3. Fixed Window Counter
 
 ```java
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class FixedWindowRateLimiter {
     private final int maxRequests;
     private final long windowSize;
-    private final AtomicInteger counter;
+    private int counter;
     private long windowStart;
 
     public FixedWindowRateLimiter(int maxRequests, long windowSize) {
+        if (maxRequests <= 0 || windowSize <= 0) {
+            throw new IllegalArgumentException("Request limit and window size must be positive");
+        }
         this.maxRequests = maxRequests;
         this.windowSize = windowSize;
-        this.counter = new AtomicInteger(0);
-        this.windowStart = System.currentTimeMillis();
+        this.counter = 0;
+        this.windowStart = System.nanoTime();
     }
 
     public synchronized boolean allowRequest() {
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime();
+        long windowNanos = java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(windowSize);
         
-        if (now - windowStart >= windowSize) {
+        if (now - windowStart >= windowNanos) {
             // Reset window
             windowStart = now;
-            counter.set(0);
+            counter = 0;
         }
         
-        if (counter.get() < maxRequests) {
-            counter.incrementAndGet();
+        if (counter < maxRequests) {
+            counter++;
             return true;
         }
         return false;
@@ -150,41 +160,52 @@ public class FixedWindowRateLimiter {
 }
 ```
 
-### Distributed Rate Limiter
+### Distributed Sliding-Window Limiter
+
+The Redis operations that prune old entries, count requests, and add a new request
+must be atomic. Separate client calls race: two application instances can both see
+one remaining slot and both admit a request. Run the operation in one Lua script.
+Redis supplies the clock so application-server clock skew cannot change the window.
+The caller must provide a unique request ID; using only the timestamp as the sorted-set
+member would overwrite requests that arrive in the same millisecond.
 
 ```java
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import java.util.Collections;
+import java.util.List;
 
 public class DistributedRateLimiter {
     private final JedisPool jedisPool;
     private final int maxRequests;
     private final long windowSize;
+    private static final String SCRIPT = """
+        local t = redis.call('TIME')
+        local now = t[1] * 1000 + math.floor(t[2] / 1000)
+        local windowStart = now - tonumber(ARGV[1])
+        redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', windowStart)
+        local count = redis.call('ZCARD', KEYS[1])
+        if count >= tonumber(ARGV[2]) then return 0 end
+        redis.call('ZADD', KEYS[1], now, ARGV[3])
+        redis.call('PEXPIRE', KEYS[1], ARGV[1])
+        return 1
+        """;
 
     public DistributedRateLimiter(JedisPool jedisPool, int maxRequests, long windowSize) {
+        if (maxRequests <= 0 || windowSize <= 0) {
+            throw new IllegalArgumentException("Request limit and window size must be positive");
+        }
         this.jedisPool = jedisPool;
         this.maxRequests = maxRequests;
         this.windowSize = windowSize;
     }
 
-    public boolean allowRequest(String userId) {
+    public boolean allowRequest(String userId, String requestId) {
         try (Jedis jedis = jedisPool.getResource()) {
             String key = "rate_limit:" + userId;
-            long now = System.currentTimeMillis();
-            long windowStart = now - windowSize;
-            
-            // Remove old entries
-            jedis.zremrangeByScore(key, 0, windowStart);
-            
-            // Count current requests
-            long currentCount = jedis.zcard(key);
-            
-            if (currentCount < maxRequests) {
-                jedis.zadd(key, now, String.valueOf(now));
-                jedis.expire(key, windowSize / 1000 + 1);
-                return true;
-            }
-            return false;
+            Object result = jedis.eval(SCRIPT, Collections.singletonList(key),
+                    List.of(Long.toString(windowSize), Integer.toString(maxRequests), requestId));
+            return ((Number) result).longValue() == 1L;
         }
     }
 }
@@ -194,29 +215,35 @@ public class DistributedRateLimiter {
 
 ```java
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class TieredRateLimiter {
     private final Map<String, RateLimitConfig> configs;
-    private final Map<String, TokenBucketRateLimiter> limiters;
+    private final ConcurrentMap<LimiterKey, TokenBucketRateLimiter> limiters = new ConcurrentHashMap<>();
 
     public TieredRateLimiter() {
-        this.configs = new HashMap<>();
-        this.limiters = new HashMap<>();
+        this.configs = Map.of(
+            "default", new RateLimitConfig(100, 1, 600),
+            "premium", new RateLimitConfig(1000, 10, 600),
+            "api", new RateLimitConfig(10000, 100, 600)
+        );
         
-        // Default configurations
-        configs.put("default", new RateLimitConfig(100, 60, 1000)); // 100 req/min
-        configs.put("premium", new RateLimitConfig(1000, 60, 1000)); // 1000 req/min
-        configs.put("api", new RateLimitConfig(10000, 60, 1000)); // 10K req/min
     }
 
     public boolean allowRequest(String userId, String tier) {
-        RateLimitConfig config = configs.getOrDefault(tier, configs.get("default"));
+        Objects.requireNonNull(userId, "userId");
+        String effectiveTier = configs.containsKey(tier) ? tier : "default";
+        RateLimitConfig config = configs.get(effectiveTier);
+        LimiterKey key = new LimiterKey(userId, effectiveTier);
         TokenBucketRateLimiter limiter = limiters.computeIfAbsent(
-            tier, 
-            t -> new TokenBucketRateLimiter(config.capacity, config.refillRate, config.refillInterval)
+            key,
+            ignored -> new TokenBucketRateLimiter(config.capacity, config.refillRate, config.refillInterval)
         );
         return limiter.allowRequest();
     }
+
+    private record LimiterKey(String userId, String tier) {}
 
     static class RateLimitConfig {
         final int capacity;
@@ -236,10 +263,18 @@ public class TieredRateLimiter {
 
 | Algorithm | Pros | Cons | Use Case |
 |-----------|------|------|----------|
-| Token Bucket | Smooth rate limiting, handles bursts | More complex | API rate limiting |
-| Leaky Bucket | Constant rate, no bursts | Wastes capacity | Network traffic shaping |
-| Sliding Window | Accurate, no spikes | Memory intensive | Precise rate limiting |
+| Token Bucket | Enforces a refill rate while allowing a bounded burst | Needs per-key state | APIs that permit short bursts |
+| Leaky Bucket | Smooths output to a steady rate | Can delay or reject bursts | Traffic shaping / paced work |
+| Sliding-Log Window | Exact count over the trailing interval | Stores one timestamp per admitted request | Strict per-user limits at modest volume |
+| Sliding-Window Counter | Lower memory than a log, approximate near the boundary | Approximation depends on previous-window traffic | High-volume distributed APIs |
 | Fixed Window | Simple, low memory | Bursts at boundaries | Simple scenarios |
+
+The examples above are teaching implementations. A production design also needs a
+policy for Redis failure (fail open or closed), key expiry and eviction, request-ID
+uniqueness, user identity trust, cardinality limits, and how limit changes affect
+existing buckets. The in-memory examples are process-local; they do not enforce a
+shared limit across application instances. The tiered example creates one limiter per
+user and tier, so a real service needs bounded/expiring state or a distributed store.
 
 ### API Gateway Integration
 
@@ -247,23 +282,31 @@ public class TieredRateLimiter {
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class RateLimitFilter implements Filter {
-    private final SlidingWindowRateLimiter rateLimiter;
+    private final ConcurrentMap<String, SlidingWindowRateLimiter> limiters = new ConcurrentHashMap<>();
+    private final int maxRequests;
+    private final long windowSizeMillis;
 
     public RateLimitFilter(int maxRequests, long windowSize) {
-        this.rateLimiter = new SlidingWindowRateLimiter(maxRequests, windowSize);
+        this.maxRequests = maxRequests;
+        this.windowSizeMillis = windowSize;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, 
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String userId = httpRequest.getHeader("X-User-ID");
+        // Use an identity established by trusted authentication middleware; clients
+        // must not be able to choose another user's rate-limit key.
+        String userId = httpRequest.getUserPrincipal() == null
+                ? httpRequest.getRemoteAddr()
+                : httpRequest.getUserPrincipal().getName();
         
-        if (userId == null) {
-            userId = httpRequest.getRemoteAddr();
-        }
+        SlidingWindowRateLimiter rateLimiter = limiters.computeIfAbsent(userId,
+                ignored -> new SlidingWindowRateLimiter(maxRequests, windowSizeMillis));
         
         if (!rateLimiter.allowRequest()) {
             HttpServletResponse httpResponse = (HttpServletResponse) response;

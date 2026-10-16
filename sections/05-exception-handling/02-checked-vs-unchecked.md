@@ -4,14 +4,14 @@
 
 ---
 
-## Difficulty: 🟢 Easy
+## � Question
+What is the difference between checked and unchecked exceptions in Java? When should you use each?
 
-## Question
-> What is the difference between checked and unchecked exceptions in Java? When should you use each?
+## Difficulty: 🟢 Easy
 
 ---
 
-## Answer
+## 💡 Answer
 
 ### Side-by-Side Comparison
 
@@ -298,13 +298,21 @@ Is the problem external and potentially recoverable?
 
 ---
 
-## Interview Tips
-- Know the hierarchy: `Exception` → checked, `RuntimeException` → unchecked
-- Mention the debate around checked exceptions (Spring/Kotlin perspective)
-- Explain that checked exceptions force API consumers to handle failure cases
-- Discuss the `UncheckedIOException` wrapper class added in Java 8
-- Be ready to argue both sides of the checked exceptions debate
+## 🎯 Interviewer Insight
+Interviewers want you to demonstrate understanding of the exception hierarchy (`Exception` → checked, `RuntimeException` → unchecked) and the practical implications. Strong candidates mention the ongoing debate around checked exceptions (Spring/Kotlin perspective), explain that checked exceptions force API consumers to handle failure cases, and discuss the `UncheckedIOException` wrapper class added in Java 8. Be prepared to argue both sides of the checked exceptions debate.
+
+## ⚡ Follow-up Questions
+1. Why doesn't Kotlin have checked exceptions, and what are the arguments for and against this design?
+2. When would you create a custom checked vs unchecked exception, and what are the naming conventions?
+3. How does Spring handle checked exceptions in its data access layer, and what is the benefit of this approach?
+4. What is the difference between `UncheckedIOException` and `RuntimeException` for wrapping checked exceptions?
+5. How do you handle checked exceptions in functional interfaces and lambda expressions?
+
+## 📚 Related Topics
+- [Exception Hierarchy](./01-exception-hierarchy.md)
+- [Try-Catch-Finally](./03-try-catch-finally.md)
+- [Exception Best Practices](./06-exception-best-practices.md)
 
 ---
 
-[<< Previous: Q1 - Exception Hierarchy](./q01-exception-hierarchy.md) | [Next: Q3 - Try-Catch-Finally >>](./q03-try-catch-finally.md)
+[<< Previous: Q1 - Exception Hierarchy](./01-exception-hierarchy.md) | [Next: Q3 - Try-Catch-Finally >>](./03-try-catch-finally.md)

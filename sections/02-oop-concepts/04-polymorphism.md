@@ -1,6 +1,6 @@
 # Q4: Explain Polymorphism with Examples
 
-## Question
+## 📋 Question
 What is polymorphism in Java? Explain compile-time and runtime polymorphism, dynamic method dispatch, and covariant return types with examples.
 
 ## Difficulty: 🟡 Intermediate
@@ -223,7 +223,8 @@ public static String describeShape(Shape shape) {
 }
 ```
 
-### Common Mistake
+### ⚠️ Common Mistake
+**Confusing reference type with object type**: You can only call methods that exist in the reference type, not the actual object type. This leads to compile errors when trying to access subclass-specific methods through a superclass reference.
 
 ```java
 // ❌ Confusing reference type with object type
@@ -236,20 +237,22 @@ if (animal instanceof Dog dog) {
 }
 ```
 
-### Performance Tip
+### ⚡ Performance Tip
 Virtual method dispatch has negligible overhead in modern JVMs. The JIT compiler aggressively inlines monomorphic (single-target) and bimorphic (two-target) call sites, making polymorphic calls nearly as fast as direct calls.
 
 ---
 
-## Interviewer Insight
+## 🎯 Interviewer Insight
 Interviewers want to see you distinguish between compile-time and runtime polymorphism clearly. Bonus points for explaining the vtable mechanism, covariant returns, and demonstrating real-world use cases like the Strategy or Template patterns.
 
-## Follow-up Questions
-1. Can you achieve polymorphism without inheritance?
-2. What is the difference between method hiding and method overriding?
-3. How does the JIT compiler optimize polymorphic call sites?
+## ⚡ Follow-up Questions
+1. Can you achieve polymorphism without inheritance? If so, how?
+2. What is the difference between method hiding (static methods) and method overriding (instance methods)?
+3. How does the JIT compiler optimize polymorphic call sites through inlining and devirtualization?
+4. What is the difference between static binding (compile-time) and dynamic binding (runtime)?
+5. How do pattern matching (Java 16+) and sealed classes (Java 17+) change polymorphism patterns?
 
-## Related Topics
-- [Method Overloading](./q08-method-overloading.md)
-- [Method Overriding](./q09-method-overriding.md)
-- [Interfaces vs Abstract Classes](./q07-interfaces-vs-abstract-classes.md)
+## 📚 Related Topics
+- [Method Overloading](./08-method-overloading.md)
+- [Method Overriding](./09-method-overriding.md)
+- [Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md)

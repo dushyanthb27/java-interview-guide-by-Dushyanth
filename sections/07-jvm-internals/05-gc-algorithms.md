@@ -271,9 +271,13 @@ Tune the Young Generation size to ensure most short-lived objects die before rea
 Interviewers want you to explain the three core algorithms and then how they map to the generational heap. Strong candidates explain **why** copying is used for Young Gen (most objects die, so copying few survivors is cheap), **why** Mark-Compact is used for Old Gen (live object ratio is high), and the card table mechanism for cross-generational references. Mentioning GC roots demonstrates deep understanding.
 
 ## ⚡ Follow-up Questions
-1. Why is the copying algorithm ideal for Young Generation?
-2. What causes a Full GC and how can you prevent it?
-3. How does the card table work?
+1. Why is the copying algorithm ideal for Young Generation, and what happens if the live object ratio is high?
+2. What causes a Full GC, and how can you prevent it through sizing and tuning?
+3. How does the card table work, and what is the overhead of maintaining it?
+4. What is the difference between Minor GC, Major GC, and Full GC in terms of stop-the-world duration?
+5. How does the tenuring threshold affect promotion rate, and when would you adjust it?
+6. What are GC roots, and which types of objects serve as roots during the mark phase?
+7. How does escape analysis affect garbage collection by allowing stack allocation?
 
 ## 📚 Related Topics
 - [GC Collectors (G1, ZGC, Shenandoah)](./q06-gc-collectors.md)
