@@ -1,19 +1,18 @@
-# Q5: How Does HashSet Work Internally?
+# HashSet Internals
 
-[Back to Collections Framework](./README.md) | **Difficulty**: 🟡 Medium
-
----
-
-## Question
-> How does HashSet work internally? Explain the hashCode/equals contract and its importance.
+[Home](../../README.md) > [Collections Framework](./README.md) > HashSet Internals
 
 ---
 
-## Answer
+## Q5 🟡 How Does HashSet Work Internally?
 
-### The Secret: HashSet is Backed by HashMap
+**Question:** How does HashSet work internally? Explain the hashCode/equals contract and its importance.
 
-HashSet internally uses a **HashMap** where each element is stored as a **key**, and a shared dummy `Object` is used as the value.
+### Answer
+
+HashSet has a secret — it's actually backed by a HashMap. Each element is stored as a key in the underlying HashMap, with a shared dummy Object as the value. This design choice means HashSet inherits all of HashMap's performance characteristics and collision handling mechanisms.
+
+### The Secret — HashSet is Backed by HashMap
 
 ```java
 // Simplified internal structure from OpenJDK
@@ -57,7 +56,7 @@ public class HashSet<E> extends AbstractSet<E>
 
 ### hashCode() and equals() Contract
 
-This is one of the most critical concepts in Java. **If two objects are equal, they MUST have the same hash code.**
+This is one of the most critical concepts in Java — if two objects are equal, they MUST have the same hash code. Violating this contract breaks HashSet and HashMap completely.
 
 ```java
 // THE CONTRACT:
@@ -89,6 +88,8 @@ public class Employee {
 ```
 
 ### What Happens When the Contract is Violated
+
+Breaking the contract causes subtle bugs that are hard to track down:
 
 ```java
 // ❌ BROKEN: Override equals() but NOT hashCode()
@@ -141,6 +142,8 @@ set.remove(key);           // FALSE! Can't find it - MEMORY LEAK
 
 ### Capacity, Load Factor, and Rehashing
 
+HashSet uses the same capacity management as HashMap:
+
 ```java
 // Default initial capacity: 16 (must be power of 2)
 // Default load factor: 0.75
@@ -166,6 +169,8 @@ HashSet<String> set = new HashSet<>(2000);
 
 ### Collision Handling
 
+When two different objects hash to the same bucket, Java handles it efficiently:
+
 ```java
 // When two different objects have the same bucket index:
 // Java 7: linked list in the bucket
@@ -187,6 +192,8 @@ set.add("BB");   // Same bucket! Stored as next node in linked list
 
 ### Null Handling
 
+HashSet allows exactly one null element:
+
 ```java
 HashSet<String> set = new HashSet<>();
 
@@ -200,6 +207,8 @@ set.remove(null);    // true - null removed
 ```
 
 ### LinkedHashSet for Insertion Order
+
+If you need to preserve insertion order, use LinkedHashSet instead:
 
 ```java
 // LinkedHashSet maintains insertion order using a doubly-linked list
@@ -222,6 +231,8 @@ unordered.add("Cherry");
 ```
 
 ### Practical Examples
+
+HashSet is great for removing duplicates and set operations:
 
 ```java
 // ✅ Removing duplicates from a list
@@ -295,9 +306,7 @@ Set<DayOfWeek> weekend = EnumSet.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 Set<String> orderedSet = new LinkedHashSet<>();
 ```
 
----
-
-## Performance Summary
+### Performance Summary
 
 | Operation | HashSet | LinkedHashSet |
 |-----------|---------|---------------|
@@ -308,15 +317,22 @@ Set<String> orderedSet = new LinkedHashSet<>();
 | Order | None | Insertion order |
 | Memory | Lower | Slightly higher (linked list) |
 
+> **🎯 Interviewer Insight:** HashSet is backed by HashMap — know this internal detail. The equals/hashCode contract is a TOP interview question. Explain why mutable keys are dangerous. Know the difference between capacity, size, load factor, and threshold. Mention Java 8's treeification of collision chains (TREEIFY_THRESHOLD = 8).
+
+> **⚠️ Common Mistake:** Overriding equals() without hashCode(), or using mutable fields in hashCode(). Both cause elements to become "lost" in the set — they're present but can't be found via contains() or remove().
+
+> **🔧 Performance Tip:** Pre-size HashSet when you know the expected number of elements to avoid rehashing. Use `expectedSize * 4 / 3 + 1` to account for the 0.75 load factor. For enum types, use EnumSet — it's backed by a bit vector and is extremely fast.
+
+> **⚡ Follow-up:** Why does HashSet use HashMap internally instead of implementing its own bucket array?
+
+> **⚡ Follow-up:** What happens to the treeification threshold when elements are removed from a treeified bucket?
+
+> **⚡ Follow-up:** How does the load factor affect the trade-off between memory usage and collision probability?
+
+> **⚡ Follow-up:** Why should you use immutable objects as Set elements?
+
+> **📚 Related:** [HashMap Internals](./07-hashmap-internals.md), [LinkedHashSet and TreeSet](./06-linkedhashset-treeset.md), [Comparable vs Comparator](./13-comparable-comparator.md)
+
 ---
 
-## Interview Tips
-- HashSet is backed by HashMap - know this internal detail
-- The equals/hashCode contract is a TOP interview question
-- Explain why mutable keys are dangerous
-- Know the difference between capacity, size, load factor, and threshold
-- Mention Java 8's treeification of collision chains (TREEIFY_THRESHOLD = 8)
-
----
-
-[Prev: Q4 - Vector and Stack](./q04-vector-stack.md) | [Next: Q6 - LinkedHashSet and TreeSet](./q06-linkedhashset-treeset.md)
+[← Previous: Vector and Stack](./04-vector-stack.md) · [Next: LinkedHashSet and TreeSet →](./06-linkedhashset-treeset.md)

@@ -1,45 +1,32 @@
-# Q7: How Does String Work in Java and What Is the String Pool?
+# Strings and String Pool
 
-## 📋 Question
-How does String work in Java and what is the String Pool? Explain String immutability, `StringBuilder` vs `StringBuffer`, and modern String features.
-
-## Difficulty: 🟡 Medium
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Strings and String Pool
 
 ---
 
-## 💡 Answer
+## Q7 🟡 How Does String Work in Java and What Is the String Pool?
+
+**Question:** How does String work in Java and what is the String Pool? Explain String immutability, `StringBuilder` vs `StringBuffer`, and modern String features.
+
+### Answer
 
 `String` in Java is a **final, immutable class** that represents a sequence of characters. Once a `String` object is created, its content **cannot be changed** — any operation that appears to modify a String actually creates a **new String object**. This immutability is a deliberate design choice that enables thread safety, caching, security, and hash code optimization.
 
-### String Immutability
+**String immutability** — The `String` class is declared as `final class String` (cannot be subclassed) and stores characters in a `private final byte[]` array (since Java 9; previously `char[]`). There are no setter methods. When you call `str.toUpperCase()`, `str.concat()`, or use `+`, a **new** String is created — the original is untouched.
 
-The `String` class is declared as `final class String` (cannot be subclassed) and stores characters in a `private final byte[]` array (since Java 9; previously `char[]`). There are no setter methods. When you call `str.toUpperCase()`, `str.concat()`, or use `+`, a **new** String is created — the original is untouched.
+**Why immutable?** — Thread safety (Strings can be shared across threads without synchronization), String pool (immutability makes interning safe — if one reference could change the String, all references would see the change), security (Strings are used for class loading, file paths, network connections, and DB URLs — immutability prevents tampering after validation), and hash code caching (`String.hashCode()` is computed once and cached, making Strings ideal `HashMap` keys).
 
-**Why immutable?**
-1. **Thread Safety**: Strings can be shared across threads without synchronization.
-2. **String Pool**: Immutability makes interning (sharing) safe — if one reference could change the String, all references would see the change.
-3. **Security**: Strings are used for class loading, file paths, network connections, and DB URLs. Immutability prevents tampering after validation.
-4. **Hash Code Caching**: `String.hashCode()` is computed once and cached, making Strings ideal `HashMap` keys.
-
-### String Pool (Intern Pool)
-
-The String Pool is a special **memory area** (in the heap since Java 7; previously in PermGen) where Java stores unique String literals. When you write `"Hello"` in source code, the JVM checks the pool first — if an identical String exists, the existing reference is returned instead of creating a new object. This saves memory when the same strings appear frequently.
-
-- **String literals** are automatically interned: `String s = "Hello";` → goes to pool
-- **`new String("Hello")`** creates a new object on the heap **outside** the pool (even if "Hello" is already in the pool)
-- **`str.intern()`** explicitly adds a String to the pool (or returns the existing pooled instance)
+**String Pool (Intern Pool)** — The String Pool is a special **memory area** (in the heap since Java 7; previously in PermGen) where Java stores unique String literals. When you write `"Hello"` in source code, the JVM checks the pool first — if an identical String exists, the existing reference is returned instead of creating a new object. This saves memory when the same strings appear frequently. String literals are automatically interned: `String s = "Hello";` → goes to pool. `new String("Hello")` creates a new object on the heap **outside** the pool (even if "Hello" is already in the pool). `str.intern()` explicitly adds a String to the pool (or returns the existing pooled instance).
 
 ### String vs StringBuilder vs StringBuffer
 
 | Feature | String | StringBuilder | StringBuffer |
 |---------|--------|---------------|--------------|
-| **Mutability** | Immutable | Mutable | Mutable |
-| **Thread Safety** | Yes (immutable) | No | Yes (synchronized) |
-| **Performance** | Slow for concatenation | Fast | Slower (sync overhead) |
-| **Since** | JDK 1.0 | JDK 1.5 | JDK 1.0 |
-| **Use When** | Few modifications | Many modifications (single thread) | Many modifications (multi-thread) |
-
-### Code Example
+| Mutability | Immutable | Mutable | Mutable |
+| Thread Safety | Yes (immutable) | No | Yes (synchronized) |
+| Performance | Slow for concatenation | Fast | Slower (sync overhead) |
+| Since | JDK 1.0 | JDK 1.5 | JDK 1.0 |
+| Use When | Few modifications | Many modifications (single thread) | Many modifications (multi-thread) |
 
 ```java
 package com.interview.fundamentals;
@@ -184,8 +171,9 @@ public class StringBuilderAndTextBlocks {
 }
 ```
 
-### ⚠️ Common Mistake
-**Using `==` instead of `.equals()` for String comparison**: `==` compares references, not content. It "works" for literals (because they're pooled) but fails for dynamically created Strings. This creates bugs that pass in testing (with hardcoded strings) but fail in production (with user input or API responses). Also, **never use `new String("literal")`** — it creates an unnecessary extra object outside the pool. Sonar and most linters flag this as a code smell.
+> **🎯 Interviewer Insight:** This is one of the most frequently asked Java interview questions. Interviewers want you to explain **why** Strings are immutable (security, thread safety, caching, pool), the exact behavior of the String Pool with concrete examples, and the performance difference between String concatenation and StringBuilder. Strong candidates mention Compact Strings (Java 9+), text blocks (Java 15+), and the JVM's string deduplication feature. Putting `.equals()` on the **literal side** (`"admin".equals(input)`) to avoid NPE is a practical best practice that shows production experience.
+
+> **⚠️ Common Mistake:** Using `==` instead of `.equals()` for String comparison — `==` compares references, not content. It "works" for literals (because they're pooled) but fails for dynamically created Strings. This creates bugs that pass in testing (with hardcoded strings) but fail in production (with user input or API responses). Also, **never use `new String("literal")`** — it creates an unnecessary extra object outside the pool. Sonar and most linters flag this as a code smell.
 
 ```java
 // ❌ This bug is hiding in YOUR codebase
@@ -200,23 +188,18 @@ if ("admin".equals(userInput)) {
 }
 ```
 
-### ⚡ Performance Tip
-Since Java 9, Strings use **Compact Strings** (`byte[]` instead of `char[]`). Latin-1 characters (ASCII) use 1 byte per character (LATIN1 encoding), while characters beyond Latin-1 use 2 bytes per character (UTF-16 encoding). This cuts memory usage nearly in half for most English/ASCII text. The JVM also performs **String deduplication** with G1 GC (`-XX:+UseStringDeduplication`) — it identifies Strings with identical content during GC and points them to the same `byte[]` array, reducing heap usage significantly in applications with many duplicate strings (like JSON parsing or log processing).
+> **⚡ Performance Tip:** Since Java 9, Strings use **Compact Strings** (`byte[]` instead of `char[]`). Latin-1 characters (ASCII) use 1 byte per character (LATIN1 encoding), while characters beyond Latin-1 use 2 bytes per character (UTF-16 encoding). This cuts memory usage nearly in half for most English/ASCII text. The JVM also performs **String deduplication** with G1 GC (`-XX:+UseStringDeduplication`) — it identifies Strings with identical content during GC and points them to the same `byte[]` array, reducing heap usage significantly in applications with many duplicate strings (like JSON parsing or log processing).
 
-### 🔧 JVM Internals
-The String Pool is implemented as a **hash table** in native memory (C++ side of the JVM), not in the Java heap. String literals are interned during class loading by the constant pool resolution process. The pool size is configurable with `-XX:StringTableSize=<n>` (default ~60,000 buckets). You can monitor the pool with `jcmd <pid> VM.stringtable`. Since Java 7, the pool was moved from **PermGen** to the **main heap**, meaning pooled strings are eligible for garbage collection when no longer referenced. The `intern()` method performs a hash lookup in this table — if found, returns the existing reference; if not, adds the string and returns it. Excessive `intern()` calls with unique strings can fill the table and degrade performance due to hash collisions.
+> **🔧 JVM Internals:** The String Pool is implemented as a **hash table** in native memory (C++ side of the JVM), not in the Java heap. String literals are interned during class loading by the constant pool resolution process. The pool size is configurable with `-XX:StringTableSize=<n>` (default ~60,000 buckets). You can monitor the pool with `jcmd <pid> VM.stringtable`. Since Java 7, the pool was moved from **PermGen** to the **main heap**, meaning pooled strings are eligible for garbage collection when no longer referenced. The `intern()` method performs a hash lookup in this table — if found, returns the existing reference; if not, adds the string and returns it. Excessive `intern()` calls with unique strings can fill the table and degrade performance due to hash collisions.
+
+> **⚡ Follow-up:** How many String objects are created by `String s = new String("Hello")`?
+
+> **⚡ Follow-up:** Why is String a popular HashMap key, and what would happen if String were mutable?
+
+> **⚡ Follow-up:** What is the difference between `trim()` and `strip()` (Java 11+)?
+
+> **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Final Keyword](./11-final-keyword.md), [Java 8+ Features](../06-java8-plus-features/README.md)
 
 ---
 
-## 🎯 Interviewer Insight
-This is one of the most frequently asked Java interview questions. Interviewers want you to explain **why** Strings are immutable (security, thread safety, caching, pool), the exact behavior of the String Pool with concrete examples, and the performance difference between String concatenation and StringBuilder. Strong candidates mention Compact Strings (Java 9+), text blocks (Java 15+), and the JVM's string deduplication feature. Putting `.equals()` on the **literal side** (`"admin".equals(input)`) to avoid NPE is a practical best practice that shows production experience.
-
-## ⚡ Follow-up Questions
-1. How many String objects are created by `String s = new String("Hello")`?
-2. Why is String a popular HashMap key, and what would happen if String were mutable?
-3. What is the difference between `trim()` and `strip()` (Java 11+)?
-
-## 📚 Related Topics
-- [Data Types and Primitives](./q03-data-types-primitives.md)
-- [Final Keyword](./q11-final-keyword.md)
-- [Java 8+ Features](../06-java8-plus-features/README.md)
+[← Previous: Arrays in Java](./06-arrays-in-java.md) · [Next: Methods and Parameter Passing →](./08-methods-and-parameter-passing.md)

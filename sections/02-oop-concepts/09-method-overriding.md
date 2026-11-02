@@ -1,17 +1,18 @@
-# Q9: How Does Method Overriding Work?
+# Method Overriding
 
-## Question
-What is method overriding in Java? Explain the rules, `@Override` annotation, access modifier and exception rules, covariant return types, and bridge methods.
-
-## Difficulty: 🟡 Intermediate
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Method Overriding
 
 ---
 
-## Answer
+## Q12 🟡 How Does Method Overriding Work?
 
-**Method overriding** occurs when a subclass provides a **specific implementation** for a method already defined in its superclass. It is the mechanism behind **runtime polymorphism**.
+**Question** — What is method overriding in Java? Explain the rules, `@Override` annotation, access modifier and exception rules, covariant return types, and bridge methods.
 
-### Basic Overriding
+### Answer
+
+**Method overriding** occurs when a subclass provides a **specific implementation** for a method already defined in its superclass. It is the mechanism behind **runtime polymorphism** — the JVM decides which method to call based on the actual object type at runtime.
+
+**Basic Overriding**
 
 ```java
 public class Animal {
@@ -21,7 +22,7 @@ public class Animal {
 }
 
 public class Dog extends Animal {
-    @Override  // ✅ Always use @Override annotation
+    @Override  // Always use @Override annotation
     public String speak() {
         return "Woof!";
     }
@@ -39,7 +40,7 @@ Animal animal = new Dog();
 System.out.println(animal.speak()); // "Woof!" - determined at runtime
 ```
 
-### Rules for Valid Overriding
+**Rules for Valid Overriding**
 
 | Rule | Requirement |
 |------|------------|
@@ -53,7 +54,9 @@ System.out.println(animal.speak()); // "Woof!" - determined at runtime
 | `private` methods | ❌ Cannot override (not inherited) |
 | Constructors | ❌ Cannot override (not inherited) |
 
-### @Override Annotation
+**@Override Annotation**
+
+Always use the `@Override` annotation to catch mistakes at compile time. It ensures you're actually overriding a method and not accidentally overloading.
 
 ```java
 public class Parent {
@@ -62,20 +65,22 @@ public class Parent {
     }
 }
 
-// ✅ @Override catches mistakes at compile time
+// @Override catches mistakes at compile time
 public class Child extends Parent {
     @Override
     public void process(String data) {  // Correct override
         System.out.println("Child processing: " + data);
     }
 
-    // ❌ Without @Override, this silent bug compiles fine:
+    // Without @Override, this silent bug compiles fine:
     // public void process(Object data) { }  // This is OVERLOADING, not overriding!
     // @Override catches: "method does not override or implement a method from a supertype"
 }
 ```
 
-### Access Modifier Rules
+**Access Modifier Rules**
+
+Subclasses can widen access (make methods more visible) but cannot narrow it. The hierarchy is — `public` → `protected` → package-private → `private`. You can move down this hierarchy but not up.
 
 ```java
 public class Base {
@@ -84,7 +89,7 @@ public class Base {
     }
 }
 
-// ✅ Less restrictive (protected → public) is allowed
+// Less restrictive (protected → public) is allowed
 public class LessRestrictive extends Base {
     @Override
     public void doWork() {  // protected → public ✅
@@ -92,21 +97,16 @@ public class LessRestrictive extends Base {
     }
 }
 
-// ❌ More restrictive is NOT allowed
+// More restrictive is NOT allowed
 public class MoreRestrictive extends Base {
     // @Override
     // private void doWork() { }  // COMPILE ERROR: protected → private ❌
 }
 ```
 
-Access modifier hierarchy (less → more restrictive):
-```
-public → protected → package-private → private
-  ✅         ✅            ⚠️              ❌
-(can widen access, cannot narrow it)
-```
+**Exception Rules**
 
-### Exception Rules
+Subclasses can narrow the exception list (declare fewer or more specific checked exceptions) but cannot broaden it. Unchecked exceptions (RuntimeException) can always be thrown regardless of the parent method's exception declaration.
 
 ```java
 public class FileProcessor {
@@ -115,21 +115,21 @@ public class FileProcessor {
     }
 }
 
-// ✅ Subtype exception (narrower)
+// Subtype exception (narrower)
 public class SafeProcessor extends FileProcessor {
     @Override
     public void process() throws FileNotFoundException { // Subtype of IOException ✅
     }
 }
 
-// ✅ No exception (narrower)
+// No exception (narrower)
 public class NoExceptionProcessor extends FileProcessor {
     @Override
     public void process() { // No checked exception ✅
     }
 }
 
-// ❌ Broader exception
+// Broader exception
 public class BroadProcessor extends FileProcessor {
     // @Override
     // public void process() throws Exception { } // COMPILE ERROR ❌
@@ -145,7 +145,9 @@ public class RuntimeProcessor extends FileProcessor {
 }
 ```
 
-### Covariant Return Types
+**Covariant Return Types**
+
+A subclass can override a method and return a **more specific type** — a subtype of the parent's return type. This eliminates the need for casting when the subclass type is known.
 
 ```java
 public class AnimalShelter {
@@ -156,7 +158,7 @@ public class AnimalShelter {
 
 public class DogShelter extends AnimalShelter {
     @Override
-    public Dog adopt() {  // ✅ Covariant return: Dog IS-A Animal
+    public Dog adopt() {  // Covariant return: Dog IS-A Animal
         return new Dog("Buddy", 3, "Lab");
     }
 }
@@ -166,21 +168,23 @@ DogShelter shelter = new DogShelter();
 Dog dog = shelter.adopt(); // No cast needed
 ```
 
-### Cannot Override: static, final, private
+**Cannot Override — static, final, private**
+
+Static methods are **hidden**, not overridden. Final methods cannot be overridden by design. Private methods are not inherited, so they cannot be overridden.
 
 ```java
 public class Parent {
-    // ❌ Static methods are HIDDEN, not overridden
+    // Static methods are HIDDEN, not overridden
     public static void staticMethod() {
         System.out.println("Parent static");
     }
 
-    // ❌ Final methods CANNOT be overridden
+    // Final methods CANNOT be overridden
     public final void finalMethod() {
         System.out.println("Cannot change me");
     }
 
-    // ❌ Private methods are NOT inherited, so cannot be overridden
+    // Private methods are NOT inherited, so cannot be overridden
     private void privateMethod() {
         System.out.println("Invisible to child");
     }
@@ -202,6 +206,8 @@ public class Child extends Parent {
 }
 ```
 
+**Method hiding vs overriding** — static methods are resolved by reference type (hiding), while instance methods are resolved by actual object type (overriding).
+
 ```java
 // Method hiding vs overriding
 Parent ref = new Child();
@@ -209,7 +215,9 @@ ref.staticMethod();   // "Parent static" → resolved by reference type (hiding)
 ref.toString();       // Resolved by actual object type (overriding)
 ```
 
-### Bridge Methods with Generics
+**Bridge Methods with Generics**
+
+The compiler generates synthetic "bridge methods" to ensure polymorphism works correctly after type erasure. These methods delegate to the actual overridden method.
 
 ```java
 public class Container<T> {
@@ -232,49 +240,10 @@ public class StringContainer extends Container<String> {
 // This ensures polymorphism works correctly with erased generics
 ```
 
-### Real-World Override Example
+> **⚠️ Common Mistake** — Accidentally overloading instead of overriding by changing the parameter type. Always use `@Override` to catch this.
 
 ```java
-public abstract class CacheStrategy {
-    public abstract <K, V> V get(K key);
-    public abstract <K, V> void put(K key, V value);
-    public abstract void evict();
-
-    // Template method with hook
-    public void clear() {
-        evict();
-        System.out.println("Cache cleared");
-    }
-}
-
-public class LRUCache extends CacheStrategy {
-    private final LinkedHashMap<Object, Object> cache;
-
-    public LRUCache(int capacity) {
-        this.cache = new LinkedHashMap<>(capacity, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
-                return size() > capacity;
-            }
-        };
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <K, V> V get(K key) { return (V) cache.get(key); }
-
-    @Override
-    public <K, V> void put(K key, V value) { cache.put(key, value); }
-
-    @Override
-    public void evict() { cache.clear(); }
-}
-```
-
-### Common Mistake
-
-```java
-// ❌ Accidentally overloading instead of overriding
+// Accidentally overloading instead of overriding
 public class Parent {
     public boolean equals(Object obj) { /* ... */ return false; }
 }
@@ -286,7 +255,7 @@ public class Child extends Parent {
     }
 }
 
-// ✅ Always use @Override to catch this
+// Always use @Override to catch this
 public class Child extends Parent {
     @Override
     public boolean equals(Object obj) { // Correct: parameter is Object
@@ -297,20 +266,18 @@ public class Child extends Parent {
 }
 ```
 
-### Performance Tip
-Method overriding uses virtual method dispatch (vtable lookup). The JIT compiler can devirtualize and inline monomorphic call sites (where only one implementation is ever used), achieving near-zero overhead.
+> **🔧 Performance Tip** — Method overriding uses virtual method dispatch (vtable lookup). The JIT compiler can devirtualize and inline monomorphic call sites (where only one implementation is ever used), achieving near-zero overhead.
+
+> **🎯 Interviewer Insight** — Interviewers look for precise knowledge of overriding rules, especially around access modifiers and exceptions. The `@Override` annotation question is a favorite. Understanding bridge methods shows deep knowledge of generics and type erasure.
+
+> **⚡ Follow-up** — What is the difference between method overriding and method hiding?
+
+> **⚡ Follow-up** — Can you override a method to be synchronized even if the parent method is not?
+
+> **⚡ Follow-up** — How does the JVM resolve overridden methods at runtime?
+
+> **📚 Related** — [Method Overloading](./08-method-overloading.md), [Polymorphism](./04-polymorphism.md), [Super Keyword](./10-super-keyword.md)
 
 ---
 
-## Interviewer Insight
-Interviewers look for precise knowledge of overriding rules, especially around access modifiers and exceptions. The `@Override` annotation question is a favorite. Understanding bridge methods shows deep knowledge of generics and type erasure.
-
-## Follow-up Questions
-1. What is the difference between method overriding and method hiding?
-2. Can you override a method to be synchronized even if the parent method is not?
-3. How does the JVM resolve overridden methods at runtime?
-
-## Related Topics
-- [Method Overloading](./q08-method-overloading.md)
-- [Polymorphism](./q04-polymorphism.md)
-- [Super Keyword](./q10-super-keyword.md)
+[← Previous: Method Overloading](./08-method-overloading.md) · [Next: Super Keyword →](./10-super-keyword.md)

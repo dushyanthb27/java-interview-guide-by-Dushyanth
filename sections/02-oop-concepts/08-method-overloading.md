@@ -1,26 +1,24 @@
-# Q8: How Does Method Overloading Work?
+# Method Overloading
 
-## Question
-What is method overloading in Java? Explain the rules, type promotion, ambiguity issues, and how overloading interacts with varargs, autoboxing, and generics.
-
-## Difficulty: 🟡 Intermediate
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Method Overloading
 
 ---
 
-## Answer
+## Q11 🟡 How Does Method Overloading Work?
 
-**Method overloading** is compile-time polymorphism where multiple methods in the same class share the same name but differ in their **parameter lists** (number, types, or order of parameters).
+**Question** — What is method overloading in Java? Explain the rules, type promotion, ambiguity issues, and how overloading interacts with varargs, autoboxing, and generics.
 
-### Rules for Overloading
+### Answer
 
-A valid overload must differ in at least one of:
-1. **Number** of parameters
-2. **Types** of parameters
-3. **Order** of parameter types
+**Method overloading** is compile-time polymorphism where multiple methods in the same class share the same name but differ in their **parameter lists** (number, types, or order of parameters). The compiler selects the most specific matching method based on the argument types.
+
+**Rules for Overloading**
+
+A valid overload must differ in at least one of — number of parameters, types of parameters, or order of parameter types. Return type alone does NOT make a valid overload.
 
 ```java
 public class Printer {
-    // ✅ Different number of parameters
+    // Different number of parameters
     public void print(String msg) {
         System.out.println(msg);
     }
@@ -29,7 +27,7 @@ public class Printer {
         for (int i = 0; i < copies; i++) System.out.println(msg);
     }
 
-    // ✅ Different parameter types
+    // Different parameter types
     public void print(int number) {
         System.out.println(number);
     }
@@ -38,7 +36,7 @@ public class Printer {
         System.out.println(number);
     }
 
-    // ✅ Different order of types
+    // Different order of types
     public void print(String msg, int code) {
         System.out.printf("[%d] %s%n", code, msg);
     }
@@ -47,23 +45,18 @@ public class Printer {
         System.out.printf("[%d] %s%n", code, msg);
     }
 
-    // ❌ Return type alone does NOT make a valid overload
+    // Return type alone does NOT make a valid overload
     // public int print(String msg) { return 0; } // COMPILE ERROR
 }
 ```
 
-### Method Resolution Order
+**Method Resolution Order**
 
-The compiler selects the most specific matching method in this priority:
+The compiler selects the most specific matching method in this priority — exact match, widening primitive conversion (byte → short → int → long → float → double), autoboxing/unboxing (int ↔ Integer), and finally varargs.
 
-```
-1. Exact match
-2. Widening primitive conversion (byte → short → int → long → float → double)
-3. Autoboxing/unboxing (int ↔ Integer)
-4. Varargs
-```
+**Type Promotion (Widening)**
 
-### Type Promotion (Widening)
+When no exact match exists, the compiler widens primitive types to find a compatible method.
 
 ```java
 public class TypePromotion {
@@ -90,13 +83,11 @@ public class TypePromotion {
 }
 ```
 
-```
-Widening path:
-byte → short → int → long → float → double
-         char ↗
-```
+Widening path — `byte → short → int → long → float → double` (with `char` also widening to `int`).
 
-### Autoboxing Interaction
+**Autoboxing Interaction**
+
+When both primitive and wrapper overloads exist, exact match wins. If only the wrapper overload exists, autoboxing occurs.
 
 ```java
 public class BoxingOverload {
@@ -125,7 +116,9 @@ public class BoxingOnly {
 }
 ```
 
-### Varargs Overloading
+**Varargs Overloading**
+
+Varargs (variable arity) is the least specific option. The compiler prefers exact matches over varargs.
 
 ```java
 public class VarargsOverload {
@@ -147,11 +140,13 @@ public class VarargsOverload {
 }
 ```
 
-### Ambiguity Issues
+**Ambiguity Issues**
+
+When multiple overload options are equally valid, the compiler reports an ambiguity error. This commonly happens with mixed primitive types.
 
 ```java
 public class Ambiguous {
-    // ❌ These cause ambiguity in certain calls
+    // These cause ambiguity in certain calls
     public void calculate(int a, double b) {
         System.out.println("int, double");
     }
@@ -163,36 +158,40 @@ public class Ambiguous {
     public static void main(String[] args) {
         var amb = new Ambiguous();
 
-        amb.calculate(10, 20.0);  // ✅ OK → "int, double" (exact match)
-        amb.calculate(10.0, 20);  // ✅ OK → "double, int" (exact match)
-        // amb.calculate(10, 20); // ❌ COMPILE ERROR: ambiguous!
+        amb.calculate(10, 20.0);  // OK → "int, double" (exact match)
+        amb.calculate(10.0, 20);  // OK → "double, int" (exact match)
+        // amb.calculate(10, 20); // COMPILE ERROR: ambiguous!
         // Both (int→int, int→double) and (int→double, int→int) are equally valid
     }
 }
 ```
 
-### Overloading with Generics
+**Overloading with Generics**
+
+After type erasure, generic types become their bounds (usually Object). This means you cannot overload based solely on different generic type parameters.
 
 ```java
 public class GenericOverload {
-    // ✅ These are valid overloads (different erased types)
+    // These are valid overloads (different erased types)
     public void process(List<String> list) {
         System.out.println("String list");
     }
 
-    // ❌ COMPILE ERROR after type erasure, both become process(List)
+    // COMPILE ERROR after type erasure, both become process(List)
     // public void process(List<Integer> list) {
     //     System.out.println("Integer list");
     // }
 
-    // ✅ Workaround: use different method names or different parameter counts
+    // Workaround: use different method names or different parameter counts
     public void processIntegers(List<Integer> list) {
         System.out.println("Integer list");
     }
 }
 ```
 
-### Real-World Example: String.valueOf()
+**Real-World Example — String.valueOf()**
+
+The JDK uses overloading extensively for convenience. `String.valueOf()` is overloaded for every primitive type and Object.
 
 ```java
 // The JDK uses overloading extensively
@@ -209,39 +208,37 @@ public class StringValueOfDemo {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Overloading with null argument causes ambiguity when multiple reference types are possible. Cast null to the desired type to resolve.
 
 ```java
-// ❌ Overloading with null argument causes ambiguity
+// Overloading with null argument causes ambiguity
 public class NullAmbiguity {
     public void test(String s) { System.out.println("String"); }
     public void test(Integer i) { System.out.println("Integer"); }
 
     public static void main(String[] args) {
         var na = new NullAmbiguity();
-        // na.test(null);  // ❌ COMPILE ERROR: ambiguous
+        // na.test(null);  // COMPILE ERROR: ambiguous
 
-        // ✅ Fix: cast null to the desired type
+        // Fix: cast null to the desired type
         na.test((String) null);   // "String"
         na.test((Integer) null);  // "Integer"
     }
 }
 ```
 
-### Performance Tip
-Overloaded methods are resolved at compile time, so there is no runtime dispatch overhead. However, avoid excessive overloading as it reduces code readability. Consider using the Builder pattern or method objects for many parameter combinations.
+> **🔧 Performance Tip** — Overloaded methods are resolved at compile time, so there is no runtime dispatch overhead. However, avoid excessive overloading as it reduces code readability. Consider using the Builder pattern or method objects for many parameter combinations.
+
+> **🎯 Interviewer Insight** — Interviewers test your understanding of the compiler's method resolution algorithm — exact match → widening → autoboxing → varargs. Tricky questions often involve ambiguity with `null` arguments or widening vs autoboxing priority.
+
+> **⚡ Follow-up** — Can you overload `main(String[] args)` in Java?
+
+> **⚡ Follow-up** — What is the difference between overloading and overriding?
+
+> **⚡ Follow-up** — Why does widening take priority over autoboxing in method resolution?
+
+> **📚 Related** — [Method Overriding](./09-method-overriding.md), [Polymorphism](./04-polymorphism.md), [Constructors](./02-constructors.md)
 
 ---
 
-## Interviewer Insight
-Interviewers test your understanding of the compiler's method resolution algorithm: exact match → widening → autoboxing → varargs. Tricky questions often involve ambiguity with `null` arguments or widening vs autoboxing priority.
-
-## Follow-up Questions
-1. Can you overload `main(String[] args)` in Java?
-2. What is the difference between overloading and overriding?
-3. Why does widening take priority over autoboxing in method resolution?
-
-## Related Topics
-- [Method Overriding](./q09-method-overriding.md)
-- [Polymorphism](./q04-polymorphism.md)
-- [Constructors](./q02-constructors.md)
+[← Previous: Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md) · [Next: Method Overriding →](./09-method-overriding.md)

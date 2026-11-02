@@ -1,17 +1,18 @@
-# Q3: How Does Inheritance Work in Java?
+# Inheritance
 
-## Question
-How does inheritance work in Java? Explain the types of inheritance, constructor chaining with `super()`, and why Java does not support multiple class inheritance.
-
-## Difficulty: 🟢 Basic
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Inheritance
 
 ---
 
-## Answer
+## Q6 🟢 How Does Inheritance Work in Java?
+
+**Question** — How does inheritance work in Java? Explain the types of inheritance, constructor chaining with `super()`, and why Java does not support multiple class inheritance.
+
+### Answer
 
 **Inheritance** is the mechanism by which one class (child/subclass) acquires the fields and methods of another class (parent/superclass). It establishes an **IS-A relationship** and promotes code reuse.
 
-### Basic Inheritance with `extends`
+**Basic Inheritance with `extends`**
 
 ```java
 // Parent (superclass)
@@ -55,7 +56,9 @@ public class Dog extends Animal {
 }
 ```
 
-### Types of Inheritance
+**Types of Inheritance**
+
+Java supports single, multilevel, and hierarchical inheritance — but NOT multiple class inheritance.
 
 ```
 1. SINGLE                2. MULTILEVEL            3. HIERARCHICAL
@@ -69,24 +72,24 @@ public class Dog extends Animal {
 ```
 
 ```java
-// ✅ Single Inheritance
+// Single Inheritance
 class Dog extends Animal { }
 
-// ✅ Multilevel Inheritance
+// Multilevel Inheritance
 class Mammal extends Animal { }
 class Dog extends Mammal { }
 
-// ✅ Hierarchical Inheritance
+// Hierarchical Inheritance
 class Dog extends Animal { }
 class Cat extends Animal { }
 
-// ❌ Multiple Class Inheritance - NOT allowed in Java
+// Multiple Class Inheritance - NOT allowed in Java
 // class Hybrid extends Dog, Cat { }  // COMPILE ERROR
 ```
 
-### Constructor Chaining with `super()`
+**Constructor Chaining with `super()`**
 
-Constructors are NOT inherited, but the parent constructor must always be called:
+Constructors are NOT inherited, but the parent constructor must always be called. If you don't call `super()` explicitly, the compiler inserts `super()` (no-arg) automatically. This can cause compile errors if the parent has no no-arg constructor.
 
 ```java
 public class Vehicle {
@@ -126,34 +129,17 @@ public class ElectricCar extends Car {
 // ElectricCar constructor: 100kWh
 ```
 
-### Object Class as Root
+**Object Class as Root**
 
-Every class in Java implicitly extends `java.lang.Object`:
+Every class in Java implicitly extends `java.lang.Object`. This means all classes inherit methods like `toString()`, `equals()`, `hashCode()`, `getClass()`, `clone()`, `finalize()`, and the thread coordination methods.
 
-```java
-// These two are equivalent:
-class MyClass { }
-class MyClass extends Object { }
+**Method Inheritance and Access**
 
-// Object methods available to all classes:
-// toString(), equals(), hashCode(), getClass(),
-// clone(), finalize(), wait(), notify(), notifyAll()
-```
+Public, protected, and package-private methods are inherited. Private methods are NOT inherited. Static methods are inherited but hidden (not overridden). Final methods are inherited but cannot be overridden.
 
-### Method Inheritance and Access
+**Why No Multiple Class Inheritance?**
 
-```java
-public class Shape {
-    public double area() { return 0; }         // ✅ Inherited
-    protected void init() { }                   // ✅ Inherited (same/sub package)
-    void packageMethod() { }                    // ✅ Inherited (same package only)
-    private void secret() { }                   // ❌ NOT inherited
-    public static void utility() { }            // ✅ Inherited (but hidden, not overridden)
-    public final void immutable() { }           // ✅ Inherited (cannot be overridden)
-}
-```
-
-### Why No Multiple Class Inheritance?
+Java avoids the diamond problem by supporting single class inheritance with multiple interface implementation. The diamond problem occurs when a class inherits from two types that both provide an implementation of the same method, creating ambiguity.
 
 ```java
 // Hypothetical problem if Java allowed multiple class inheritance:
@@ -165,10 +151,10 @@ class B {
     public void greet() { System.out.println("Hello from B"); }
 }
 
-// ❌ If this were allowed, which greet() does C inherit?
+// If this were allowed, which greet() does C inherit?
 // class C extends A, B { }  // Ambiguity! (The Diamond Problem)
 
-// ✅ Java solution: use interfaces for multiple inheritance of type
+// Java solution: use interfaces for multiple inheritance of type
 interface Greetable {
     default void greet() { System.out.println("Hello from Greetable"); }
 }
@@ -186,10 +172,12 @@ class Polite implements Greetable, Farewell {
 }
 ```
 
-### Sealed Classes (Java 17+)
+**Sealed Classes (Java 17+)**
+
+Sealed classes control which classes can extend them, providing a more secure inheritance model.
 
 ```java
-// ✅ Control which classes can extend your class
+// Control which classes can extend your class
 public sealed class Shape permits Circle, Rectangle, Triangle {
     public abstract double area();
 }
@@ -213,10 +201,10 @@ public non-sealed class Triangle extends Shape {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Forgetting that `super()` is implicitly called if not specified. If the parent has no no-arg constructor, this causes a compile error.
 
 ```java
-// ❌ Forgetting that super() is implicitly called if not specified
+// Forgetting that super() is implicitly called if not specified
 class Parent {
     Parent(int x) { } // No no-arg constructor
 }
@@ -228,7 +216,7 @@ class Child extends Parent {
     }
 }
 
-// ✅ Fix: explicitly call the available parent constructor
+// Fix: explicitly call the available parent constructor
 class Child extends Parent {
     Child() {
         super(0); // Explicitly call the parameterized constructor
@@ -236,20 +224,18 @@ class Child extends Parent {
 }
 ```
 
-### Performance Tip
-Deep inheritance hierarchies (more than 3-4 levels) become hard to maintain and debug. Prefer **composition over inheritance** for flexible designs. Use inheritance only for genuine IS-A relationships.
+> **🔧 Performance Tip** — Deep inheritance hierarchies (more than 3-4 levels) become hard to maintain and debug. Prefer **composition over inheritance** for flexible designs. Use inheritance only for genuine IS-A relationships.
+
+> **🎯 Interviewer Insight** — Interviewers look for a clear understanding of the IS-A relationship, constructor chaining, and the rationale behind Java's single-inheritance restriction. Mentioning sealed classes (Java 17+) shows awareness of modern Java.
+
+> **⚡ Follow-up** — Can a subclass inherit private members of its parent?
+
+> **⚡ Follow-up** — What is the difference between `extends` and `implements`?
+
+> **⚡ Follow-up** — How do sealed classes improve upon traditional inheritance?
+
+> **📚 Related** — [Polymorphism](./04-polymorphism.md), [Super Keyword](./10-super-keyword.md), [Composition vs Inheritance](./12-object-composition.md)
 
 ---
 
-## Interviewer Insight
-Interviewers look for a clear understanding of the IS-A relationship, constructor chaining, and the rationale behind Java's single-inheritance restriction. Mentioning sealed classes (Java 17+) shows awareness of modern Java.
-
-## Follow-up Questions
-1. Can a subclass inherit private members of its parent?
-2. What is the difference between `extends` and `implements`?
-3. How do sealed classes improve upon traditional inheritance?
-
-## Related Topics
-- [Polymorphism](./q04-polymorphism.md)
-- [Super Keyword](./q10-super-keyword.md)
-- [Composition vs Inheritance](./q12-object-composition.md)
+[← Previous: Constructors](./02-constructors.md) · [Next: Polymorphism →](./04-polymorphism.md)

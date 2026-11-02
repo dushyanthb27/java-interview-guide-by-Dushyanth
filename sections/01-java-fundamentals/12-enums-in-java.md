@@ -1,26 +1,20 @@
-# Q12: How Do Enums Work in Java?
+# Enums in Java
 
-## 📋 Question
-How do Enums work in Java? Explain enum basics, enums with fields and methods, enum implementing interfaces, and when to use enums vs constants.
-
-## Difficulty: 🟡 Medium
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Enums in Java
 
 ---
 
-## 💡 Answer
+## Q12 🟡 How Do Enums Work in Java?
+
+**Question:** How do Enums work in Java? Explain enum basics, enums with fields and methods, enum implementing interfaces, and when to use enums vs constants.
+
+### Answer
 
 Java **enums** (enumerated types) are special classes that represent a **fixed set of constants**. Introduced in Java 5, they are far more powerful than enums in most other languages — Java enums are full-fledged classes that can have **fields, constructors, methods**, and can **implement interfaces**.
 
 Every enum implicitly extends `java.lang.Enum<E>`, which means: (1) enums cannot extend other classes (single inheritance already used); (2) enums are implicitly `final` (cannot be subclassed, with a nuance for constant-specific bodies); (3) each enum constant is a `public static final` instance of the enum type, created once during class loading.
 
-### Key Enum Features
-- **Type safety**: Unlike `int` constants, enums are typed — you cannot pass a `Season` where a `Color` is expected.
-- **Namespace**: Enum constants are scoped to the enum type — `Season.SPRING` vs `Color.RED`.
-- **Singleton guarantee**: Each enum constant is a singleton — exactly one instance exists per JVM (even surviving serialization/deserialization).
-- **Built-in methods**: `values()`, `valueOf(String)`, `name()`, `ordinal()`, `compareTo()`.
-- **Usable in switch**: Enums work seamlessly with switch statements and expressions.
-
-### Code Example
+**Key enum features** — Type safety (unlike `int` constants, enums are typed — you cannot pass a `Season` where a `Color` is expected), namespace (enum constants are scoped to the enum type — `Season.SPRING` vs `Color.RED`), singleton guarantee (each enum constant is a singleton — exactly one instance exists per JVM, even surviving serialization/deserialization), built-in methods (`values()`, `valueOf(String)`, `name()`, `ordinal()`, `compareTo()`), and usability in switch (enums work seamlessly with switch statements and expressions).
 
 ```java
 package com.interview.fundamentals;
@@ -247,8 +241,9 @@ class EnumSingletonUsage {
 }
 ```
 
-### ⚠️ Common Mistake
-**Relying on `ordinal()` for logic or persistence**: The ordinal is the position of the constant in the declaration (0-based). If you add, remove, or reorder enum constants, all ordinals change — breaking any code or database that depends on them. Use the `name()` string representation or a custom field instead. Also, **never use `int` constants** (`public static final int STATUS_OK = 0`) when an enum is appropriate — `int` constants have no type safety, no namespace, no methods, and no IDE support.
+> **🎯 Interviewer Insight:** Interviewers expect you to go beyond basic enum usage. Discussing enums with fields, constructors, and methods shows you understand they are full classes. Mentioning the enum singleton pattern (Effective Java) demonstrates awareness of best practices. Knowing about `EnumSet`/`EnumMap` and their performance advantages shows practical experience. The key insight is explaining why enums are **type-safe** alternatives to `int` constants and when to use enums vs sealed classes (Java 17+).
+
+> **⚠️ Common Mistake:** Relying on `ordinal()` for logic or persistence — the ordinal is the position of the constant in the declaration (0-based). If you add, remove, or reorder enum constants, all ordinals change — breaking any code or database that depends on them. Use the `name()` string representation or a custom field instead. Also, **never use `int` constants** (`public static final int STATUS_OK = 0`) when an enum is appropriate — `int` constants have no type safety, no namespace, no methods, and no IDE support.
 
 ```java
 // ❌ Anti-pattern: using ordinal for storage
@@ -259,23 +254,18 @@ String saved2 = Season.SUMMER.name();  // "SUMMER" — stable
 Season restored = Season.valueOf(saved2);
 ```
 
-### ⚡ Performance Tip
-`EnumSet` is internally implemented as a **bit vector** — each enum constant maps to a single bit. Operations like `contains`, `add`, `remove`, and set operations (union, intersection) execute in **O(1)** time using bitwise operations. For enums with 64 or fewer constants, `EnumSet` uses a single `long` (64 bits). This makes it orders of magnitude faster than `HashSet<MyEnum>`. Similarly, `EnumMap` uses a **simple array** indexed by `ordinal()`, making it faster and more memory-efficient than `HashMap<MyEnum, V>`. Always prefer `EnumSet` and `EnumMap` when keys are enum types.
+> **⚡ Performance Tip:** `EnumSet` is internally implemented as a **bit vector** — each enum constant maps to a single bit. Operations like `contains`, `add`, `remove`, and set operations (union, intersection) execute in **O(1)** time using bitwise operations. For enums with 64 or fewer constants, `EnumSet` uses a single `long` (64 bits). This makes it orders of magnitude faster than `HashSet<MyEnum>`. Similarly, `EnumMap` uses a **simple array** indexed by `ordinal()`, making it faster and more memory-efficient than `HashMap<MyEnum, V>`. Always prefer `EnumSet` and `EnumMap` when keys are enum types.
 
-### 🔧 JVM Internals
-At the bytecode level, each enum class compiles to a class that extends `java.lang.Enum`. Each constant becomes a `public static final` field of the enum type, initialized in a `static {}` block. The `values()` method returns a **clone** of an internal array (so callers cannot corrupt the original). The enum constructor is always `private` — the JVM prevents reflective creation of new enum instances by throwing `IllegalArgumentException` in `Constructor.newInstance()`. During deserialization, the JVM calls `Enum.valueOf()` instead of creating a new instance, ensuring the singleton property is preserved. The `switch` on enum compiles to a `tableswitch` on ordinals, wrapped in a synthetic `$SwitchMap` array that maps ordinals to case indices — this indirection allows the switch to work even when enum classes are compiled separately.
+> **🔧 JVM Internals:** At the bytecode level, each enum class compiles to a class that extends `java.lang.Enum`. Each constant becomes a `public static final` field of the enum type, initialized in a `static {}` block. The `values()` method returns a **clone** of an internal array (so callers cannot corrupt the original). The enum constructor is always `private` — the JVM prevents reflective creation of new enum instances by throwing `IllegalArgumentException` in `Constructor.newInstance()`. During deserialization, the JVM calls `Enum.valueOf()` instead of creating a new instance, ensuring the singleton property is preserved. The `switch` on enum compiles to a `tableswitch` on ordinals, wrapped in a synthetic `$SwitchMap` array that maps ordinals to case indices — this indirection allows the switch to work even when enum classes are compiled separately.
+
+> **⚡ Follow-up:** Can an enum extend a class? Can it implement multiple interfaces?
+
+> **⚡ Follow-up:** How does enum serialization work, and why is it safe for singletons?
+
+> **⚡ Follow-up:** When would you use a sealed class instead of an enum?
+
+> **📚 Related:** [Final Keyword](./11-final-keyword.md), [Sealed Classes](./15-sealed-classes-java15.md), [Records in Java 14+](./14-records-java14.md)
 
 ---
 
-## 🎯 Interviewer Insight
-Interviewers expect you to go beyond basic enum usage. Discussing enums with fields, constructors, and methods shows you understand they are full classes. Mentioning the enum singleton pattern (Effective Java) demonstrates awareness of best practices. Knowing about `EnumSet`/`EnumMap` and their performance advantages shows practical experience. The key insight is explaining why enums are **type-safe** alternatives to `int` constants and when to use enums vs sealed classes (Java 17+).
-
-## ⚡ Follow-up Questions
-1. Can an enum extend a class? Can it implement multiple interfaces?
-2. How does enum serialization work, and why is it safe for singletons?
-3. When would you use a sealed class instead of an enum?
-
-## 📚 Related Topics
-- [Final Keyword](./q11-final-keyword.md)
-- [Sealed Classes](./q15-sealed-classes-java15.md)
-- [Records in Java 14+](./q14-records-java14.md)
+[← Previous: Final Keyword](./11-final-keyword.md) · [Next: Annotations →](./13-annotations.md)

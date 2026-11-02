@@ -1,21 +1,20 @@
-# Q7: How Does HashMap Work Internally? (Deep Dive)
+# HashMap Internals
 
-[Back to Collections Framework](./README.md)
-
----
-
-## 📋 Question
-Explain the internal working of HashMap in detail. How does it handle hashing, collisions, and resizing?
-
-## Difficulty: 🟠 Hard
+[Home](../../README.md) > [Collections Framework](./README.md) > HashMap Internals
 
 ---
 
-## 💡 Answer
+## Q7 � How Does HashMap Work Internally?
+
+**Question:** Explain the internal working of HashMap in detail. How does it handle hashing, collisions, and resizing?
+
+### Answer
+
+HashMap is the most widely used Map implementation in Java, and understanding its internals is a classic interview question. It stores key-value pairs in an array of buckets, where each bucket can hold a linked list or a red-black tree of entries. The magic lies in how it handles collisions, resizes, and optimizes for performance.
 
 ### Internal Structure
 
-HashMap stores key-value pairs in an **array of buckets** (called `table`). Each bucket can hold a linked list or a red-black tree of entries.
+HashMap uses an array of buckets called `table`. Each bucket starts as a linked list and converts to a red-black tree when it gets too large:
 
 ```java
 // Simplified internal structure from OpenJDK
@@ -64,7 +63,9 @@ public class HashMap<K, V> extends AbstractMap<K, V>
 }
 ```
 
-### Hash Function - Spreading Bits
+### Hash Function — Spreading Bits
+
+HashMap doesn't use `Object.hashCode()` directly — it applies a bit-spreading function to reduce collisions:
 
 ```java
 // HashMap's internal hash function (NOT Object.hashCode() directly)
@@ -87,6 +88,8 @@ static final int hash(Object key) {
 
 ### Bucket Index Calculation
 
+HashMap uses bitwise AND instead of modulo for speed — this is why capacity must be a power of 2:
+
 ```java
 // Index = hash & (capacity - 1)
 // This is equivalent to hash % capacity when capacity is a power of 2
@@ -105,11 +108,11 @@ static final int hash(Object key) {
 // new HashMap<>(17) -> actual capacity = 32
 ```
 
-### put() Operation - Step by Step
+### put() Operation — Step by Step
+
+Here's what happens when you call `map.put("key", "value")`:
 
 ```java
-// What happens when you call: map.put("key", "value")
-
 // Step 1: Calculate hash
 int hash = hash("key");  // key.hashCode() ^ (key.hashCode() >>> 16)
 
@@ -143,7 +146,7 @@ if (++size > threshold) {
 }
 ```
 
-### Visual: put() Operation
+### Visual — put() Operation
 
 ```
 Initial state (capacity=4):
@@ -167,7 +170,9 @@ After put("B", 3):  hash("B") & 3 = 2
           null  [A:1]->[E:2]     [B:3]->null  null
 ```
 
-### Collision Handling: Linked List to Red-Black Tree
+### Collision Handling — Linked List to Red-Black Tree
+
+Java 8 introduced a key optimization — when a bucket has more than 8 entries, the linked list converts to a red-black tree:
 
 ```java
 // Java 8+ Treeification:
@@ -195,6 +200,8 @@ After put("B", 3):  hash("B") & 3 = 2
 
 ### Null Key Handling
 
+HashMap allows exactly one null key, stored at index 0:
+
 ```java
 HashMap<String, Integer> map = new HashMap<>();
 
@@ -214,6 +221,8 @@ map.containsKey("key1"); // true - use this to check presence
 ```
 
 ### Resizing (Rehashing)
+
+When the size exceeds the threshold, HashMap doubles its capacity and rehashes all entries:
 
 ```java
 // Triggered when: size > threshold (capacity * loadFactor)
@@ -241,6 +250,8 @@ map.containsKey("key1"); // true - use this to check presence
 
 ### Load Factor Deep Dive
 
+The load factor controls the trade-off between memory usage and collision probability:
+
 ```java
 // Load factor = size / capacity
 // Higher load factor: more elements per bucket, more collisions, less memory
@@ -266,6 +277,8 @@ map = new HashMap<>(256);  // No resizing for up to 192 entries
 ```
 
 ### equals() and hashCode() Contract for Keys
+
+Keys must follow the hashCode/equals contract — breaking it causes subtle bugs:
 
 ```java
 // CRITICAL: Keys in HashMap MUST follow the hashCode/equals contract
@@ -300,6 +313,8 @@ public class CacheKey {
 
 ### Java 7 vs Java 8 HashMap Changes
 
+Java 8 made significant improvements to HashMap:
+
 ```java
 // Java 7 HashMap:
 // - Linked list only (no tree optimization)
@@ -316,6 +331,8 @@ public class CacheKey {
 ```
 
 ### Thread Safety Warning
+
+HashMap is NOT thread-safe — concurrent modifications can cause data corruption:
 
 ```java
 // ❌ HashMap is NOT thread-safe!
@@ -389,9 +406,7 @@ map.putIfAbsent("key", expensiveComputation());
 map.merge("key", 1, Integer::sum);  // Increment counter
 ```
 
----
-
-## Performance Summary
+### Performance Summary
 
 | Operation | Average Case | Worst Case (all collisions) |
 |-----------|-------------|----------------------------|
@@ -403,27 +418,28 @@ map.merge("key", 1, Integer::sum);  // Increment counter
 | Iteration | O(capacity + n) | O(capacity + n) |
 | Resize | O(n) | O(n) |
 
-\* O(n) in Java 7 (linked list only), O(log n) in Java 8+ (red-black tree)
+* O(n) in Java 7 (linked list only), O(log n) in Java 8+ (red-black tree)
+
+> **🎯 Interviewer Insight:** This is THE most asked collection question — know every detail. Interviewers expect you to draw the bucket array + linked list + tree structure, explain the hash spreading function `hash ^ (hash >>> 16)`, and know the thresholds (TREEIFY_THRESHOLD=8, UNTREEIFY_THRESHOLD=6, MIN_TREEIFY_CAPACITY=64). You must explain why capacity must be a power of 2 (for `hash & (n-1)` optimization) and know Java 7 vs Java 8 differences (head vs tail insertion, tree optimization). Emphasize the equals/hashCode contract for keys.
+
+> **⚠️ Common Mistake:** Using mutable objects as HashMap keys. If the hash code changes after insertion, the entry becomes "lost" — it's still in the map but can't be found via get() or remove().
+
+> **🔧 Performance Tip:** Pre-size HashMap when you know the expected number of elements to avoid resizes. Use `expectedSize * 4 / 3 + 1` to account for the 0.75 load factor. Use entrySet() for iteration instead of keySet() + get() to avoid double hash lookups.
+
+> **⚡ Follow-up:** Why does HashMap use a power of 2 for capacity, and how does this affect the hash function?
+
+> **⚡ Follow-up:** What happens if you use a mutable object as a HashMap key, and how can you detect this issue?
+
+> **⚡ Follow-up:** How does ConcurrentHashMap differ from HashMap internally in terms of locking and iteration?
+
+> **⚡ Follow-up:** What is the formula for calculating the threshold, and how does load factor impact performance?
+
+> **⚡ Follow-up:** How does Java 8's treeification improve performance for collision-heavy scenarios?
+
+> **⚡ Follow-up:** What is the difference between Java 7 and Java 8 HashMap implementations regarding collision handling?
+
+> **📚 Related:** [LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md), [HashSet Internals](./05-hashset.md), [Thread-Safe Collections](./19-thread-safe-collections.md)
 
 ---
 
-## 🎯 Interviewer Insight
-This is THE most asked collection question - know every detail. Interviewers expect you to draw the bucket array + linked list + tree structure, explain the hash spreading function `hash ^ (hash >>> 16)`, and know the thresholds (TREEIFY_THRESHOLD=8, UNTREEIFY_THRESHOLD=6, MIN_TREEIFY_CAPACITY=64). You must explain why capacity must be a power of 2 (for `hash & (n-1)` optimization) and know Java 7 vs Java 8 differences (head vs tail insertion, tree optimization). Emphasize the equals/hashCode contract for keys.
-
-## ⚡ Follow-up Questions
-1. Why does HashMap use a power of 2 for capacity, and how does this affect the hash function?
-2. What happens if you use a mutable object as a HashMap key, and how can you detect this issue?
-3. How does ConcurrentHashMap differ from HashMap internally in terms of locking and iteration?
-4. What is the formula for calculating the threshold, and how does load factor impact performance?
-5. How does Java 8's treeification improve performance for collision-heavy scenarios?
-6. What is the difference between Java 7 and Java 8 HashMap implementations regarding collision handling?
-7. How would you implement a custom hash function for a complex key object to minimize collisions?
-
-## 📚 Related Topics
-- [LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md)
-- [HashSet Internals](./05-hashset.md)
-- [Thread-Safe Collections](./19-thread-safe-collections.md)
-
----
-
-[Prev: Q6 - LinkedHashSet and TreeSet](./06-linkedhashset-treeset.md) | [Next: Q8 - LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md)
+[← Previous: LinkedHashSet and TreeSet](./06-linkedhashset-treeset.md) · [Next: LinkedHashMap and TreeMap →](./08-linkedhashmap-treemap.md)

@@ -1,20 +1,23 @@
-# Q15: What Are Functional Interfaces?
+# Functional Interfaces
 
-## Question
-What are functional interfaces in Java? Explain `@FunctionalInterface`, the built-in functional interfaces, composition methods, custom functional interfaces, and primitive specializations.
-
-## Difficulty: 🟡 Intermediate
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Functional Interfaces
 
 ---
 
-## Answer
+## Q18 🟡 What Are Functional Interfaces?
+
+**Question** — What are functional interfaces in Java? Explain `@FunctionalInterface`, the built-in functional interfaces, composition methods, custom functional interfaces, and primitive specializations.
+
+### Answer
 
 A **functional interface** is an interface with exactly **one abstract method** (SAM - Single Abstract Method). It can have any number of default, static, or private methods. Functional interfaces are the target types for lambda expressions and method references.
 
-### @FunctionalInterface Annotation
+**@FunctionalInterface Annotation**
+
+The `@FunctionalInterface` annotation is optional but recommended — it causes a compile error if the interface doesn't meet the SAM contract, catching mistakes early.
 
 ```java
-// ✅ Valid functional interface
+// Valid functional interface
 @FunctionalInterface
 public interface Converter<F, T> {
     T convert(F from); // Single abstract method
@@ -28,7 +31,7 @@ public interface Converter<F, T> {
     String toString();
 }
 
-// ❌ NOT a functional interface - two abstract methods
+// NOT a functional interface - two abstract methods
 // @FunctionalInterface  // COMPILE ERROR
 public interface InvalidFI {
     void method1();
@@ -36,7 +39,9 @@ public interface InvalidFI {
 }
 ```
 
-### Built-in Functional Interfaces (java.util.function)
+**Built-in Functional Interfaces (java.util.function)**
+
+Java provides a rich set of built-in functional interfaces in `java.util.function`. The core four are `Function<T,R>`, `Predicate<T>`, `Consumer<T>`, and `Supplier<T>`.
 
 | Interface | Method | Signature | Use Case |
 |-----------|--------|-----------|----------|
@@ -50,7 +55,9 @@ public interface InvalidFI {
 | `BiPredicate<T,U>` | `test` | `(T, U) → boolean` | Two-input filter |
 | `BiConsumer<T,U>` | `accept` | `(T, U) → void` | Two-input process |
 
-### Function<T, R>
+**Function<T, R>**
+
+Transforms an input to an output. Provides `andThen()` and `compose()` for function composition.
 
 ```java
 public class FunctionDemo {
@@ -61,22 +68,24 @@ public class FunctionDemo {
         // Apply
         System.out.println(length.apply("Hello")); // 5
 
-        // ✅ Compose functions
+        // Compose functions
         Function<String, String> lengthThenFormat = length.andThen(intToStr);
         System.out.println(lengthThenFormat.apply("Hello")); // "Number: 5"
 
-        // ✅ compose (reverse order)
+        // compose (reverse order)
         Function<String, String> sameResult = intToStr.compose(length);
         System.out.println(sameResult.apply("Hello")); // "Number: 5"
 
-        // ✅ Identity function
+        // Identity function
         Function<String, String> identity = Function.identity();
         System.out.println(identity.apply("unchanged")); // "unchanged"
     }
 }
 ```
 
-### Predicate<T>
+**Predicate<T>**
+
+Represents a boolean-valued function of one argument. Provides `and()`, `or()`, and `negate()` for combining predicates.
 
 ```java
 public class PredicateDemo {
@@ -85,7 +94,7 @@ public class PredicateDemo {
         Predicate<String> isLong = s -> s.length() > 5;
         Predicate<String> startsWithA = s -> s.startsWith("A");
 
-        // ✅ Combine predicates with and(), or(), negate()
+        // Combine predicates with and(), or(), negate()
         Predicate<String> complexCheck = isNotEmpty
             .and(isLong)
             .and(startsWithA.negate()); // Not starting with A
@@ -96,11 +105,11 @@ public class PredicateDemo {
                             .toList();
         System.out.println(filtered); // [Charlie]
 
-        // ✅ Predicate.isEqual()
+        // Predicate.isEqual()
         Predicate<String> isHello = Predicate.isEqual("Hello");
         System.out.println(isHello.test("Hello")); // true
 
-        // ✅ Predicate.not() (Java 11+)
+        // Predicate.not() (Java 11+)
         var nonEmpty = names.stream()
                             .filter(Predicate.not(String::isEmpty))
                             .toList();
@@ -108,7 +117,9 @@ public class PredicateDemo {
 }
 ```
 
-### Consumer<T> and Supplier<T>
+**Consumer<T> and Supplier<T>**
+
+Consumer accepts an input and returns nothing. Supplier takes nothing and returns a value. Both support chaining with `andThen()` (Consumer) or are often used as factories (Supplier).
 
 ```java
 public class ConsumerSupplierDemo {
@@ -117,7 +128,7 @@ public class ConsumerSupplierDemo {
         Consumer<String> printer = System.out::println;
         Consumer<String> logger = s -> System.out.println("[LOG] " + s);
 
-        // ✅ Chain consumers with andThen
+        // Chain consumers with andThen
         Consumer<String> printAndLog = printer.andThen(logger);
         printAndLog.accept("Hello");
         // Hello
@@ -127,14 +138,16 @@ public class ConsumerSupplierDemo {
         Supplier<List<String>> listFactory = ArrayList::new;
         Supplier<Double> randomSupplier = Math::random;
 
-        // ✅ Lazy initialization
+        // Lazy initialization
         List<String> newList = listFactory.get();
         System.out.println(randomSupplier.get()); // Random number
     }
 }
 ```
 
-### UnaryOperator<T> and BinaryOperator<T>
+**UnaryOperator<T> and BinaryOperator<T>**
+
+Special cases of Function where input and output types are the same (UnaryOperator) or where two inputs combine to produce an output of the same type (BinaryOperator).
 
 ```java
 public class OperatorDemo {
@@ -153,7 +166,7 @@ public class OperatorDemo {
         System.out.println(max.apply(10, 20)); // 20
         System.out.println(concat.apply("Hello, ", "World")); // "Hello, World"
 
-        // ✅ Used in Stream.reduce()
+        // Used in Stream.reduce()
         var numbers = List.of(1, 2, 3, 4, 5);
         int sum = numbers.stream().reduce(0, Integer::sum);
         System.out.println(sum); // 15
@@ -161,10 +174,12 @@ public class OperatorDemo {
 }
 ```
 
-### Custom Functional Interfaces
+**Custom Functional Interfaces**
+
+You can create custom functional interfaces, especially to handle checked exceptions or domain-specific operations.
 
 ```java
-// ✅ Custom functional interface with checked exception
+// Custom functional interface with checked exception
 @FunctionalInterface
 public interface ThrowingFunction<T, R> {
     R apply(T t) throws Exception;
@@ -188,7 +203,9 @@ var contents = urls.stream()
     .toList();
 ```
 
-### Composition (andThen, compose)
+**Composition (andThen, compose)**
+
+Functional interfaces support composition — combining small functions to build complex transformations.
 
 ```java
 public class CompositionDemo {
@@ -197,14 +214,14 @@ public class CompositionDemo {
         Function<String, String> lower = String::toLowerCase;
         Function<String, String> sanitize = s -> s.replaceAll("[^a-z0-9]", "");
 
-        // ✅ Build a processing pipeline
+        // Build a processing pipeline
         Function<String, String> pipeline = trim
             .andThen(lower)
             .andThen(sanitize);
 
         System.out.println(pipeline.apply("  Hello, World! 123  ")); // "helloworld123"
 
-        // ✅ Predicate composition for validation
+        // Predicate composition for validation
         Predicate<String> isEmail = s -> s.contains("@");
         Predicate<String> hasMinLength = s -> s.length() >= 5;
         Predicate<String> noDots = s -> !s.startsWith(".");
@@ -219,10 +236,12 @@ public class CompositionDemo {
 }
 ```
 
-### Primitive Specializations
+**Primitive Specializations**
+
+Avoid autoboxing overhead by using primitive specializations like `IntFunction`, `LongPredicate`, `DoubleConsumer`. These are significantly more efficient when working with primitives.
 
 ```java
-// ✅ Avoid autoboxing overhead with primitive specializations
+// Avoid autoboxing overhead with primitive specializations
 public class PrimitiveDemo {
     public static void main(String[] args) {
         // Instead of Function<Integer, Integer>:
@@ -257,43 +276,41 @@ public class PrimitiveDemo {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Creating unnecessary custom functional interfaces when built-in ones would suffice, or overcomplicating with too many generic type parameters.
 
 ```java
-// ❌ Creating unnecessary custom functional interfaces
+// Creating unnecessary custom functional interfaces
 @FunctionalInterface
 interface StringProcessor {
     String process(String input);
 }
-// ✅ Just use UnaryOperator<String> or Function<String, String>
+// Just use UnaryOperator<String> or Function<String, String>
 
-// ❌ Overcomplicating with too many generic type parameters
+// Overcomplicating with too many generic type parameters
 @FunctionalInterface
 interface TriFunction<A, B, C, R> {
     R apply(A a, B b, C c);
 }
-// ✅ Consider using a parameter object or method instead
+// Consider using a parameter object or method instead
 
-// ❌ Lambda that captures mutable state
+// Lambda that captures mutable state
 int[] counter = {0};
 list.forEach(item -> counter[0]++); // Side effect - hard to parallelize
-// ✅ Use Stream.count() or Collectors instead
+// Use Stream.count() or Collectors instead
 ```
 
-### Performance Tip
-Always prefer **primitive specializations** (`IntFunction`, `LongPredicate`, `DoubleConsumer`, etc.) over their generic counterparts when working with primitives. This avoids autoboxing/unboxing overhead, which can be significant in tight loops or stream pipelines.
+> **🔧 Performance Tip** — Always prefer **primitive specializations** (`IntFunction`, `LongPredicate`, `DoubleConsumer`, etc.) over their generic counterparts when working with primitives. This avoids autoboxing/unboxing overhead, which can be significant in tight loops or stream pipelines.
+
+> **🎯 Interviewer Insight** — Interviewers expect you to know the core four (`Function`, `Predicate`, `Consumer`, `Supplier`) and explain composition (`andThen`, `compose`). Understanding primitive specializations and when to create custom functional interfaces shows depth.
+
+> **⚡ Follow-up** — What is the difference between `Function.andThen()` and `Function.compose()`?
+
+> **⚡ Follow-up** — Why can't lambda expressions throw checked exceptions by default?
+
+> **⚡ Follow-up** — How do functional interfaces enable the Strategy pattern?
+
+> **📚 Related** — [Lambdas and OOP](./14-lambdas-and-oop.md), [Default Methods in Interfaces](./16-default-methods-interfaces.md), [Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md)
 
 ---
 
-## Interviewer Insight
-Interviewers expect you to know the core four (`Function`, `Predicate`, `Consumer`, `Supplier`) and explain composition (`andThen`, `compose`). Understanding primitive specializations and when to create custom functional interfaces shows depth.
-
-## Follow-up Questions
-1. What is the difference between `Function.andThen()` and `Function.compose()`?
-2. Why can't lambda expressions throw checked exceptions by default?
-3. How do functional interfaces enable the Strategy pattern?
-
-## Related Topics
-- [Lambdas and OOP](./q14-lambdas-and-oop.md)
-- [Default Methods in Interfaces](./q16-default-methods-interfaces.md)
-- [Interfaces vs Abstract Classes](./q07-interfaces-vs-abstract-classes.md)
+[← Previous: Lambdas and OOP](./14-lambdas-and-oop.md) · [Next: Default Methods in Interfaces →](./16-default-methods-interfaces.md)

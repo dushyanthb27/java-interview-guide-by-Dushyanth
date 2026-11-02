@@ -1,17 +1,18 @@
-# Q7: Interfaces vs Abstract Classes - When to Use Each?
+# Interfaces vs Abstract Classes
 
-## Question
-What are the differences between interfaces and abstract classes in Java? When should you use each, and how have interfaces evolved since Java 8?
-
-## Difficulty: 🟡 Intermediate
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Interfaces vs Abstract Classes
 
 ---
 
-## Answer
+## Q10 🟡 Interfaces vs Abstract Classes — When to Use Each?
 
-Both interfaces and abstract classes provide abstraction, but they serve different design purposes and have distinct capabilities.
+**Question** — What are the differences between interfaces and abstract classes in Java? When should you use each, and how have interfaces evolved since Java 8?
 
-### Comprehensive Comparison Table
+### Answer
+
+Both interfaces and abstract classes provide abstraction, but they serve different design purposes and have distinct capabilities. Choose based on whether you need to define a contract (CAN-DO) or a base type (IS-A), whether you need state, and whether you need multiple inheritance.
+
+**Comprehensive Comparison**
 
 | Feature | Interface | Abstract Class |
 |---------|-----------|---------------|
@@ -25,15 +26,17 @@ Both interfaces and abstract classes provide abstraction, but they serve differe
 | Inheritance keyword | `implements` | `extends` |
 | Purpose | Define a **contract** (CAN-DO) | Define a **base type** (IS-A) |
 
-### When to Use Interfaces
+**When to Use Interfaces**
+
+Use interfaces to define a capability or contract, especially when you need multiple inheritance of type. A class can implement many interfaces but extend only one abstract class.
 
 ```java
-// ✅ USE INTERFACE: Define a capability/contract
+// USE INTERFACE: Define a capability/contract
 public interface Sortable<T> {
     int compareTo(T other);
 }
 
-// ✅ USE INTERFACE: Multiple inheritance of type
+// USE INTERFACE: Multiple inheritance of type
 public interface Flyable {
     void fly();
 }
@@ -52,10 +55,12 @@ public class Duck implements Flyable, Swimmable {
 }
 ```
 
-### When to Use Abstract Classes
+**When to Use Abstract Classes**
+
+Use abstract classes when you need shared state, partial implementation, or constructor initialization. They provide a template method pattern with common behavior that subclasses can customize.
 
 ```java
-// ✅ USE ABSTRACT CLASS: Shared state + partial implementation
+// USE ABSTRACT CLASS: Shared state + partial implementation
 public abstract class AbstractHttpHandler {
     // Shared state
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -99,7 +104,9 @@ public class UserHandler extends AbstractHttpHandler {
 }
 ```
 
-### Java 8+ Interface Evolution
+**Java 8+ Interface Evolution**
+
+Interfaces have evolved significantly. Java 8 added default and static methods, Java 9 added private methods for code reuse, and Java 17 added sealed interfaces for controlled implementation.
 
 ```java
 // Pre-Java 8: interfaces could only have abstract methods
@@ -142,7 +149,9 @@ public interface Loggable {
 }
 ```
 
-### Decision Framework
+**Decision Framework**
+
+Use this decision tree to choose between interfaces and abstract classes:
 
 ```
                         Need to share state (fields)?
@@ -158,11 +167,13 @@ public interface Loggable {
                                               prefer Interface
 ```
 
-### Template Method Pattern (Abstract Class)
+**Template Method Pattern (Abstract Class)**
+
+Abstract classes excel at the template method pattern — defining an algorithm skeleton in a base class with hooks that subclasses override.
 
 ```java
 public abstract class DataProcessor {
-    // ✅ Template method - invariant algorithm structure
+    // Template method - invariant algorithm structure
     public final void process() {
         List<String> data = readData();
         List<String> transformed = transformData(data);
@@ -184,24 +195,26 @@ public class CsvProcessor extends DataProcessor {
 }
 ```
 
-### API Design: Interface-First Approach
+**API Design — Interface-First Approach**
+
+The best practice is to define the contract with an interface first, optionally provide an abstract base class if there's shared logic, then implement concrete classes.
 
 ```java
-// ✅ Step 1: Define the contract with an interface
+// Step 1: Define the contract with an interface
 public interface UserService {
     User findById(long id);
     User save(User user);
     void delete(long id);
 }
 
-// ✅ Step 2: Provide abstract base if there's shared logic
+// Step 2: Provide abstract base if there's shared logic
 public abstract class AbstractUserService implements UserService {
     protected void validateUser(User user) {
         if (user.getName() == null) throw new IllegalArgumentException("Name required");
     }
 }
 
-// ✅ Step 3: Concrete implementation
+// Step 3: Concrete implementation
 public class DatabaseUserService extends AbstractUserService {
     @Override
     public User findById(long id) { /* DB query */ return null; }
@@ -218,20 +231,20 @@ public class DatabaseUserService extends AbstractUserService {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Using abstract class when you only need a contract, or adding too many default methods to interfaces (turning them into "fat interfaces" that violate Interface Segregation).
 
 ```java
-// ❌ Using abstract class when you only need a contract
+// Using abstract class when you only need a contract
 public abstract class Printable {
     public abstract void print(); // No state, no shared logic
 }
 
-// ✅ Use an interface - simpler and allows multiple implementation
+// Use an interface - simpler and allows multiple implementation
 public interface Printable {
     void print();
 }
 
-// ❌ Adding too many default methods to interfaces
+// Adding too many default methods to interfaces
 // (turns them into "fat interfaces" violating Interface Segregation)
 public interface Kitchen {
     default void cook() { }
@@ -242,22 +255,22 @@ public interface Kitchen {
 }
 ```
 
-### Performance Tip
-Interface method dispatch (`invokeinterface`) involves an extra lookup compared to virtual dispatch (`invokevirtual`), but the JIT compiler optimizes this in hot paths. Choose based on design needs, not performance concerns.
+> **🔧 Performance Tip** — Interface method dispatch (`invokeinterface`) involves an extra lookup compared to virtual dispatch (`invokevirtual`), but the JIT compiler optimizes this in hot paths. Choose based on design needs, not performance concerns.
+
+> **🎯 Interviewer Insight** — Interviewers expect you to articulate clear decision criteria, not just list differences. Show you understand when each is appropriate and can discuss the evolution of interfaces in modern Java.
+
+> **⚡ Follow-up** — Can an abstract class implement an interface without providing all methods, and what are the implications for subclasses?
+
+> **⚡ Follow-up** — How do sealed interfaces (Java 17) change the design landscape compared to traditional interfaces?
+
+> **⚡ Follow-up** — When would you use both an interface AND an abstract class together in a design pattern?
+
+> **⚡ Follow-up** — How does the introduction of default methods (Java 8) affect the diamond problem resolution?
+
+> **⚡ Follow-up** — What are the performance implications of interface method dispatch vs abstract class method dispatch?
+
+> **📚 Related** — [Abstraction](./06-abstraction.md), [Default Methods in Interfaces](./16-default-methods-interfaces.md), [Diamond Problem](./18-diamond-problem.md)
 
 ---
 
-## Interviewer Insight
-Interviewers expect you to articulate clear decision criteria, not just list differences. Show you understand when each is appropriate and can discuss the evolution of interfaces in modern Java.
-
-## ⚡ Follow-up Questions
-1. Can an abstract class implement an interface without providing all methods, and what are the implications for subclasses?
-2. How do sealed interfaces (Java 17) change the design landscape compared to traditional interfaces?
-3. When would you use both an interface AND an abstract class together in a design pattern?
-4. How does the introduction of default methods (Java 8) affect the diamond problem resolution?
-5. What are the performance implications of interface method dispatch vs abstract class method dispatch?
-
-## Related Topics
-- [Abstraction](./q06-abstraction.md)
-- [Default Methods in Interfaces](./q16-default-methods-interfaces.md)
-- [Diamond Problem](./q18-diamond-problem.md)
+[← Previous: Abstraction](./06-abstraction.md) · [Next: Method Overloading →](./08-method-overloading.md)

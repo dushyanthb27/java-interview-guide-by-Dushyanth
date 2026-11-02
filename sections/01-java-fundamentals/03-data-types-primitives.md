@@ -1,17 +1,18 @@
-# Q3: Explain Java's Primitive Data Types and Their Wrapper Classes
+# Data Types and Primitives
 
-## 📋 Question
-Explain Java's primitive data types and their wrapper classes. How do autoboxing and unboxing work, and what are the pitfalls?
-
-## Difficulty: 🟢 Easy
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Data Types and Primitives
 
 ---
 
-## 💡 Answer
+## Q3 🟢 Explain Java's Primitive Data Types and Their Wrapper Classes
+
+**Question:** Explain Java's primitive data types and their wrapper classes. How do autoboxing and unboxing work, and what are the pitfalls?
+
+### Answer
 
 Java has **8 primitive data types** that are not objects — they hold values directly on the stack (when local) rather than as references on the heap. Each primitive has a corresponding **wrapper class** in `java.lang` that allows primitives to be used in object-oriented contexts (collections, generics, etc.).
 
-### The 8 Primitive Types
+**Primitive types table**
 
 | Type | Size | Min Value | Max Value | Default | Wrapper Class |
 |------|------|-----------|-----------|---------|---------------|
@@ -26,11 +27,9 @@ Java has **8 primitive data types** that are not objects — they hold values di
 
 **Autoboxing** is the automatic conversion from a primitive to its wrapper class (`int` → `Integer`). **Unboxing** is the reverse (`Integer` → `int`). Introduced in Java 5, these conversions happen implicitly but carry performance costs — each autobox creates (or retrieves) an object on the heap.
 
-**Integer Cache**: Java caches `Integer` objects for values **-128 to 127** (and `Byte`, `Short`, `Long` in the same range, plus `Character` 0-127 and `Boolean`). This means `Integer.valueOf(127) == Integer.valueOf(127)` returns `true`, but `Integer.valueOf(128) == Integer.valueOf(128)` returns `false` — a classic interview trap.
+**Integer cache** — Java caches `Integer` objects for values **-128 to 127** (and `Byte`, `Short`, `Long` in the same range, plus `Character` 0-127 and `Boolean`). This means `Integer.valueOf(127) == Integer.valueOf(127)` returns `true`, but `Integer.valueOf(128) == Integer.valueOf(128)` returns `false` — a classic interview trap.
 
 Primitives cannot be `null` and cannot be used as generic type parameters (`List<int>` is illegal; use `List<Integer>`). They also don't have methods — you must use the wrapper class for utility methods like `Integer.parseInt()`, `Double.isNaN()`, etc.
-
-### Code Example
 
 ```java
 package com.interview.fundamentals;
@@ -118,11 +117,11 @@ public class IntegerCacheGotcha {
 }
 ```
 
-### ⚠️ Common Mistake
-**Using `==` to compare wrapper objects**: `==` checks reference equality, not value equality, for objects. Due to the Integer cache, `==` works for small values (-128 to 127) but fails silently for larger values. This creates bugs that are hard to detect in testing (small test values work) but fail in production (real values exceed the cache range). Always use `.equals()` for wrapper comparison.
+> **🎯 Interviewer Insight:** This question tests your understanding of Java's type system and memory model. Interviewers expect you to know the Integer cache behavior, the autoboxing/unboxing mechanics, and the performance implications. Being able to explain **why** `==` works for `Integer(127)` but fails for `Integer(128)` demonstrates deep understanding. Mentioning the `NullPointerException` risk from unboxing `null` shows production experience.
 
-### ⚡ Performance Tip
-Autoboxing in tight loops can cause **massive garbage collection pressure**. Each autobox creates a new object on the heap (outside the cache range). Prefer primitives for computation-heavy code. For collections requiring objects, consider specialized collections like Eclipse Collections' `IntList` or `IntObjectMap` that avoid boxing entirely. In Java 21+ (preview), **Project Valhalla** aims to add value types and primitive generics (`List<int>`) to solve this problem at the language level.
+> **⚠️ Common Mistake:** Using `==` to compare wrapper objects — `==` checks reference equality, not value equality, for objects. Due to the Integer cache, `==` works for small values (-128 to 127) but fails silently for larger values. This creates bugs that are hard to detect in testing (small test values work) but fail in production (real values exceed the cache range). Always use `.equals()` for wrapper comparison.
+
+> **⚡ Performance Tip:** Autoboxing in tight loops can cause **massive garbage collection pressure**. Each autobox creates a new object on the heap (outside the cache range). Prefer primitives for computation-heavy code. For collections requiring objects, consider specialized collections like Eclipse Collections' `IntList` or `IntObjectMap` that avoid boxing entirely. In Java 21+ (preview), **Project Valhalla** aims to add value types and primitive generics (`List<int>`) to solve this problem at the language level.
 
 ```java
 // ❌ Bad: autoboxing in a loop creates ~10 million Integer objects
@@ -138,20 +137,16 @@ for (long i = 0; i < 10_000_000; i++) {
 }
 ```
 
-### 🔧 JVM Internals
-Primitives stored as local variables live on the **thread's stack** frame — they are allocated and freed automatically when the method enters and exits, with zero GC overhead. Wrapper objects live on the **heap** and are managed by the garbage collector. The JVM's **escape analysis** can sometimes optimize wrapper objects: if the JIT compiler proves an `Integer` object doesn't escape the method, it may **scalar-replace** it (store the `int` value directly on the stack, eliminating the heap allocation entirely). The Integer cache is implemented in `Integer.valueOf()` using a static inner class `IntegerCache` that pre-initializes an `Integer[]` array. The upper bound of the cache can be extended with `-XX:AutoBoxCacheMax=<size>`.
+> **🔧 JVM Internals:** Primitives stored as local variables live on the **thread's stack** frame — they are allocated and freed automatically when the method enters and exits, with zero GC overhead. Wrapper objects live on the **heap** and are managed by the garbage collector. The JVM's **escape analysis** can sometimes optimize wrapper objects — if the JIT compiler proves an `Integer` object doesn't escape the method, it may **scalar-replace** it (store the `int` value directly on the stack, eliminating the heap allocation entirely). The Integer cache is implemented in `Integer.valueOf()` using a static inner class `IntegerCache` that pre-initializes an `Integer[]` array. The upper bound of the cache can be extended with `-XX:AutoBoxCacheMax=<size>`.
+
+> **⚡ Follow-up:** Why can't you use primitive types as generic type parameters in Java?
+
+> **⚡ Follow-up:** What happens when you mix primitives and wrappers in arithmetic expressions?
+
+> **⚡ Follow-up:** How does `float` vs `double` affect precision, and why should you never use `float`/`double` for monetary calculations?
+
+> **📚 Related:** [Operators and Expressions](./04-operators-and-expressions.md), [Strings and String Pool](./07-strings-and-string-pool.md), [Generics & Type System](../09-generics-type-system/README.md)
 
 ---
 
-## 🎯 Interviewer Insight
-This question tests your understanding of Java's type system and memory model. Interviewers expect you to know the Integer cache behavior, the autoboxing/unboxing mechanics, and the performance implications. Being able to explain **why** `==` works for `Integer(127)` but fails for `Integer(128)` demonstrates deep understanding. Mentioning the `NullPointerException` risk from unboxing `null` shows production experience.
-
-## ⚡ Follow-up Questions
-1. Why can't you use primitive types as generic type parameters in Java?
-2. What happens when you mix primitives and wrappers in arithmetic expressions?
-3. How does `float` vs `double` affect precision, and why should you never use `float`/`double` for monetary calculations?
-
-## 📚 Related Topics
-- [Operators and Expressions](./q04-operators-and-expressions.md)
-- [Strings and String Pool](./q07-strings-and-string-pool.md)
-- [Generics & Type System](../09-generics-type-system/README.md)
+[← Previous: JVM, JRE, and JDK](./02-jvm-jre-jdk.md) · [Next: Operators and Expressions →](./04-operators-and-expressions.md)

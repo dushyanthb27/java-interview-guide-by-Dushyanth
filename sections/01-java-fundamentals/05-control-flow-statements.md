@@ -1,33 +1,22 @@
-# Q5: Explain Control Flow Statements in Java
+# Control Flow Statements
 
-## 📋 Question
-Explain control flow statements in Java. Cover conditional statements, loops, and modern switch expressions introduced in Java 14+.
-
-## Difficulty: 🟢 Easy
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Control Flow Statements
 
 ---
 
-## 💡 Answer
+## Q5 🟢 Explain Control Flow Statements in Java
 
-Control flow statements determine the **order of execution** in a Java program. They fall into three categories: **selection** (choosing which code to execute), **iteration** (repeating code), and **transfer** (jumping to a different point in execution).
+**Question:** Explain control flow statements in Java. Cover conditional statements, loops, and modern switch expressions introduced in Java 14+.
 
-### Selection Statements
-- **`if` / `else if` / `else`**: The fundamental conditional construct. Conditions must be boolean expressions (Java doesn't allow truthy/falsy values like JavaScript/Python).
-- **`switch` (traditional)**: Matches a value against multiple `case` labels. Supports `byte`, `short`, `int`, `char`, `String` (Java 7+), and enums. Falls through to the next case without `break`.
-- **`switch` expressions (Java 14+)**: Modern arrow syntax (`->`) with no fall-through, can return values, supports `yield` for multi-statement blocks, and the compiler enforces exhaustiveness.
+### Answer
 
-### Iteration Statements
-- **`for`**: Classic C-style loop with initialization, condition, and update.
-- **`for-each` (enhanced for)**: Iterates over arrays and `Iterable` objects. Cleaner syntax, no index management, but cannot modify the collection or access the index.
-- **`while`**: Condition checked before each iteration — may never execute.
-- **`do-while`**: Condition checked after each iteration — always executes at least once.
+Control flow statements determine the **order of execution** in a Java program. They fall into three categories — **selection** (choosing which code to execute), **iteration** (repeating code), and **transfer** (jumping to a different point in execution).
 
-### Transfer Statements
-- **`break`**: Exits the current loop or switch statement. With a label, exits the labeled outer loop.
-- **`continue`**: Skips the rest of the current iteration and moves to the next. With a label, continues the labeled outer loop.
-- **`return`**: Exits the current method, optionally returning a value.
+**Selection statements** — `if` / `else if` / `else` is the fundamental conditional construct. Conditions must be boolean expressions (Java doesn't allow truthy/falsy values like JavaScript/Python). The traditional `switch` matches a value against multiple `case` labels. Modern **switch expressions** (Java 14+) use arrow syntax (`->`) with no fall-through, can return values, support `yield` for multi-statement blocks, and the compiler enforces exhaustiveness.
 
-### Code Example
+**Iteration statements** — Classic C-style `for` loop with initialization, condition, and update. The `for-each` (enhanced for) iterates over arrays and `Iterable` objects with cleaner syntax and no index management. The `while` loop checks the condition before each iteration (may never execute), while `do-while` checks after each iteration (always executes at least once).
+
+**Transfer statements** — `break` exits the current loop or switch statement. With a label, it exits the labeled outer loop. `continue` skips the rest of the current iteration and moves to the next. With a label, it continues the labeled outer loop. `return` exits the current method, optionally returning a value.
 
 ```java
 package com.interview.fundamentals;
@@ -191,26 +180,22 @@ public class ExhaustiveSwitchDemo {
 }
 ```
 
-### ⚠️ Common Mistake
-**Forgetting `break` in traditional `switch`** causes fall-through — execution continues into the next `case` block. This is the #1 reason to prefer the enhanced switch expression (`->` syntax) which has **no fall-through by design**. Another common mistake: modifying a collection inside a `for-each` loop throws `ConcurrentModificationException`. Use `Iterator.remove()`, `List.removeIf()`, or collect changes in a separate list.
+> **🎯 Interviewer Insight:** Interviewers want to see that you understand modern switch expressions (Java 14+) and can explain why they are superior to traditional switch (no fall-through, return values, exhaustiveness). Demonstrating knowledge of labeled loops shows you understand complex iteration control. Being able to discuss `tableswitch` vs `lookupswitch` JVM optimizations shows genuine depth.
 
-### ⚡ Performance Tip
-The JVM optimizes `switch` statements using **two bytecode strategies**: `tableswitch` (constant-time O(1) jump table for dense, sequential cases like 1, 2, 3, 4, 5) and `lookupswitch` (binary search O(log n) for sparse cases like 1, 100, 500). Dense `switch` statements are faster than equivalent `if-else` chains because of the jump table. String-based `switch` uses `hashCode()` first for O(1) bucket selection, then `.equals()` for verification.
+> **⚠️ Common Mistake:** Forgetting `break` in traditional `switch` causes fall-through — execution continues into the next `case` block. This is the #1 reason to prefer the enhanced switch expression (`->` syntax) which has **no fall-through by design**. Another common mistake: modifying a collection inside a `for-each` loop throws `ConcurrentModificationException`. Use `Iterator.remove()`, `List.removeIf()`, or collect changes in a separate list.
 
-### 🔧 JVM Internals
-At the bytecode level, the enhanced switch expression (`->`) compiles to the **same** `tableswitch`/`lookupswitch` bytecodes as the traditional switch — the improvement is purely syntactic and safety-oriented (no fall-through, exhaustiveness checking). Pattern matching in `switch` (Java 21+) generates `instanceof` checks and casts in the bytecode, combined with the switch structure. The `for-each` loop over a collection compiles to an `Iterator`-based `while` loop: `Iterator<E> it = collection.iterator(); while (it.hasNext()) { E e = it.next(); ... }`. For arrays, it compiles to a classic indexed `for` loop.
+> **⚡ Performance Tip:** The JVM optimizes `switch` statements using **two bytecode strategies**: `tableswitch` (constant-time O(1) jump table for dense, sequential cases like 1, 2, 3, 4, 5) and `lookupswitch` (binary search O(log n) for sparse cases like 1, 100, 500). Dense `switch` statements are faster than equivalent `if-else` chains because of the jump table. String-based `switch` uses `hashCode()` first for O(1) bucket selection, then `.equals()` for verification.
+
+> **🔧 JVM Internals:** At the bytecode level, the enhanced switch expression (`->`) compiles to the **same** `tableswitch`/`lookupswitch` bytecodes as the traditional switch — the improvement is purely syntactic and safety-oriented (no fall-through, exhaustiveness checking). Pattern matching in `switch` (Java 21+) generates `instanceof` checks and casts in the bytecode, combined with the switch structure. The `for-each` loop over a collection compiles to an `Iterator`-based `while` loop: `Iterator<E> it = collection.iterator(); while (it.hasNext()) { E e = it.next(); ... }`. For arrays, it compiles to a classic indexed `for` loop.
+
+> **⚡ Follow-up:** What is the difference between `tableswitch` and `lookupswitch` at the bytecode level?
+
+> **⚡ Follow-up:** Can you use `switch` with `long`, `float`, or `double` types? Why or why not?
+
+> **⚡ Follow-up:** How does pattern matching in `switch` (Java 21) differ from traditional `instanceof` chains?
+
+> **📚 Related:** [Operators and Expressions](./04-operators-and-expressions.md), [Enums in Java](./12-enums-in-java.md), [Sealed Classes](./15-sealed-classes-java15.md)
 
 ---
 
-## 🎯 Interviewer Insight
-Interviewers want to see that you understand modern switch expressions (Java 14+) and can explain why they are superior to traditional switch (no fall-through, return values, exhaustiveness). Demonstrating knowledge of labeled loops shows you understand complex iteration control. Being able to discuss `tableswitch` vs `lookupswitch` JVM optimizations shows genuine depth.
-
-## ⚡ Follow-up Questions
-1. What is the difference between `tableswitch` and `lookupswitch` at the bytecode level?
-2. Can you use `switch` with `long`, `float`, or `double` types? Why or why not?
-3. How does pattern matching in `switch` (Java 21) differ from traditional `instanceof` chains?
-
-## 📚 Related Topics
-- [Operators and Expressions](./q04-operators-and-expressions.md)
-- [Enums in Java](./q12-enums-in-java.md)
-- [Sealed Classes](./q15-sealed-classes-java15.md)
+[← Previous: Operators and Expressions](./04-operators-and-expressions.md) · [Next: Arrays in Java →](./06-arrays-in-java.md)

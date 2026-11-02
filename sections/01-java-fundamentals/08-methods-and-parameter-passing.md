@@ -1,27 +1,25 @@
-# Q8: How Does Parameter Passing Work in Java?
+# Methods and Parameter Passing
 
-## 📋 Question
-How does parameter passing work in Java? Is Java pass-by-value or pass-by-reference? Explain with examples for both primitives and objects.
-
-## Difficulty: 🟡 Medium
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Methods and Parameter Passing
 
 ---
 
-## 💡 Answer
+## Q8 🟡 How Does Parameter Passing Work in Java?
+
+**Question:** How does parameter passing work in Java? Is Java pass-by-value or pass-by-reference? Explain with examples for both primitives and objects.
+
+### Answer
 
 Java is **always pass-by-value**. There are no exceptions to this rule. However, the confusion arises because when you pass an object, you are passing the **value of the reference** (a copy of the pointer to the object), not the object itself and not a reference to the reference. This means:
 
-- **Primitives**: A **copy of the value** is passed. Changing the parameter inside the method has **no effect** on the original variable.
-- **Objects**: A **copy of the reference** (memory address) is passed. You **can modify the object's state** through the copied reference (since both references point to the same object), but you **cannot make the original reference point to a different object** by reassigning the parameter.
+- **Primitives** — A **copy of the value** is passed. Changing the parameter inside the method has **no effect** on the original variable.
+- **Objects** — A **copy of the reference** (memory address) is passed. You **can modify the object's state** through the copied reference (since both references point to the same object), but you **cannot make the original reference point to a different object** by reassigning the parameter.
 
 This is the single most misunderstood concept in Java. Many developers say "Java passes objects by reference" — this is **incorrect**. If Java were truly pass-by-reference, reassigning the parameter inside a method would change the caller's variable. It doesn't.
 
-**The Litmus Test**: If you can write a `swap(a, b)` method that swaps the caller's variables, the language supports pass-by-reference. You **cannot** write such a method in Java — proving it is pass-by-value.
+**The litmus test** — If you can write a `swap(a, b)` method that swaps the caller's variables, the language supports pass-by-reference. You **cannot** write such a method in Java — proving it is pass-by-value.
 
-### Methods Overview
-Beyond parameter passing, Java methods have important features: **method overloading** (same name, different parameter lists), **varargs** (variable-length arguments), and **method signature** (name + parameter types, used for overload resolution). Return type is NOT part of the method signature.
-
-### Code Example
+**Methods overview** — Beyond parameter passing, Java methods have important features: **method overloading** (same name, different parameter lists), **varargs** (variable-length arguments), and **method signature** (name + parameter types, used for overload resolution). Return type is NOT part of the method signature.
 
 ```java
 package com.interview.fundamentals;
@@ -185,11 +183,11 @@ public class MethodFeaturesDemo {
 }
 ```
 
-### ⚠️ Common Mistake
-**Believing Java passes objects by reference**: This misconception leads to bugs where developers expect reassigning a method parameter to affect the caller's variable. For example, a `resetUser(User user)` method that does `user = new User()` will NOT reset the caller's `user` variable — it only reassigns the local copy of the reference. To "reset" the object, you must modify its state (`user.setName(null)`) rather than reassigning the reference. If you need swap semantics, use a container object, an array, or return the new value.
+> **🎯 Interviewer Insight:** This is a **trick question** that separates well-prepared candidates from the rest. Interviewers want to hear you say "Java is always pass-by-value" and then demonstrate the nuance: object references are passed by value, so you can modify the object's state but cannot reassign the caller's reference. The swap example is the definitive proof. Candidates who confidently say "pass-by-reference for objects" immediately reveal a gap in understanding. Mentioning the method overloading resolution order (exact > widening > boxing > varargs) shows compiler-level knowledge.
 
-### ⚡ Performance Tip
-Varargs creates a **new array** on every invocation, which adds GC pressure in hot paths. For performance-critical methods, provide explicit overloads for common arities:
+> **⚠️ Common Mistake:** Believing Java passes objects by reference — this misconception leads to bugs where developers expect reassigning a method parameter to affect the caller's variable. For example, a `resetUser(User user)` method that does `user = new User()` will NOT reset the caller's `user` variable — it only reassigns the local copy of the reference. To "reset" the object, you must modify its state (`user.setName(null)`) rather than reassigning the reference. If you need swap semantics, use a container object, an array, or return the new value.
+
+> **⚡ Performance Tip:** Varargs creates a **new array** on every invocation, which adds GC pressure in hot paths. For performance-critical methods, provide explicit overloads for common arities:
 
 ```java
 // ✅ Optimized: no array allocation for common cases
@@ -200,20 +198,16 @@ static int sum(int... numbers) { /* fallback for 4+ args */ }
 // This is the pattern used by List.of(), Set.of(), Map.of() in Java 9+
 ```
 
-### 🔧 JVM Internals
-At the bytecode level, method parameters are stored in the **local variable table** of the method's stack frame. For primitives, the value is copied directly. For object references, the **reference value** (a pointer to the heap object, typically 4 bytes with compressed oops or 8 bytes otherwise) is copied. The `invokevirtual` bytecode instruction pushes arguments onto the operand stack before the call, and the callee pops them into its local variable table. Varargs compiles to an array creation (`anewarray` or `newarray`) followed by element stores (`aastore` or `iastore`) before the method call. Method overloading is resolved entirely at **compile time** — the bytecode contains the exact method descriptor (name + parameter types + return type), so the JVM performs no runtime resolution for overloaded methods (unlike overridden methods, which use dynamic dispatch).
+> **🔧 JVM Internals:** At the bytecode level, method parameters are stored in the **local variable table** of the method's stack frame. For primitives, the value is copied directly. For object references, the **reference value** (a pointer to the heap object, typically 4 bytes with compressed oops or 8 bytes otherwise) is copied. The `invokevirtual` bytecode instruction pushes arguments onto the operand stack before the call, and the callee pops them into its local variable table. Varargs compiles to an array creation (`anewarray` or `newarray`) followed by element stores (`aastore` or `iastore`) before the method call. Method overloading is resolved entirely at **compile time** — the bytecode contains the exact method descriptor (name + parameter types + return type), so the JVM performs no runtime resolution for overloaded methods (unlike overridden methods, which use dynamic dispatch).
+
+> **⚡ Follow-up:** How would you implement a swap operation in Java without using a temp variable?
+
+> **⚡ Follow-up:** What is the method overloading resolution priority when multiple methods match?
+
+> **⚡ Follow-up:** Why can't you overload methods by return type alone?
+
+> **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Static vs Instance](./10-static-vs-instance.md), [Object-Oriented Programming](../02-oop-concepts/README.md)
 
 ---
 
-## 🎯 Interviewer Insight
-This is a **trick question** that separates well-prepared candidates from the rest. Interviewers want to hear you say "Java is always pass-by-value" and then demonstrate the nuance: object references are passed by value, so you can modify the object's state but cannot reassign the caller's reference. The swap example is the definitive proof. Candidates who confidently say "pass-by-reference for objects" immediately reveal a gap in understanding. Mentioning the method overloading resolution order (exact > widening > boxing > varargs) shows compiler-level knowledge.
-
-## ⚡ Follow-up Questions
-1. How would you implement a swap operation in Java without using a temp variable?
-2. What is the method overloading resolution priority when multiple methods match?
-3. Why can't you overload methods by return type alone?
-
-## 📚 Related Topics
-- [Data Types and Primitives](./q03-data-types-primitives.md)
-- [Static vs Instance](./q10-static-vs-instance.md)
-- [Object-Oriented Programming](../02-oop-concepts/README.md)
+[← Previous: Strings and String Pool](./07-strings-and-string-pool.md) · [Next: Packages and Access Modifiers →](./09-packages-and-access-modifiers.md)

@@ -1,17 +1,18 @@
-# Q18: How Does Java Solve the Diamond Problem?
+# Diamond Problem
 
-## Question
-What is the Diamond Problem? How does Java handle it with interfaces and default methods? Explain the resolution rules, `InterfaceName.super` syntax, and compare with C++ multiple inheritance.
-
-## Difficulty: 🟠 Advanced
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Diamond Problem
 
 ---
 
-## Answer
+## Q21 🟠 How Does Java Solve the Diamond Problem?
+
+**Question** — What is the Diamond Problem? How does Java handle it with interfaces and default methods? Explain the resolution rules, `InterfaceName.super` syntax, and compare with C++ multiple inheritance.
+
+### Answer
 
 The **Diamond Problem** occurs when a class inherits from two types that both provide an implementation of the same method, creating ambiguity about which version to use. The name comes from the diamond shape of the inheritance diagram.
 
-### The Diamond Shape
+**The Diamond Shape**
 
 ```
          Interface A
@@ -25,7 +26,9 @@ The **Diamond Problem** occurs when a class inherits from two types that both pr
 
 If both B and C provide a default implementation of a method from A, which does D inherit?
 
-### Diamond Problem in Java
+**Diamond Problem in Java**
+
+Java requires explicit conflict resolution when implementing multiple interfaces with the same default method. This prevents ambiguity at compile time.
 
 ```java
 public interface Animal {
@@ -48,10 +51,10 @@ public interface WildAnimal extends Animal {
     }
 }
 
-// ❌ COMPILE ERROR: class ExoticPet inherits unrelated defaults for sound()
+// COMPILE ERROR: class ExoticPet inherits unrelated defaults for sound()
 // public class ExoticPet implements Pet, WildAnimal { }
 
-// ✅ Must explicitly resolve the conflict
+// Must explicitly resolve the conflict
 public class ExoticPet implements Pet, WildAnimal {
     @Override
     public String sound() {
@@ -70,11 +73,11 @@ public class ExoticPet implements Pet, WildAnimal {
 }
 ```
 
-### Java's Resolution Rules
+**Java's Resolution Rules**
 
-The compiler follows three rules in strict order:
+The compiler follows three rules in strict order to resolve conflicts.
 
-#### Rule 1: Class Methods Win Over Interface Defaults
+**Rule 1 — Class Methods Win Over Interface Defaults**
 
 ```java
 public interface Greeting {
@@ -99,7 +102,7 @@ public class Demo {
 }
 ```
 
-#### Rule 2: More Specific Interface Wins
+**Rule 2 — More Specific Interface Wins**
 
 ```java
 public interface Base {
@@ -108,7 +111,7 @@ public interface Base {
 
 public interface Specific extends Base {
     @Override
-    default String identify() { return "Specific"; }
+    default String identify() { return "Specific"; } // More specific
 }
 
 // Specific.identify() wins because Specific extends Base
@@ -124,7 +127,9 @@ public class Demo {
 }
 ```
 
-#### Rule 3: If Still Ambiguous, Must Override
+**Rule 3 — If Still Ambiguous, Must Override**
+
+When two interfaces are unrelated (neither extends the other) and both provide the same default method, the implementing class must explicitly override.
 
 ```java
 public interface Left {
@@ -144,7 +149,9 @@ public class Center implements Left, Right {
 }
 ```
 
-### InterfaceName.super Syntax
+**InterfaceName.super Syntax**
+
+When implementing multiple interfaces with conflicting defaults, use `InterfaceName.super.method()` to explicitly call a specific interface's default method.
 
 ```java
 public interface Logger {
@@ -162,7 +169,7 @@ public interface Auditor {
 public class SecureService implements Logger, Auditor {
     @Override
     public void log(String msg) {
-        // ✅ Call specific interface's default method
+        // Call specific interface's default method
         Logger.super.log(msg);   // "[LOG] message"
         Auditor.super.log(msg);  // "[AUDIT] message"
     }
@@ -178,7 +185,9 @@ public class SecureService implements Logger, Auditor {
 }
 ```
 
-### Complex Diamond Scenario
+**Complex Diamond Scenario**
+
+When multiple interfaces extend a common interface and all provide default implementations, the most specific wins automatically. Only when there's no clear specificity does manual resolution become necessary.
 
 ```java
 public interface Printable {
@@ -211,45 +220,9 @@ public class SimpleReport implements Displayable {
 }
 ```
 
-### Multiple Diamonds
+**Comparison — Java vs C++ Multiple Inheritance**
 
-```java
-public interface A {
-    default void action() { System.out.println("A"); }
-}
-
-public interface B extends A {
-    @Override
-    default void action() { System.out.println("B"); }
-}
-
-public interface C extends A {
-    @Override
-    default void action() { System.out.println("C"); }
-}
-
-public interface D extends A {
-    // Does NOT override - inherits A's default
-}
-
-// Case 1: B vs C - must resolve (both equally specific)
-class Case1 implements B, C {
-    @Override
-    public void action() { B.super.action(); } // Must choose
-}
-
-// Case 2: B vs D - B wins (more specific, B overrides A's method)
-class Case2 implements B, D {
-    // B.action() wins automatically - no override needed
-}
-
-// Case 3: B vs A - B wins (more specific, B extends A)
-class Case3 implements A, B {
-    // B.action() wins automatically - no override needed
-}
-```
-
-### Comparison: Java vs C++ Multiple Inheritance
+Java avoids the complexity of C++ virtual inheritance by restricting multiple inheritance to interfaces only (no state). C++ allows full multiple inheritance with state, which requires virtual inheritance to solve the diamond problem.
 
 | Feature | Java | C++ |
 |---------|------|-----|
@@ -281,7 +254,9 @@ class Exotic implements Pet, Wild {
 }
 ```
 
-### Real-World Diamond Scenario
+**Real-World Diamond Scenario**
+
+In real APIs, diamond problems can occur when different aspects of functionality (caching, auditing, serialization) all extend a common base interface.
 
 ```java
 public interface Serializable {
@@ -331,10 +306,10 @@ public class UserProfile implements Cacheable, Auditable {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Assuming diamond resolution works like method overloading (the compiler can "pick one"), or trying to call `super.super` to skip a level in the hierarchy.
 
 ```java
-// ❌ Assuming diamond resolution works like method overloading
+// Assuming diamond resolution works like method overloading
 public interface A {
     default void process(String s) { System.out.println("A: " + s); }
 }
@@ -343,39 +318,37 @@ public interface B {
 }
 public class C implements A, B {
     // You MUST override process() - the compiler cannot "pick one"
-    // ❌ This class won't compile without the override
+    // This class won't compile without the override
     @Override
     public void process(String s) {
         A.super.process(s); // Explicitly choose
     }
 }
 
-// ❌ Trying to call super.super (skipping a level)
+// Trying to call super.super (skipping a level)
 public interface Base { default void run() { } }
 public interface Mid extends Base { default void run() { } }
 public class Impl implements Mid {
     @Override
     public void run() {
-        // Base.super.run();  // ❌ Can only call directly implemented interfaces
-        Mid.super.run();      // ✅ This is the immediate super
+        // Base.super.run();  // Can only call directly implemented interfaces
+        Mid.super.run();      // This is the immediate super
     }
 }
 ```
 
-### Performance Tip
-Diamond resolution is entirely a compile-time concern. Once the compiler resolves which method to use, the bytecode contains a direct reference. There is no runtime overhead for diamond resolution. The JVM uses the same `invokeinterface` instruction regardless of how many interfaces are involved.
+> **🔧 Performance Tip** — Diamond resolution is entirely a compile-time concern. Once the compiler resolves which method to use, the bytecode contains a direct reference. There is no runtime overhead for diamond resolution. The JVM uses the same `invokeinterface` instruction regardless of how many interfaces are involved.
+
+> **🎯 Interviewer Insight** — This is a design question that tests understanding of Java's type system. Interviewers want to hear the three resolution rules in order (class > specific > explicit), the `InterfaceName.super` syntax, and why Java's approach avoids the complexity of C++ virtual inheritance.
+
+> **⚡ Follow-up** — What happens if two interfaces have the same default method with different return types?
+
+> **⚡ Follow-up** — Can the diamond problem occur with abstract methods?
+
+> **⚡ Follow-up** — How do sealed interfaces (Java 17) affect the diamond problem?
+
+> **📚 Related** — [Default Methods in Interfaces](./16-default-methods-interfaces.md), [Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md), [Inheritance](./03-inheritance.md)
 
 ---
 
-## Interviewer Insight
-This is a design question that tests understanding of Java's type system. Interviewers want to hear the three resolution rules in order (class > specific > explicit), the `InterfaceName.super` syntax, and why Java's approach avoids the complexity of C++ virtual inheritance.
-
-## Follow-up Questions
-1. What happens if two interfaces have the same default method with different return types?
-2. Can the diamond problem occur with abstract methods?
-3. How do sealed interfaces (Java 17) affect the diamond problem?
-
-## Related Topics
-- [Default Methods in Interfaces](./q16-default-methods-interfaces.md)
-- [Interfaces vs Abstract Classes](./q07-interfaces-vs-abstract-classes.md)
-- [Inheritance](./q03-inheritance.md)
+[← Previous: Static and Private Methods in Interfaces](./17-static-private-methods-interfaces.md) · [Back to Section Index](./README.md)

@@ -1,20 +1,23 @@
-# Q12: Composition vs Inheritance
+# Object Composition
 
-## Question
-What is object composition? Explain the "favor composition over inheritance" principle, Has-A vs Is-A relationships, and demonstrate refactoring from inheritance to composition.
-
-## Difficulty: 🟠 Advanced
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Object Composition
 
 ---
 
-## Answer
+## Q15 🟠 Composition vs Inheritance
+
+**Question** — What is object composition? Explain the "favor composition over inheritance" principle, Has-A vs Is-A relationships, and demonstrate refactoring from inheritance to composition.
+
+### Answer
 
 **Composition** is a design technique where a class contains references to other objects to reuse their behavior, establishing a **HAS-A** relationship. The principle "favor composition over inheritance" from *Effective Java* (Item 18) advises using composition for code reuse unless a genuine IS-A relationship exists.
 
-### Inheritance (IS-A) vs Composition (HAS-A)
+**Inheritance (IS-A) vs Composition (HAS-A)**
+
+Inheritance establishes an IS-A relationship (a Dog IS-A Animal). Composition establishes a HAS-A relationship (a Car HAS-A Engine). Use inheritance only when the Liskov Substitution Principle holds — the subclass should be usable anywhere the parent is expected.
 
 ```java
-// ❌ Inheritance: Stack IS-A ArrayList? No! Stack should only allow push/pop.
+// Inheritance: Stack IS-A ArrayList? No! Stack should only allow push/pop.
 public class Stack<E> extends ArrayList<E> {
     public void push(E item) { add(item); }
     public E pop() { return remove(size() - 1); }
@@ -22,7 +25,7 @@ public class Stack<E> extends ArrayList<E> {
     // This VIOLATES the stack contract!
 }
 
-// ✅ Composition: Stack HAS-A List (internal implementation detail)
+// Composition: Stack HAS-A List (internal implementation detail)
 public class Stack<E> {
     private final List<E> elements = new ArrayList<>();
 
@@ -46,7 +49,9 @@ public class Stack<E> {
 }
 ```
 
-### Why Composition Over Inheritance
+**Why Composition Over Inheritance**
+
+Composition offers loose coupling, runtime flexibility, preserved encapsulation, and easier testing. Inheritance creates tight coupling, fixes behavior at compile time, can break parent encapsulation, and is harder to mock in tests.
 
 | Aspect | Inheritance | Composition |
 |--------|-----------|-------------|
@@ -56,10 +61,12 @@ public class Stack<E> {
 | Reuse | Single class only | Multiple objects |
 | Testing | Hard to mock parent | Easy to mock components |
 
-### The Fragile Base Class Problem
+**The Fragile Base Class Problem**
+
+Inheritance creates fragile coupling because changes to the parent class can unexpectedly break child classes. The child may depend on implementation details of the parent that the parent's author didn't intend to be part of the contract.
 
 ```java
-// ❌ Inheritance creates fragile coupling
+// Inheritance creates fragile coupling
 public class InstrumentedHashSet<E> extends HashSet<E> {
     private int addCount = 0;
 
@@ -87,7 +94,7 @@ System.out.println(set.getAddCount()); // 6! (expected 3)
 ```
 
 ```java
-// ✅ Composition: Wrapper/Decorator pattern
+// Composition: Wrapper/Decorator pattern
 public class InstrumentedSet<E> implements Set<E> {
     private final Set<E> delegate;  // HAS-A relationship
     private int addCount = 0;
@@ -130,10 +137,12 @@ set.addAll(List.of("a", "b", "c"));
 System.out.println(set.getAddCount()); // 3 ✅
 ```
 
-### Strategy Pattern (Composition in Action)
+**Strategy Pattern (Composition in Action)**
+
+Composition enables the Strategy pattern — behavior can be changed at runtime by swapping composed objects.
 
 ```java
-// ✅ Composition allows runtime behavior change
+// Composition allows runtime behavior change
 public interface SortStrategy {
     <T extends Comparable<T>> void sort(List<T> list);
 }
@@ -161,7 +170,7 @@ public class DataProcessor {
         this.strategy = strategy;
     }
 
-    // ✅ Can change strategy at runtime!
+    // Can change strategy at runtime!
     public void setStrategy(SortStrategy strategy) {
         this.strategy = strategy;
     }
@@ -180,10 +189,12 @@ processor.setStrategy(new MergeSort()); // Swap at runtime!
 processor.process(new ArrayList<>(List.of(9, 2, 6, 5, 3)));
 ```
 
-### Dependency Injection (Composition Pattern)
+**Dependency Injection (Composition Pattern)**
+
+Dependency injection is composition in action — dependencies are passed in (injected) rather than created internally. This makes code testable and flexible.
 
 ```java
-// ✅ Spring-style composition via dependency injection
+// Spring-style composition via dependency injection
 public interface NotificationSender {
     void send(String to, String message);
 }
@@ -202,7 +213,7 @@ public class SmsSender implements NotificationSender {
     }
 }
 
-// ✅ OrderService composes NotificationSender (doesn't inherit from it)
+// OrderService composes NotificationSender (doesn't inherit from it)
 public class OrderService {
     private final NotificationSender sender;
     private final OrderRepository repository;
@@ -220,16 +231,16 @@ public class OrderService {
 }
 ```
 
-### Refactoring: Inheritance to Composition
+**Refactoring — Inheritance to Composition**
 
 ```java
-// ❌ BEFORE: Tight coupling via inheritance
+// BEFORE: Tight coupling via inheritance
 public class Robot extends ArrayList<String> {
     public void addCommand(String cmd) { add(cmd); }
     public void execute() { forEach(System.out::println); }
 }
 
-// ✅ AFTER: Loose coupling via composition
+// AFTER: Loose coupling via composition
 public class Robot {
     private final List<String> commands = new ArrayList<>();
     private final Executor executor;
@@ -252,10 +263,10 @@ public interface Executor {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Using inheritance purely for code reuse when there's no genuine IS-A relationship. This violates the Liskov Substitution Principle and creates fragile designs.
 
 ```java
-// ❌ Using inheritance purely for code reuse (no IS-A relationship)
+// Using inheritance purely for code reuse (no IS-A relationship)
 public class StringUtils {
     public String capitalize(String s) { return s.substring(0, 1).toUpperCase() + s.substring(1); }
 }
@@ -263,7 +274,7 @@ public class UserFormatter extends StringUtils { // UserFormatter IS-A StringUti
     public String format(User u) { return capitalize(u.getName()); }
 }
 
-// ✅ Use composition or static utility
+// Use composition or static utility
 public class UserFormatter {
     public String format(User u) {
         return StringUtils.capitalize(u.getName()); // Static call or inject
@@ -271,20 +282,18 @@ public class UserFormatter {
 }
 ```
 
-### Performance Tip
-Composition adds a layer of indirection (delegation call), but the JIT compiler inlines these calls aggressively. The design flexibility and maintainability benefits far outweigh any negligible performance cost. Profile before optimizing.
+> **🔧 Performance Tip** — Composition adds a layer of indirection (delegation call), but the JIT compiler inlines these calls aggressively. The design flexibility and maintainability benefits far outweigh any negligible performance cost. Profile before optimizing.
+
+> **🎯 Interviewer Insight** — This is a design-focused question. Interviewers want to see you explain the **fragile base class problem**, demonstrate the **Decorator/Strategy pattern**, and articulate when inheritance IS appropriate (genuine IS-A + Liskov Substitution). Real refactoring examples are highly valued.
+
+> **⚡ Follow-up** — What is the Liskov Substitution Principle and how does it relate to inheritance?
+
+> **⚡ Follow-up** — How does the Decorator pattern use composition?
+
+> **⚡ Follow-up** — When IS inheritance the right choice over composition?
+
+> **📚 Related** — [Inheritance](./03-inheritance.md), [Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md), [Polymorphism](./04-polymorphism.md)
 
 ---
 
-## Interviewer Insight
-This is a design-focused question. Interviewers want to see you explain the **fragile base class problem**, demonstrate the **Decorator/Strategy pattern**, and articulate when inheritance IS appropriate (genuine IS-A + Liskov Substitution). Real refactoring examples are highly valued.
-
-## Follow-up Questions
-1. What is the Liskov Substitution Principle and how does it relate to inheritance?
-2. How does the Decorator pattern use composition?
-3. When IS inheritance the right choice over composition?
-
-## Related Topics
-- [Inheritance](./q03-inheritance.md)
-- [Interfaces vs Abstract Classes](./q07-interfaces-vs-abstract-classes.md)
-- [Polymorphism](./q04-polymorphism.md)
+[← Previous: This Keyword](./11-this-keyword.md) · [Next: Inner Classes →](./13-inner-classes.md)

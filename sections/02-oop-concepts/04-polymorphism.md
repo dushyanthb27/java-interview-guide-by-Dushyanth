@@ -1,30 +1,31 @@
-# Q4: Explain Polymorphism with Examples
+# Polymorphism
 
-## 📋 Question
-What is polymorphism in Java? Explain compile-time and runtime polymorphism, dynamic method dispatch, and covariant return types with examples.
-
-## Difficulty: 🟡 Intermediate
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Polymorphism
 
 ---
 
-## Answer
+## Q7 🟡 Explain Polymorphism with Examples
+
+**Question** — What is polymorphism in Java? Explain compile-time and runtime polymorphism, dynamic method dispatch, and covariant return types with examples.
+
+### Answer
 
 **Polymorphism** (Greek for "many forms") allows objects to be treated as instances of their parent type while retaining their actual behavior. It is one of the four pillars of OOP.
 
-### Two Types of Polymorphism
+**Two Types of Polymorphism**
 
 | Type | Mechanism | Binding | Also Called |
 |------|-----------|---------|-------------|
 | Compile-time | Method overloading | Static (at compile time) | Static polymorphism |
 | Runtime | Method overriding | Dynamic (at runtime) | Dynamic polymorphism |
 
-### 1. Compile-Time Polymorphism (Overloading)
+**Compile-Time Polymorphism (Overloading)**
 
-The compiler decides which method to call based on the **method signature**:
+The compiler decides which method to call based on the **method signature** — name, parameter types, parameter count, or parameter order.
 
 ```java
 public class Calculator {
-    // ✅ Same name, different parameter lists
+    // Same name, different parameter lists
     public int add(int a, int b) {
         return a + b;
     }
@@ -43,9 +44,9 @@ public class Calculator {
 }
 ```
 
-### 2. Runtime Polymorphism (Overriding + Dynamic Dispatch)
+**Runtime Polymorphism (Overriding + Dynamic Dispatch)**
 
-The JVM decides which method to call based on the **actual object type** at runtime:
+The JVM decides which method to call based on the **actual object type** at runtime, not the reference type. This enables the Strategy pattern and other flexible designs.
 
 ```java
 public abstract class Shape {
@@ -94,7 +95,7 @@ public class Rectangle extends Shape {
 }
 ```
 
-### Dynamic Method Dispatch
+**Dynamic Method Dispatch**
 
 ```java
 public class PolymorphismDemo {
@@ -106,7 +107,7 @@ public class PolymorphismDemo {
             new Circle("Green", 3.0)
         );
 
-        // ✅ Dynamic dispatch: JVM calls the correct area() at runtime
+        // Dynamic dispatch: JVM calls the correct area() at runtime
         for (Shape shape : shapes) {
             System.out.println(shape); // Calls correct toString() -> area()
         }
@@ -117,7 +118,7 @@ public class PolymorphismDemo {
         // Green Circle (area=28.27)
     }
 
-    // ✅ Polymorphic method - works with ANY Shape subtype
+    // Polymorphic method - works with ANY Shape subtype
     public static double totalArea(List<Shape> shapes) {
         return shapes.stream()
                      .mapToDouble(Shape::area)
@@ -126,7 +127,9 @@ public class PolymorphismDemo {
 }
 ```
 
-### How It Works: Virtual Method Table (vtable)
+**How It Works — Virtual Method Table (vtable)**
+
+Each class has a virtual method table that maps method signatures to actual implementations. The JVM uses the vtable to dispatch calls to the correct method at runtime.
 
 ```
 Shape reference ──▶ Circle Object
@@ -145,11 +148,9 @@ Shape reference ──▶ Rectangle Object
                     └─────────────────────┘
 ```
 
-Each class has a virtual method table that maps method signatures to actual implementations. The JVM uses the vtable to dispatch calls to the correct method at runtime.
+**Covariant Return Types**
 
-### Covariant Return Types
-
-A subclass can override a method and return a **more specific type**:
+A subclass can override a method and return a **more specific type** — a subtype of the parent's return type.
 
 ```java
 public class AnimalFactory {
@@ -159,7 +160,7 @@ public class AnimalFactory {
 }
 
 public class DogFactory extends AnimalFactory {
-    // ✅ Covariant return: Dog is a subtype of Animal
+    // Covariant return: Dog is a subtype of Animal
     @Override
     public Dog create() {
         return new Dog("Buddy", 3, "Labrador");
@@ -167,7 +168,9 @@ public class DogFactory extends AnimalFactory {
 }
 ```
 
-### Polymorphism with Interfaces
+**Polymorphism with Interfaces**
+
+Interfaces enable polymorphism across unrelated classes that share a contract.
 
 ```java
 public interface Notification {
@@ -195,7 +198,7 @@ public class PushNotification implements Notification {
     }
 }
 
-// ✅ Client code depends on the interface, not the implementation
+// Client code depends on the interface, not the implementation
 public class NotificationService {
     private final List<Notification> channels;
 
@@ -209,11 +212,11 @@ public class NotificationService {
 }
 ```
 
-### Pattern Matching with Polymorphism (Java 17+)
+**Pattern Matching with Polymorphism (Java 17+)**
 
 ```java
 public static String describeShape(Shape shape) {
-    // ✅ Pattern matching for instanceof (Java 16+)
+    // Pattern matching for instanceof (Java 16+)
     if (shape instanceof Circle c) {
         return "Circle with radius: " + c.getRadius();
     } else if (shape instanceof Rectangle r) {
@@ -223,36 +226,35 @@ public static String describeShape(Shape shape) {
 }
 ```
 
-### ⚠️ Common Mistake
-**Confusing reference type with object type**: You can only call methods that exist in the reference type, not the actual object type. This leads to compile errors when trying to access subclass-specific methods through a superclass reference.
+> **⚠️ Common Mistake** — Confusing reference type with object type. You can only call methods that exist in the reference type, not the actual object type. This leads to compile errors when trying to access subclass-specific methods through a superclass reference.
 
 ```java
-// ❌ Confusing reference type with object type
+// Confusing reference type with object type
 Animal animal = new Dog("Rex", 5, "Shepherd");
 // animal.fetch();  // COMPILE ERROR - Animal reference doesn't see Dog methods
 
-// ✅ Cast when you need subclass-specific behavior
+// Cast when you need subclass-specific behavior
 if (animal instanceof Dog dog) {
     dog.fetch(); // Now accessible
 }
 ```
 
-### ⚡ Performance Tip
-Virtual method dispatch has negligible overhead in modern JVMs. The JIT compiler aggressively inlines monomorphic (single-target) and bimorphic (two-target) call sites, making polymorphic calls nearly as fast as direct calls.
+> **🔧 Performance Tip** — Virtual method dispatch has negligible overhead in modern JVMs. The JIT compiler aggressively inlines monomorphic (single-target) and bimorphic (two-target) call sites, making polymorphic calls nearly as fast as direct calls.
+
+> **🎯 Interviewer Insight** — Interviewers want to see you distinguish between compile-time and runtime polymorphism clearly. Bonus points for explaining the vtable mechanism, covariant returns, and demonstrating real-world use cases like the Strategy or Template patterns.
+
+> **⚡ Follow-up** — Can you achieve polymorphism without inheritance? If so, how?
+
+> **⚡ Follow-up** — What is the difference between method hiding (static methods) and method overriding (instance methods)?
+
+> **⚡ Follow-up** — How does the JIT compiler optimize polymorphic call sites through inlining and devirtualization?
+
+> **⚡ Follow-up** — What is the difference between static binding (compile-time) and dynamic binding (runtime)?
+
+> **⚡ Follow-up** — How do pattern matching (Java 16+) and sealed classes (Java 17+) change polymorphism patterns?
+
+> **📚 Related** — [Method Overloading](./08-method-overloading.md), [Method Overriding](./09-method-overriding.md), [Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md)
 
 ---
 
-## 🎯 Interviewer Insight
-Interviewers want to see you distinguish between compile-time and runtime polymorphism clearly. Bonus points for explaining the vtable mechanism, covariant returns, and demonstrating real-world use cases like the Strategy or Template patterns.
-
-## ⚡ Follow-up Questions
-1. Can you achieve polymorphism without inheritance? If so, how?
-2. What is the difference between method hiding (static methods) and method overriding (instance methods)?
-3. How does the JIT compiler optimize polymorphic call sites through inlining and devirtualization?
-4. What is the difference between static binding (compile-time) and dynamic binding (runtime)?
-5. How do pattern matching (Java 16+) and sealed classes (Java 17+) change polymorphism patterns?
-
-## 📚 Related Topics
-- [Method Overloading](./08-method-overloading.md)
-- [Method Overriding](./09-method-overriding.md)
-- [Interfaces vs Abstract Classes](./07-interfaces-vs-abstract-classes.md)
+[← Previous: Inheritance](./03-inheritance.md) · [Next: Encapsulation →](./05-encapsulation.md)

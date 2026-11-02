@@ -1,17 +1,18 @@
-# Q1: What Are Classes and Objects in Java?
+# Classes and Objects
 
-## Question
-What are classes and objects in Java? Explain the relationship between them, how objects are created in memory, and the key methods inherited from the Object class.
-
-## Difficulty: 🟢 Basic
+[Home](../../README.md) > [Object-Oriented Programming](./README.md) > Classes and Objects
 
 ---
 
-## Answer
+## Q4 🟢 What Are Classes and Objects in Java?
+
+**Question** — What are classes and objects in Java? Explain the relationship between them, how objects are created in memory, and the key methods inherited from the Object class.
+
+### Answer
 
 A **class** is a blueprint or template that defines the structure (fields) and behavior (methods) of a type. An **object** is a concrete instance of a class that occupies memory at runtime.
 
-### Class as Blueprint
+**Class as Blueprint**
 
 ```java
 // Class definition - the blueprint
@@ -32,14 +33,9 @@ public class Employee {
 }
 ```
 
-### Object Creation Process
+**Object Creation Process**
 
-When you write `new Employee()`, several things happen in order:
-
-1. **Memory allocation** - JVM allocates space on the **heap** for the object
-2. **Field initialization** - Fields are set to default values (`null`, `0`, `false`)
-3. **Constructor execution** - The constructor body runs to initialize state
-4. **Reference returned** - A reference (pointer) to the heap object is stored on the **stack**
+When you write `new Employee()`, several things happen in order — memory allocation, field initialization, constructor execution, and reference return. The JVM allocates space on the **heap** for the object, sets fields to default values (`null`, `0`, `false`), runs the constructor body to initialize state, and returns a reference (pointer) to the heap object stored on the **stack**.
 
 ```java
 public class ObjectCreationDemo {
@@ -57,7 +53,7 @@ public class ObjectCreationDemo {
 }
 ```
 
-### Stack vs Heap Memory
+**Stack vs Heap Memory**
 
 ```
  STACK (per thread)          HEAP (shared)
@@ -69,12 +65,11 @@ public class ObjectCreationDemo {
 └─────────────────┘     └──────────────────────────┘
 ```
 
-- **Stack**: stores local variables and object references (fast, thread-local)
-- **Heap**: stores actual objects (shared across threads, garbage-collected)
+The **stack** stores local variables and object references (fast, thread-local), while the **heap** stores actual objects (shared across threads, garbage-collected).
 
-### Object Class Methods
+**Object Class Methods**
 
-Every Java class implicitly extends `java.lang.Object`. Key methods:
+Every Java class implicitly extends `java.lang.Object`. Key methods include `toString()`, `equals()`, `hashCode()`, `clone()`, `finalize()`, `getClass()`, and the thread coordination methods `wait()`, `notify()`, and `notifyAll()`.
 
 ```java
 public class Product {
@@ -88,7 +83,7 @@ public class Product {
         this.price = price;
     }
 
-    // ✅ Override equals() for logical equality
+    // Override equals() for logical equality
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -97,13 +92,13 @@ public class Product {
         return Objects.equals(id, product.id);
     }
 
-    // ✅ Always override hashCode() when overriding equals()
+    // Always override hashCode() when overriding equals()
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
 
-    // ✅ Override toString() for meaningful output
+    // Override toString() for meaningful output
     @Override
     public String toString() {
         return "Product{id='%s', name='%s', price=%.2f}".formatted(id, name, price);
@@ -116,10 +111,12 @@ public class Product {
 }
 ```
 
-### Modern Alternative: Records (Java 16+)
+**Modern Alternative — Records (Java 16+)**
+
+Records auto-generate constructor, equals, hashCode, and toString methods, reducing boilerplate while maintaining immutability.
 
 ```java
-// ✅ Records auto-generate constructor, equals, hashCode, toString
+// Records auto-generate constructor, equals, hashCode, toString
 public record ProductRecord(String id, String name, double price) {
     // Compact constructor for validation
     public ProductRecord {
@@ -141,35 +138,34 @@ public class RecordDemo {
 }
 ```
 
-### Common Mistake
+> **⚠️ Common Mistake** — Comparing objects with `==` checks reference equality, not content equality. Always use `equals()` for logical comparison of object contents.
 
 ```java
-// ❌ Comparing objects with == (checks reference, not content)
+// Comparing objects with == (checks reference, not content)
 String s1 = new String("hello");
 String s2 = new String("hello");
 System.out.println(s1 == s2);      // false (different references)
 
-// ✅ Use equals() for logical equality
+// Use equals() for logical equality
 System.out.println(s1.equals(s2)); // true (same content)
 ```
 
-### Performance Tip
-Use `var` (Java 10+) for local variable type inference when the type is obvious from the right-hand side. It reduces boilerplate without sacrificing readability:
+> **🔧 Performance Tip** — Use `var` (Java 10+) for local variable type inference when the type is obvious from the right-hand side. It reduces boilerplate without sacrificing readability.
+
 ```java
 var employees = new ArrayList<Employee>(); // Type is inferred
 ```
 
+> **🎯 Interviewer Insight** — Interviewers want to see that you understand the **memory model** (stack vs heap), the **contract between equals() and hashCode()**, and how modern Java features like **records** simplify class definitions. Mentioning the Object class hierarchy shows depth.
+
+> **⚡ Follow-up** — What happens if you override `equals()` but not `hashCode()`?
+
+> **⚡ Follow-up** — How does garbage collection decide when to reclaim an object?
+
+> **⚡ Follow-up** — What is the difference between shallow copy and deep copy?
+
+> **📚 Related** — [Constructors](./02-constructors.md), [Encapsulation](./05-encapsulation.md), [Inheritance](./03-inheritance.md)
+
 ---
 
-## Interviewer Insight
-Interviewers want to see that you understand the **memory model** (stack vs heap), the **contract between equals() and hashCode()**, and how modern Java features like **records** simplify class definitions. Mentioning the Object class hierarchy shows depth.
-
-## Follow-up Questions
-1. What happens if you override `equals()` but not `hashCode()`?
-2. How does garbage collection decide when to reclaim an object?
-3. What is the difference between shallow copy and deep copy?
-
-## Related Topics
-- [Constructors](./q02-constructors.md)
-- [Encapsulation](./q05-encapsulation.md)
-- [Inheritance](./q03-inheritance.md)
+[← Back to Section Index](./README.md) · [Next: Constructors →](./02-constructors.md)

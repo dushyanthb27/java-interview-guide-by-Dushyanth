@@ -1,13 +1,14 @@
-# Q10: What Is the Difference Between Static and Instance Members?
+# Static vs Instance
 
-## 📋 Question
-What is the difference between static and instance members in Java? Explain static fields, methods, blocks, and nested classes, including class loading order and memory implications.
-
-## Difficulty: 🟡 Medium
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Static vs Instance
 
 ---
 
-## 💡 Answer
+## Q10 🟡 What Is the Difference Between Static and Instance Members?
+
+**Question:** What is the difference between static and instance members in Java? Explain static fields, methods, blocks, and nested classes, including class loading order and memory implications.
+
+### Answer
 
 In Java, members (fields, methods, blocks, nested classes) belong to either the **class itself** (static) or to **individual objects/instances** of the class.
 
@@ -19,29 +20,25 @@ In Java, members (fields, methods, blocks, nested classes) belong to either the 
 
 | Aspect | Static | Instance |
 |--------|--------|----------|
-| **Belongs to** | Class | Object |
-| **Memory** | One copy (Method Area) | Per-object copy (Heap) |
-| **Access** | `ClassName.member` | `object.member` |
-| **Lifecycle** | Class loading → JVM shutdown | Object creation → GC |
-| **Can access** | Other static members only | Both static + instance |
-| **`this` keyword** | Not available | Available |
-| **Override** | Cannot be overridden (hidden) | Can be overridden |
-| **Use for** | Utilities, constants, factories | Object state & behavior |
+| Belongs to | Class | Object |
+| Memory | One copy (Method Area) | Per-object copy (Heap) |
+| Access | `ClassName.member` | `object.member` |
+| Lifecycle | Class loading → JVM shutdown | Object creation → GC |
+| Can access | Other static members only | Both static + instance |
+| `this` keyword | Not available | Available |
+| Override | Cannot be overridden (hidden) | Can be overridden |
+| Use for | Utilities, constants, factories | Object state & behavior |
 
 ### Class Initialization Order
 
 When a class is loaded, initialization follows a strict order:
 
-```
 1. Static fields — initialized in declaration order (default values first, then initializers)
 2. Static initializer blocks — executed in declaration order
 3. ─── (class is now ready; above runs ONCE per class) ───
 4. Instance fields — initialized in declaration order
 5. Instance initializer blocks — executed in declaration order
 6. Constructor body — executed last
-```
-
-### Code Example
 
 ```java
 package com.interview.fundamentals;
@@ -230,26 +227,22 @@ private static final MyService INSTANCE = new MyService();
 //   (Mockito 3.4+ supports static mocking, but it's a code smell)
 ```
 
-### ⚠️ Common Mistake
-**Accessing static members via instance references** (`obj.staticMethod()`) compiles but is deeply misleading — it suggests polymorphic behavior where none exists. The compiler resolves the call based on the **reference type**, not the object type. Always use `ClassName.staticMethod()`. Another common mistake: declaring a non-static inner class when a static nested class would suffice. Non-static inner classes hold an implicit reference to the outer instance, preventing it from being garbage collected and potentially causing **memory leaks** (especially common with Android's `Handler` pattern).
+> **🎯 Interviewer Insight:** Interviewers want you to explain that static methods **cannot be overridden** (only hidden), and to demonstrate understanding of the class initialization order. The distinction between static nested classes and inner classes (and the memory leak risk of inner classes) is a strong differentiator. Mentioning that static methods are harder to mock in unit tests shows practical testing experience — and explains why modern Java prefers dependency injection over static utility methods.
 
-### ⚡ Performance Tip
-Static fields live in the **Method Area** (Metaspace since Java 8), not the heap, and exist once per class — they consume no per-instance memory. However, be cautious with `static` collections or caches — they persist for the lifetime of the ClassLoader (typically the entire JVM lifetime), creating potential **memory leaks** if entries are added but never removed. Use `WeakHashMap` or bounded caches (Caffeine, Guava) for static caches. Static methods are slightly faster to invoke than instance methods because they don't require `this` reference resolution and are candidates for **inlining** by the JIT compiler without needing virtual dispatch.
+> **⚠️ Common Mistake:** Accessing static members via instance references (`obj.staticMethod()`) compiles but is deeply misleading — it suggests polymorphic behavior where none exists. The compiler resolves the call based on the **reference type**, not the object type. Always use `ClassName.staticMethod()`. Another common mistake: declaring a non-static inner class when a static nested class would suffice. Non-static inner classes hold an implicit reference to the outer instance, preventing it from being garbage collected and potentially causing **memory leaks** (especially common with Android's `Handler` pattern).
 
-### 🔧 JVM Internals
-Static fields are stored in the **class object** on the heap (the `java.lang.Class` instance that represents the loaded class). The JVM's class loading mechanism ensures that static initializers run exactly once, even in multi-threaded environments — the JVM acquires an internal lock during class initialization, making `static final` fields a simple way to implement thread-safe lazy initialization (the **Initialization-on-demand holder** pattern). At the bytecode level, static field access uses `getstatic`/`putstatic` instructions, while instance field access uses `getfield`/`putfield`. Static method calls use `invokestatic` (direct dispatch, no virtual table lookup), whereas instance method calls use `invokevirtual` (virtual dispatch through the vtable).
+> **⚡ Performance Tip:** Static fields live in the **Method Area** (Metaspace since Java 8), not the heap, and exist once per class — they consume no per-instance memory. However, be cautious with `static` collections or caches — they persist for the lifetime of the ClassLoader (typically the entire JVM lifetime), creating potential **memory leaks** if entries are added but never removed. Use `WeakHashMap` or bounded caches (Caffeine, Guava) for static caches. Static methods are slightly faster to invoke than instance methods because they don't require `this` reference resolution and are candidates for **inlining** by the JIT compiler without needing virtual dispatch.
+
+> **🔧 JVM Internals:** Static fields are stored in the **class object** on the heap (the `java.lang.Class` instance that represents the loaded class). The JVM's class loading mechanism ensures that static initializers run exactly once, even in multi-threaded environments — the JVM acquires an internal lock during class initialization, making `static final` fields a simple way to implement thread-safe lazy initialization (the **Initialization-on-demand holder** pattern). At the bytecode level, static field access uses `getstatic`/`putstatic` instructions, while instance field access uses `getfield`/`putfield`. Static method calls use `invokestatic` (direct dispatch, no virtual table lookup), whereas instance method calls use `invokevirtual` (virtual dispatch through the vtable).
+
+> **⚡ Follow-up:** Can you override a static method in Java? What happens if you try?
+
+> **⚡ Follow-up:** What is the Initialization-on-demand holder pattern and how does it leverage class loading for thread safety?
+
+> **⚡ Follow-up:** Why are inner (non-static) classes problematic for garbage collection?
+
+> **📚 Related:** [Final Keyword](./11-final-keyword.md), [Packages and Access Modifiers](./09-packages-and-access-modifiers.md), [Object-Oriented Programming](../02-oop-concepts/README.md)
 
 ---
 
-## 🎯 Interviewer Insight
-Interviewers want you to explain that static methods **cannot be overridden** (only hidden), and to demonstrate understanding of the class initialization order. The distinction between static nested classes and inner classes (and the memory leak risk of inner classes) is a strong differentiator. Mentioning that static methods are harder to mock in unit tests shows practical testing experience — and explains why modern Java prefers dependency injection over static utility methods.
-
-## ⚡ Follow-up Questions
-1. Can you override a static method in Java? What happens if you try?
-2. What is the Initialization-on-demand holder pattern and how does it leverage class loading for thread safety?
-3. Why are inner (non-static) classes problematic for garbage collection?
-
-## 📚 Related Topics
-- [Final Keyword](./q11-final-keyword.md)
-- [Packages and Access Modifiers](./q09-packages-and-access-modifiers.md)
-- [Object-Oriented Programming](../02-oop-concepts/README.md)
+[← Previous: Packages and Access Modifiers](./09-packages-and-access-modifiers.md) · [Next: Final Keyword →](./11-final-keyword.md)

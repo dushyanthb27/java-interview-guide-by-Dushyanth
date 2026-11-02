@@ -1,19 +1,20 @@
-# Q6: Compare LinkedHashSet and TreeSet
+# LinkedHashSet and TreeSet
 
-[Back to Collections Framework](./README.md) | **Difficulty**: 🟡 Medium
-
----
-
-## Question
-> Compare LinkedHashSet and TreeSet. When would you use each?
+[Home](../../README.md) > [Collections Framework](./README.md) > LinkedHashSet and TreeSet
 
 ---
 
-## Answer
+## Q6 🟡 Compare LinkedHashSet and TreeSet
 
-### LinkedHashSet - Hash Table + Doubly-Linked List
+**Question:** Compare LinkedHashSet and TreeSet. When would you use each?
 
-LinkedHashSet maintains **insertion order** by connecting entries with a doubly-linked list on top of the hash table structure.
+### Answer
+
+LinkedHashSet and TreeSet both extend the Set contract but serve different purposes — LinkedHashSet preserves insertion order, while TreeSet maintains sorted order. Understanding their trade-offs helps you choose the right tool for your use case.
+
+### LinkedHashSet — Hash Table + Doubly-Linked List
+
+LinkedHashSet maintains insertion order by connecting entries with a doubly-linked list on top of the hash table structure. It extends HashSet but internally uses LinkedHashMap:
 
 ```java
 // LinkedHashSet extends HashSet, backed by LinkedHashMap internally
@@ -38,6 +39,8 @@ public class LinkedHashSet<E> extends HashSet<E>
 
 ### LinkedHashSet Usage
 
+LinkedHashSet is perfect when you need to remove duplicates while preserving order:
+
 ```java
 Set<String> linkedSet = new LinkedHashSet<>();
 linkedSet.add("Cherry");
@@ -57,9 +60,9 @@ for (String fruit : linkedSet) {
 // ✅ Iteration order is predictable and deterministic
 ```
 
-### TreeSet - Red-Black Tree (Sorted Set)
+### TreeSet — Red-Black Tree (Sorted Set)
 
-TreeSet maintains elements in **sorted order** using a self-balancing Red-Black tree. It implements `NavigableSet`.
+TreeSet maintains elements in sorted order using a self-balancing Red-Black tree. It implements `NavigableSet`, which provides powerful navigation methods:
 
 ```java
 // TreeSet is backed by a TreeMap
@@ -87,6 +90,8 @@ public class TreeSet<E> extends AbstractSet<E>
 ```
 
 ### TreeSet Usage
+
+TreeSet automatically keeps elements sorted:
 
 ```java
 // Natural ordering (Comparable)
@@ -116,6 +121,8 @@ caseInsensitive.size();         // 1
 ```
 
 ### NavigableSet Methods (TreeSet-Specific)
+
+The NavigableSet interface provides powerful navigation methods:
 
 ```java
 TreeSet<Integer> nums = new TreeSet<>(List.of(10, 20, 30, 40, 50, 60, 70));
@@ -153,6 +160,8 @@ Iterator<Integer> descIt = nums.descendingIterator();
 
 ### Null Handling
 
+LinkedHashSet allows one null element, but TreeSet throws NullPointerException unless you use a null-safe comparator:
+
 ```java
 // LinkedHashSet: allows ONE null element
 LinkedHashSet<String> lhs = new LinkedHashSet<>();
@@ -172,6 +181,8 @@ ts2.add("Apple");
 ```
 
 ### Custom Objects in TreeSet
+
+You can sort custom objects by implementing Comparable or providing a Comparator:
 
 ```java
 // Option 1: Implement Comparable (natural ordering)
@@ -220,21 +231,19 @@ set.size();  // 1! Bob is "equal" to Alice because same age
 
 ### Performance Comparison
 
-```java
-// Operation           | HashSet  | LinkedHashSet | TreeSet
-// --------------------|----------|---------------|--------
-// add(e)              | O(1)     | O(1)          | O(log n)
-// remove(e)           | O(1)     | O(1)          | O(log n)
-// contains(e)         | O(1)     | O(1)          | O(log n)
-// first()/last()      | N/A      | O(1)*         | O(log n)
-// floor()/ceiling()   | N/A      | N/A           | O(log n)
-// iteration           | O(cap)   | O(n)          | O(n)
-// ordered?            | No       | Insertion      | Sorted
-// null elements?      | Yes (1)  | Yes (1)       | No**
+| Operation | HashSet | LinkedHashSet | TreeSet |
+|-----------|---------|---------------|---------|
+| `add(e)` | O(1) | O(1) | O(log n) |
+| `remove(e)` | O(1) | O(1) | O(log n) |
+| `contains(e)` | O(1) | O(1) | O(log n) |
+| `first()/last()` | N/A | O(1)* | O(log n) |
+| `floor()/ceiling()` | N/A | N/A | O(log n) |
+| iteration | O(cap) | O(n) | O(n) |
+| ordered? | No | Insertion | Sorted |
+| null elements? | Yes (1) | Yes (1) | No** |
 
-// * LinkedHashSet doesn't expose first/last but iteration is ordered
-// ** Unless using null-safe Comparator
-```
+* LinkedHashSet doesn't expose first/last but iteration is ordered
+** Unless using null-safe Comparator
 
 ### Real-World Use Cases
 
@@ -310,15 +319,22 @@ Set<DayOfWeek> workdays = EnumSet.range(DayOfWeek.MONDAY, DayOfWeek.FRIDAY);
 // ✅ Use immutable objects as Set elements
 ```
 
+> **🎯 Interviewer Insight:** LinkedHashSet = HashSet + insertion order (doubly-linked list overhead). TreeSet = sorted order via Red-Black tree (O(log n) operations). TreeSet does NOT use hashCode/equals — it uses Comparable/Comparator. compareTo returning 0 means "equal" in TreeSet (potential data loss). NavigableSet methods (floor, ceiling, lower, higher) are powerful interview topics.
+
+> **⚠️ Common Mistake:** Forgetting that TreeSet uses compareTo for equality, not equals(). If compareTo returns 0 for two objects that aren't equals(), one will be silently dropped as a "duplicate."
+
+> **🔧 Performance Tip:** Use HashSet when order doesn't matter — it's O(1) vs O(log n) for TreeSet. Use LinkedHashSet when you need insertion order. Use TreeSet only when you need sorted order or range queries.
+
+> **⚡ Follow-up:** Why does TreeSet not use hashCode() and equals() for element comparison?
+
+> **⚡ Follow-up:** What happens if compareTo is not consistent with equals in a TreeSet?
+
+> **⚡ Follow-up:** How does the performance of LinkedHashSet compare to HashSet for iteration?
+
+> **⚡ Follow-up:** When would you choose a NavigableSet over a regular Set?
+
+> **📚 Related:** [HashSet Internals](./05-hashset.md), [HashMap Internals](./07-hashmap-internals.md), [Comparable vs Comparator](./13-comparable-comparator.md)
+
 ---
 
-## Interview Tips
-- LinkedHashSet = HashSet + insertion order (doubly-linked list overhead)
-- TreeSet = sorted order via Red-Black tree (O(log n) operations)
-- TreeSet does NOT use hashCode/equals - it uses Comparable/Comparator
-- compareTo returning 0 means "equal" in TreeSet (potential data loss)
-- NavigableSet methods (floor, ceiling, lower, higher) are powerful interview topics
-
----
-
-[Prev: Q5 - HashSet](./q05-hashset.md) | [Next: Q7 - HashMap Internals](./q07-hashmap-internals.md)
+[← Previous: HashSet Internals](./05-hashset.md) · [Next: HashMap Internals →](./07-hashmap-internals.md)

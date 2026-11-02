@@ -1,23 +1,22 @@
-# Q6: How Do Arrays Work in Java?
+# Arrays in Java
 
-## 📋 Question
-How do arrays work in Java? Explain declaration, initialization, multi-dimensional arrays, and common array operations.
-
-## Difficulty: 🟢 Easy
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Arrays in Java
 
 ---
 
-## 💡 Answer
+## Q6 🟢 How Do Arrays Work in Java?
+
+**Question:** How do arrays work in Java? Explain declaration, initialization, multi-dimensional arrays, and common array operations.
+
+### Answer
 
 Arrays in Java are **fixed-size, contiguous data structures** that store elements of the same type. Unlike C/C++, Java arrays are **objects** — they are allocated on the heap, have a `length` field, and perform **bounds checking** at runtime (throwing `ArrayIndexOutOfBoundsException` for invalid indices). Arrays are **covariant**: `String[]` is a subtype of `Object[]`, which can lead to runtime `ArrayStoreException` issues.
 
-**Declaration and Initialization**: Arrays can be declared with the type before or after the variable name (`int[] arr` or `int arr[]`, though the former is preferred). They can be initialized with `new` (specifying size), with an initializer list, or anonymously.
+**Declaration and initialization** — Arrays can be declared with the type before or after the variable name (`int[] arr` or `int arr[]`, though the former is preferred). They can be initialized with `new` (specifying size), with an initializer list, or anonymously.
 
-**Multi-dimensional Arrays**: Java supports multi-dimensional arrays as "arrays of arrays." Unlike languages with true 2D memory layouts, Java's multi-dimensional arrays are **jagged** by default — each row can have a different length. This means a `int[][]` is an array of `int[]` references, each pointing to a separately allocated array.
+**Multi-dimensional arrays** — Java supports multi-dimensional arrays as "arrays of arrays." Unlike languages with true 2D memory layouts, Java's multi-dimensional arrays are **jagged** by default — each row can have a different length. This means a `int[][]` is an array of `int[]` references, each pointing to a separately allocated array.
 
-**Key Difference — Array vs ArrayList**: Arrays have a **fixed size** set at creation, use `[]` syntax, and can hold primitives. `ArrayList` is dynamically resizable, uses generics (objects only), and provides richer APIs. Use arrays for performance-critical, fixed-size data; use `ArrayList` for flexibility.
-
-### Code Example
+**Key difference — Array vs ArrayList** — Arrays have a **fixed size** set at creation, use `[]` syntax, and can hold primitives. `ArrayList` is dynamically resizable, uses generics (objects only), and provides richer APIs. Use arrays for performance-critical, fixed-size data; use `ArrayList` for flexibility.
 
 ```java
 package com.interview.fundamentals;
@@ -165,25 +164,22 @@ public class ArraysDemo {
 
 ### Array vs ArrayList Comparison
 
-```
-┌─────────────────────┬──────────────────┬──────────────────────┐
-│ Feature             │ Array            │ ArrayList            │
-├─────────────────────┼──────────────────┼──────────────────────┤
-│ Size                │ Fixed            │ Dynamic (grows 50%)  │
-│ Primitives          │ Yes (int[])      │ No (Integer only)    │
-│ Type Safety         │ Runtime check    │ Compile-time generic │
-│ Performance         │ Faster (direct)  │ Slightly slower      │
-│ Syntax              │ arr[i]           │ list.get(i)          │
-│ Length              │ arr.length       │ list.size()          │
-│ Multi-dimensional   │ Yes (int[][])    │ List<List<Integer>>  │
-│ Null Elements       │ Yes (obj arrays) │ Yes                  │
-│ Memory              │ Contiguous       │ Contiguous (backing) │
-│ API Richness        │ Arrays utility   │ Rich Collection API  │
-└─────────────────────┴──────────────────┴──────────────────────┘
-```
+| Feature | Array | ArrayList |
+|---------|-------|-----------|
+| Size | Fixed | Dynamic (grows 50%) |
+| Primitives | Yes (int[]) | No (Integer only) |
+| Type Safety | Runtime check | Compile-time generic |
+| Performance | Faster (direct) | Slightly slower |
+| Syntax | arr[i] | list.get(i) |
+| Length | arr.length | list.size() |
+| Multi-dimensional | Yes (int[][]) | List<List<Integer>> |
+| Null Elements | Yes (obj arrays) | Yes |
+| Memory | Contiguous | Contiguous (backing) |
+| API Richness | Arrays utility | Rich Collection API |
 
-### ⚠️ Common Mistake
-**Array covariance can cause runtime errors**: Since `String[]` is a subtype of `Object[]`, you can assign a `String[]` to an `Object[]` variable. But storing a non-String in that `Object[]` throws `ArrayStoreException` at runtime — the compiler cannot catch this. Generics (e.g., `List<String>`) are invariant and catch such errors at compile time.
+> **🎯 Interviewer Insight:** Interviewers check whether you understand the fundamental trade-offs between arrays and collections, and whether you know about array covariance (a classic Java design flaw). Demonstrating knowledge of the `Arrays` utility class, `System.arraycopy()`, and the difference between shallow and deep copies shows practical experience. Understanding jagged arrays vs true multi-dimensional arrays reveals your knowledge of Java's memory model.
+
+> **⚠️ Common Mistake:** Array covariance can cause runtime errors — since `String[]` is a subtype of `Object[]`, you can assign a `String[]` to an `Object[]` variable. But storing a non-String in that `Object[]` throws `ArrayStoreException` at runtime — the compiler cannot catch this. Generics (e.g., `List<String>`) are invariant and catch such errors at compile time.
 
 ```java
 String[] strings = {"hello", "world"};
@@ -191,23 +187,18 @@ Object[] objects = strings;   // ✅ Compiles (covariance)
 objects[0] = 42;              // ❌ ArrayStoreException at runtime!
 ```
 
-### ⚡ Performance Tip
-`System.arraycopy()` is the **fastest** way to copy arrays — it's a native method that uses memory-level block copying (similar to C's `memcpy`). For small arrays, the JIT may inline the copy entirely. `Arrays.copyOf()` internally calls `System.arraycopy()`. For sorting, `Arrays.sort()` uses **dual-pivot Quicksort** for primitives (O(n log n) average) and **TimSort** for objects (stable, O(n log n)). The choice of algorithm matters: TimSort is stable (preserves order of equal elements), while Quicksort is not.
+> **⚡ Performance Tip:** `System.arraycopy()` is the **fastest** way to copy arrays — it's a native method that uses memory-level block copying (similar to C's `memcpy`). For small arrays, the JIT may inline the copy entirely. `Arrays.copyOf()` internally calls `System.arraycopy()`. For sorting, `Arrays.sort()` uses **dual-pivot Quicksort** for primitives (O(n log n) average) and **TimSort** for objects (stable, O(n log n)). The choice of algorithm matters: TimSort is stable (preserves order of equal elements), while Quicksort is not.
 
-### 🔧 JVM Internals
-Arrays in Java are objects with a special **header** that includes the standard object header (mark word + klass pointer) plus a **length field** (4 bytes). This is why `arr.length` is O(1) — it reads a field, not a method call. Primitive arrays store values **contiguously** in memory, enabling CPU cache-friendly sequential access. Object arrays store **references** contiguously, but the objects themselves may be scattered across the heap. The JVM performs **bounds checking** on every array access — the JIT compiler can sometimes eliminate redundant bounds checks via **range check elimination** when it can prove the index is always valid (e.g., in a standard for loop iterating from 0 to `arr.length`).
+> **🔧 JVM Internals:** Arrays in Java are objects with a special **header** that includes the standard object header (mark word + klass pointer) plus a **length field** (4 bytes). This is why `arr.length` is O(1) — it reads a field, not a method call. Primitive arrays store values **contiguously** in memory, enabling CPU cache-friendly sequential access. Object arrays store **references** contiguously, but the objects themselves may be scattered across the heap. The JVM performs **bounds checking** on every array access — the JIT compiler can sometimes eliminate redundant bounds checks via **range check elimination** when it can prove the index is always valid (e.g., in a standard for loop iterating from 0 to `arr.length`).
+
+> **⚡ Follow-up:** Why is array covariance considered a design flaw, and how do generics solve this?
+
+> **⚡ Follow-up:** What sorting algorithm does `Arrays.sort()` use for primitives vs objects, and why?
+
+> **⚡ Follow-up:** How does `Arrays.asList()` differ from `List.of()`, and what are the mutability implications?
+
+> **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Strings and String Pool](./07-strings-and-string-pool.md), [Generics & Type System](../09-generics-type-system/README.md)
 
 ---
 
-## 🎯 Interviewer Insight
-Interviewers check whether you understand the fundamental trade-offs between arrays and collections, and whether you know about array covariance (a classic Java design flaw). Demonstrating knowledge of the `Arrays` utility class, `System.arraycopy()`, and the difference between shallow and deep copies shows practical experience. Understanding jagged arrays vs true multi-dimensional arrays reveals your knowledge of Java's memory model.
-
-## ⚡ Follow-up Questions
-1. Why is array covariance considered a design flaw, and how do generics solve this?
-2. What sorting algorithm does `Arrays.sort()` use for primitives vs objects, and why?
-3. How does `Arrays.asList()` differ from `List.of()`, and what are the mutability implications?
-
-## 📚 Related Topics
-- [Data Types and Primitives](./q03-data-types-primitives.md)
-- [Strings and String Pool](./q07-strings-and-string-pool.md)
-- [Generics & Type System](../09-generics-type-system/README.md)
+[← Previous: Control Flow Statements](./05-control-flow-statements.md) · [Next: Strings and String Pool →](./07-strings-and-string-pool.md)

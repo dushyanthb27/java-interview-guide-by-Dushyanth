@@ -1,19 +1,20 @@
-# Q8: Compare LinkedHashMap and TreeMap
+# LinkedHashMap and TreeMap
 
-[Back to Collections Framework](./README.md) | **Difficulty**: 🟡 Medium
-
----
-
-## Question
-> Compare LinkedHashMap and TreeMap. When would you use each?
+[Home](../../README.md) > [Collections Framework](./README.md) > LinkedHashMap and TreeMap
 
 ---
 
-## Answer
+## Q8 🟡 Compare LinkedHashMap and TreeMap
 
-### LinkedHashMap - HashMap + Insertion/Access Order
+**Question:** Compare LinkedHashMap and TreeMap. When would you use each?
 
-LinkedHashMap extends HashMap and maintains a **doubly-linked list** across all entries to preserve order.
+### Answer
+
+LinkedHashMap and TreeMap both extend HashMap's functionality but serve different purposes — LinkedHashMap preserves insertion or access order using a doubly-linked list, while TreeMap maintains sorted order using a red-black tree. Understanding their trade-offs helps you choose the right tool for ordered map needs.
+
+### LinkedHashMap — HashMap + Insertion/Access Order
+
+LinkedHashMap extends HashMap and maintains a doubly-linked list across all entries to preserve order:
 
 ```java
 // Simplified internal structure
@@ -31,7 +32,9 @@ public class LinkedHashMap<K,V> extends HashMap<K,V> implements Map<K,V> {
 }
 ```
 
-### LinkedHashMap - Insertion Order (Default)
+### LinkedHashMap — Insertion Order (Default)
+
+By default, LinkedHashMap preserves the order in which keys were inserted:
 
 ```java
 Map<String, Integer> map = new LinkedHashMap<>();
@@ -52,7 +55,9 @@ map.put("Alice", 10);
 // Order: Charlie, Alice, Bob (Alice stays in original position)
 ```
 
-### LinkedHashMap - Access Order (LRU Cache)
+### LinkedHashMap — Access Order (LRU Cache)
+
+With `accessOrder = true`, the most recently accessed entries move to the tail — this is perfect for LRU caches:
 
 ```java
 // accessOrder = true: most recently accessed entries move to tail
@@ -73,6 +78,8 @@ accessMap.put("C", 30);  // Update "C" - moves to tail
 ```
 
 ### LRU Cache with removeEldestEntry()
+
+You can implement a bounded LRU cache by overriding `removeEldestEntry()`:
 
 ```java
 // Simple LRU (Least Recently Used) cache
@@ -110,9 +117,9 @@ cache.put("E", "5");   // Removes eldest (A)
 // Cache: [D=4, C=3, E=5]
 ```
 
-### TreeMap - Red-Black Tree (Sorted Map)
+### TreeMap — Red-Black Tree (Sorted Map)
 
-TreeMap stores entries in a **self-balancing Red-Black tree**, sorted by keys.
+TreeMap stores entries in a self-balancing Red-Black tree, sorted by keys:
 
 ```java
 // Internal structure
@@ -136,6 +143,8 @@ public class TreeMap<K,V> extends AbstractMap<K,V>
 
 ### TreeMap Usage
 
+TreeMap automatically keeps entries sorted by key:
+
 ```java
 // Natural ordering (keys must implement Comparable)
 TreeMap<String, Integer> treeMap = new TreeMap<>();
@@ -158,6 +167,8 @@ reverseMap.putAll(treeMap);
 ```
 
 ### NavigableMap Methods (TreeMap-Specific)
+
+The NavigableMap interface provides powerful navigation methods:
 
 ```java
 TreeMap<Integer, String> scores = new TreeMap<>();
@@ -242,6 +253,8 @@ response.put("data", resultList);
 
 ### Null Handling
 
+LinkedHashMap allows one null key, but TreeMap throws NullPointerException unless you use a null-safe comparator:
+
 ```java
 // LinkedHashMap: allows one null key and multiple null values
 LinkedHashMap<String, Integer> lhm = new LinkedHashMap<>();
@@ -256,21 +269,19 @@ tm.put("key", null);    // ✅ null values are OK
 
 ### Performance Comparison
 
-```java
-// Operation          | HashMap  | LinkedHashMap | TreeMap
-// -------------------|----------|---------------|--------
-// put(k,v)           | O(1)     | O(1)          | O(log n)
-// get(k)             | O(1)     | O(1)          | O(log n)
-// remove(k)          | O(1)     | O(1)          | O(log n)
-// containsKey(k)     | O(1)     | O(1)          | O(log n)
-// firstKey/lastKey   | N/A      | O(1)          | O(log n)
-// floor/ceiling      | N/A      | N/A           | O(log n)
-// Iteration order    | None     | Insert/Access | Sorted
-// Null key           | Yes      | Yes           | No*
-// Memory overhead    | Low      | Medium        | High
+| Operation | HashMap | LinkedHashMap | TreeMap |
+|-----------|---------|---------------|---------|
+| `put(k,v)` | O(1) | O(1) | O(log n) |
+| `get(k)` | O(1) | O(1) | O(log n) |
+| `remove(k)` | O(1) | O(1) | O(log n) |
+| `containsKey(k)` | O(1) | O(1) | O(log n) |
+| `firstKey/lastKey` | N/A | O(1) | O(log n) |
+| `floor/ceiling` | N/A | N/A | O(log n) |
+| Iteration order | None | Insert/Access | Sorted |
+| Null key | Yes | Yes | No* |
+| Memory overhead | Low | Medium | High |
 
-// * Unless using null-safe Comparator
-```
+* Unless using null-safe Comparator
 
 ### Common Anti-Patterns
 
@@ -324,16 +335,22 @@ Map<String, Integer> readOnly = Collections.unmodifiableMap(map);
 Map<String, Integer> constants = Map.of("A", 1, "B", 2, "C", 3);
 ```
 
+> **🎯 Interviewer Insight:** LinkedHashMap = HashMap + doubly-linked list for order. TreeMap = Red-Black tree, always sorted, O(log n) operations. Know the LRU cache implementation with `removeEldestEntry()`. NavigableMap methods (floorKey, ceilingKey, subMap) are great for range queries. TreeMap doesn't use hashCode — it uses Comparable/Comparator. LinkedHashMap supports both insertion-order and access-order modes.
+
+> **⚠️ Common Mistake:** Using TreeMap when you don't need sorted order — you pay the O(log n) performance penalty for no benefit. Use HashMap when order doesn't matter, LinkedHashMap when you need insertion order, and TreeMap only when you need sorted order or range queries.
+
+> **🔧 Performance Tip:** Use LinkedHashMap for LRU caches with `removeEldestEntry()` to bound memory. Be careful with access-order mode — calling get() during iteration causes ConcurrentModificationException because it modifies the internal order.
+
+> **⚡ Follow-up:** How does the LRU cache implementation using LinkedHashMap work under the hood?
+
+> **⚡ Follow-up:** What is the difference between floorKey and lowerKey in TreeMap?
+
+> **⚡ Follow-up:** How does TreeMap's red-black tree maintain balance during insertions and deletions?
+
+> **⚡ Follow-up:** When would you choose TreeMap over a HashMap with a sorted List of keys?
+
+> **📚 Related:** [HashMap Internals](./07-hashmap-internals.md), [ConcurrentHashMap](./09-concurrenthashmap.md), [Comparable vs Comparator](./13-comparable-comparator.md)
+
 ---
 
-## Interview Tips
-- LinkedHashMap = HashMap + doubly-linked list for order
-- TreeMap = Red-Black tree, always sorted, O(log n) operations
-- Know the LRU cache implementation with `removeEldestEntry()`
-- NavigableMap methods (floorKey, ceilingKey, subMap) are great for range queries
-- TreeMap doesn't use hashCode - it uses Comparable/Comparator
-- LinkedHashMap supports both insertion-order and access-order modes
-
----
-
-[Prev: Q7 - HashMap Internals](./q07-hashmap-internals.md) | [Next: Q9 - ConcurrentHashMap](./q09-concurrenthashmap.md)
+[← Previous: HashMap Internals](./07-hashmap-internals.md) · [Next: ConcurrentHashMap →](./09-concurrenthashmap.md)

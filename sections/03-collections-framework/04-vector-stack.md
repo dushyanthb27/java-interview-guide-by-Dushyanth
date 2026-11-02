@@ -1,19 +1,20 @@
-# Q4: Are Vector and Stack Still Relevant?
+# Vector and Stack
 
-[Back to Collections Framework](./README.md) | **Difficulty**: 🟡 Medium
-
----
-
-## Question
-> Are Vector and Stack still relevant in modern Java? What should be used instead?
+[Home](../../README.md) > [Collections Framework](./README.md) > Vector and Stack
 
 ---
 
-## Answer
+## Q4 🟡 Are Vector and Stack Still Relevant?
 
-### Vector - The Synchronized ArrayList
+**Question:** Are Vector and Stack still relevant in modern Java? What should be used instead?
 
-Vector was part of Java 1.0, predating the Collections Framework (Java 1.2). It's essentially a **synchronized ArrayList**.
+### Answer
+
+Vector and Stack are legacy classes from Java 1.0 that predate the Collections Framework (Java 1.2). They're still in the JDK for backward compatibility, but you should never use them in new code. Understanding why they're legacy — and what to use instead — is a common interview topic.
+
+### Vector — The Synchronized ArrayList
+
+Vector is essentially a synchronized ArrayList. Every method is synchronized, which makes it thread-safe but slow:
 
 ```java
 // Vector internal structure (simplified)
@@ -33,7 +34,7 @@ public class Vector<E> extends AbstractList<E>
 }
 ```
 
-### Key Differences: Vector vs ArrayList
+### Key Differences — Vector vs ArrayList
 
 ```java
 // 1. Synchronization
@@ -59,6 +60,8 @@ Vector<String> v = new Vector<>(20, 10);  // initial=20, increment=10
 
 ### Why Vector is Legacy
 
+Vector has three fundamental problems that make it unsuitable for modern code:
+
 ```java
 // ❌ Problem 1: Synchronization is too coarse-grained
 // Every single method call acquires a lock, even when no contention exists
@@ -81,7 +84,9 @@ if (!v.contains("item")) {   // Lock acquired and released
 // All operations on the vector are serialized
 ```
 
-### Stack - Extends Vector (Legacy)
+### Stack — Extends Vector (Legacy)
+
+Stack extends Vector, which is a textbook example of bad inheritance design:
 
 ```java
 // Stack extends Vector (bad inheritance design)
@@ -104,6 +109,8 @@ stack.get(0);           // ❌ Violates stack contract! Random access
 ```
 
 ### Modern Replacements
+
+Here's what you should use instead:
 
 ```java
 // ✅ Replacement for Vector -> ArrayList
@@ -133,6 +140,8 @@ Deque<String> syncStack = Collections.synchronizedDeque(new ArrayDeque<>());
 ```
 
 ### Thread Safety Trade-offs
+
+If you need thread-safe collections, choose the right tool for your use case:
 
 ```java
 // Approach 1: Collections.synchronizedList (similar to Vector)
@@ -182,6 +191,8 @@ try {
 
 ### ArrayDeque vs Stack vs LinkedList (as Stack)
 
+ArrayDeque is the clear winner for stack operations:
+
 ```java
 // Performance comparison for stack operations:
 //
@@ -212,6 +223,8 @@ try {
 ```
 
 ### Migration Guide
+
+Here's how to migrate legacy code:
 
 ```java
 // FROM: Legacy Vector code
@@ -250,6 +263,8 @@ while (!stack.isEmpty()) {
 ```
 
 ### When You Might Still Encounter Vector/Stack
+
+You'll see these in legacy codebases and certain APIs:
 
 ```java
 // 1. Legacy codebases (pre-Java 1.2 systems)
@@ -303,15 +318,22 @@ Deque<String> concurrentStack = new ConcurrentLinkedDeque<>();
 // - High concurrency: Consider lock-free structures
 ```
 
+> **🎯 Interviewer Insight:** Vector and Stack are LEGACY — never recommend them in new code. Explain WHY they're legacy (coarse-grained synchronization, design flaws). Know the replacements — ArrayList, ArrayDeque, CopyOnWriteArrayList. Stack extends Vector is a textbook example of bad inheritance (LSP violation). Compound operations on Vector are NOT atomic despite synchronization.
+
+> **⚠️ Common Mistake:** Using Vector "for thread safety" without understanding that compound operations (check-then-act) are still not atomic. Vector's method-level synchronization gives a false sense of security.
+
+> **🔧 Performance Tip:** Use ArrayDeque instead of Stack for stack operations — it's 3-5x faster due to no synchronization overhead and better cache locality. Use ArrayList instead of Vector unless you truly need synchronization, and even then, consider CopyOnWriteArrayList or manual synchronization.
+
+> **⚡ Follow-up:** Why does Stack extending Vector violate the Liskov Substitution Principle?
+
+> **⚡ Follow-up:** When would you choose CopyOnWriteArrayList over Collections.synchronizedList?
+
+> **⚡ Follow-up:** How does the 2x growth factor of Vector compare to ArrayList's 1.5x factor in terms of memory efficiency?
+
+> **⚡ Follow-up:** What are the performance implications of Vector's coarse-grained synchronization under high contention?
+
+> **📚 Related:** [ArrayList Internals](./02-arraylist.md), [HashSet Internals](./05-hashset.md), [Thread-Safe Collections](./19-thread-safe-collections.md)
+
 ---
 
-## Interview Tips
-- Vector and Stack are LEGACY - never recommend them in new code
-- Explain WHY they're legacy (coarse-grained synchronization, design flaws)
-- Know the replacements: ArrayList, ArrayDeque, CopyOnWriteArrayList
-- Stack extends Vector is a textbook example of bad inheritance (LSP violation)
-- Compound operations on Vector are NOT atomic despite synchronization
-
----
-
-[Prev: Q3 - LinkedList](./q03-linkedlist.md) | [Next: Q5 - HashSet](./q05-hashset.md)
+[← Previous: LinkedList Internals](./03-linkedlist.md) · [Next: HashSet Internals →](./05-hashset.md)

@@ -1,19 +1,21 @@
-# Q15: What Are Sealed Classes in Java 15+ and What Problems Do They Solve?
+# Sealed Classes in Java 15+
 
-## 📋 Question
-What are Sealed Classes in Java 15+ and what problems do they solve? How do they combine with records and pattern matching? When should you use sealed classes vs enums vs interfaces?
-
-## Difficulty: 🟠 Intermediate
+[Home](../../README.md) > [Java Fundamentals](./README.md) > Sealed Classes in Java 15+
 
 ---
 
-## 💡 Answer
+## Q15 🟠 What Are Sealed Classes in Java 15+ and What Problems Do They Solve?
+
+**Question:** What are Sealed Classes in Java 15+ and what problems do they solve? How do they combine with records and pattern matching? When should you use sealed classes vs enums vs interfaces?
+
+### Answer
 
 **Sealed classes** (finalized in Java 17, previewed in Java 15) allow a class or interface to **explicitly control which classes can extend or implement it** using the `permits` clause. This fills a gap in Java's type system: before sealed classes, you could either allow **any** class to extend yours (`public class`) or **none** (`final class`) — there was no middle ground for "only these specific classes."
 
 Sealed classes solve the problem of **restricted type hierarchies** — situations where you know the complete set of subtypes and want the compiler to enforce this constraint. They are the foundation for **algebraic data types (ADTs)** in Java, enabling exhaustive pattern matching in `switch` expressions.
 
 ### Key Rules
+
 1. A sealed class/interface uses the `sealed` modifier and `permits` clause to list allowed subtypes
 2. Permitted subclasses must be in the **same package** (or same module) as the sealed parent
 3. Each permitted subclass must be exactly one of:
@@ -34,8 +36,6 @@ sealed class Shape permits Circle, Rectangle, Triangle
        ├── class RightTriangle     → Anyone can extend
        └── class EquilateralTriangle
 ```
-
-### Code Example
 
 ```java
 package com.interview.fundamentals;
@@ -217,31 +217,22 @@ class PickupTruck extends Truck {
 
 ### Sealed Classes vs Enums vs Interfaces
 
-```
-┌────────────────────────┬──────────────┬─────────────────┬───────────────────┐
-│ Feature                │ Enum         │ Sealed Class    │ Interface         │
-├────────────────────────┼──────────────┼─────────────────┼───────────────────┤
-│ Fixed set of types     │ ✅ (values)  │ ✅ (permits)    │ ❌ (open)         │
-│ Can have state         │ ✅ (limited) │ ✅ (full)       │ ❌ (no instance)  │
-│ Different fields/type  │ ❌ (same)    │ ✅ (per subtype)│ N/A               │
-│ Pattern matching       │ ✅ (values)  │ ✅ (types+data) │ ❌ (no exhaust.)  │
-│ Exhaustive switch      │ ✅           │ ✅              │ ❌ (need default) │
-│ Singleton instances    │ ✅           │ ❌              │ N/A               │
-│ Inheritance            │ ❌           │ ✅ (multi-level)│ ✅                │
-│ Can carry data         │ ✅ (uniform) │ ✅ (per subtype)│ N/A               │
-└────────────────────────┴──────────────┴─────────────────┴───────────────────┘
+| Feature | Enum | Sealed Class | Interface |
+|---------|------|--------------|-----------|
+| Fixed set of types | ✅ (values) | ✅ (permits) | ❌ (open) |
+| Can have state | ✅ (limited) | ✅ (full) | ❌ (no instance) |
+| Different fields/type | ❌ (same) | ✅ (per subtype) | N/A |
+| Pattern matching | ✅ (values) | ✅ (types+data) | ❌ (no exhaust.) |
+| Exhaustive switch | ✅ | ✅ | ❌ (need default) |
+| Singleton instances | ✅ | ❌ | N/A |
+| Inheritance | ❌ | ✅ (multi-level) | ✅ |
+| Can carry data | ✅ (uniform) | ✅ (per subtype) | N/A |
 
-Use ENUM when:
-  → Fixed set of SINGLETON values with the SAME structure (Season, Color, HttpStatus)
+**Use ENUM when** — Fixed set of SINGLETON values with the SAME structure (Season, Color, HttpStatus)
 
-Use SEALED CLASS when:
-  → Fixed set of TYPES, each with DIFFERENT state/behavior (Shape→Circle, Rectangle)
-  → Need pattern matching with data extraction (destructuring)
+**Use SEALED CLASS when** — Fixed set of TYPES, each with DIFFERENT state/behavior (Shape→Circle, Rectangle). Need pattern matching with data extraction (destructuring)
 
-Use INTERFACE when:
-  → Open for extension by anyone (Collection, Comparable, Serializable)
-  → You don't know or control all implementations
-```
+**Use INTERFACE when** — Open for extension by anyone (Collection, Comparable, Serializable). You don't know or control all implementations
 
 ### Real-World Use Cases
 
@@ -281,23 +272,20 @@ record DigitalWallet(String provider, String email) implements PaymentMethod {
 // }
 ```
 
-### ⚠️ Common Mistake
-**Using `non-sealed` when you actually want `final`**: Making a subclass `non-sealed` reopens the hierarchy, allowing anyone to extend it and defeating the purpose of the sealed parent. Use `non-sealed` only when you intentionally want to allow unrestricted extension of a specific branch. Another common mistake: trying to use sealed classes across different packages or modules without understanding the co-location constraint — all permitted subtypes must be in the **same package** (or accessible in the same module). This constraint ensures the compiler can verify exhaustiveness.
+> **🎯 Interviewer Insight:** Sealed classes test a candidate's knowledge of **modern Java type system design**. Interviewers want to see that you understand the problem sealed classes solve (the gap between `final` and fully open extension), how they enable exhaustive pattern matching, and the synergy with records for algebraic data types. Strong candidates can articulate the three modifiers (`final`, `sealed`, `non-sealed`) and explain when to choose sealed classes over enums. Demonstrating real-world use cases (API response types, domain modeling) and connecting sealed classes to functional programming concepts (ADTs, discriminated unions) shows both depth and breadth.
 
-### ⚡ Performance Tip
-Sealed classes enable the JVM to perform **exhaustive type checking at compile time**, which means `switch` expressions over sealed types don't need a `default` branch. This eliminates dead-code paths and allows the JIT compiler to optimize the type dispatch more aggressively. Record patterns combined with sealed types enable the JIT to perform **scalar replacement** — decomposing record objects into their component values on the stack, avoiding heap allocation entirely. In performance-critical path processing (like AST evaluation or protocol parsing), sealed hierarchies with records can be as fast as manual `if-else instanceof` chains while being dramatically more maintainable.
+> **⚠️ Common Mistake:** Using `non-sealed` when you actually want `final` — making a subclass `non-sealed` reopens the hierarchy, allowing anyone to extend it and defeating the purpose of the sealed parent. Use `non-sealed` only when you intentionally want to allow unrestricted extension of a specific branch. Another common mistake: trying to use sealed classes across different packages or modules without understanding the co-location constraint — all permitted subtypes must be in the **same package** (or accessible in the same module). This constraint ensures the compiler can verify exhaustiveness.
+
+> **⚡ Performance Tip:** Sealed classes enable the JVM to perform **exhaustive type checking at compile time**, which means `switch` expressions over sealed types don't need a `default` branch. This eliminates dead-code paths and allows the JIT compiler to optimize the type dispatch more aggressively. Record patterns combined with sealed types enable the JIT to perform **scalar replacement** — decomposing record objects into their component values on the stack, avoiding heap allocation entirely. In performance-critical path processing (like AST evaluation or protocol parsing), sealed hierarchies with records can be as fast as manual `if-else instanceof` chains while being dramatically more maintainable.
+
+> **⚡ Follow-up:** How do sealed classes interact with the module system (JPMS)?
+
+> **⚡ Follow-up:** Can a sealed interface have `non-sealed` implementations? What are the implications?
+
+> **⚡ Follow-up:** How would you model a binary tree using sealed classes and records?
+
+> **📚 Related:** [Records in Java 14+](./14-records-java14.md), [Enums in Java](./12-enums-in-java.md), [Control Flow — Switch Expressions](./05-control-flow-statements.md)
 
 ---
 
-## 🎯 Interviewer Insight
-Sealed classes test a candidate's knowledge of **modern Java type system design**. Interviewers want to see that you understand the problem sealed classes solve (the gap between `final` and fully open extension), how they enable exhaustive pattern matching, and the synergy with records for algebraic data types. Strong candidates can articulate the three modifiers (`final`, `sealed`, `non-sealed`) and explain when to choose sealed classes over enums. Demonstrating real-world use cases (API response types, domain modeling) and connecting sealed classes to functional programming concepts (ADTs, discriminated unions) shows both depth and breadth.
-
-## ⚡ Follow-up Questions
-1. How do sealed classes interact with the module system (JPMS)?
-2. Can a sealed interface have `non-sealed` implementations? What are the implications?
-3. How would you model a binary tree using sealed classes and records?
-
-## 📚 Related Topics
-- [Records in Java 14+](./14-records-java14.md)
-- [Enums in Java](./12-enums-in-java.md)
-- [Control Flow — Switch Expressions](./05-control-flow-statements.md)
+[← Previous: Records in Java 14+](./14-records-java14.md) · [Next: Java 8+ Features →](../06-java8-plus-features/README.md)
