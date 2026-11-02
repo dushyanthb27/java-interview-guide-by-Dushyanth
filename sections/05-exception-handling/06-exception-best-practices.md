@@ -1,13 +1,6 @@
-# Q6: What Are Exception Handling Best Practices?
+# Q6 🟠 What Are Exception Handling Best Practices?
 
-[Home](../../README.md) > [Exception Handling](./README.md) > Exception Best Practices
-
----
-
-## Difficulty: 🟠 Hard
-
-## Question
-> What are the key best practices for exception handling in Java? What patterns and anti-patterns should developers be aware of?
+**Question:** What are the key best practices for exception handling in Java? What patterns and anti-patterns should developers be aware of?
 
 ---
 
@@ -16,7 +9,7 @@
 ### 1. Don't Use Exceptions for Flow Control
 
 ```java
-// ❌ Using exceptions as control flow - VERY expensive
+// ❌ Using exceptions as control flow — VERY expensive
 public boolean isInteger(String input) {
     try {
         Integer.parseInt(input);
@@ -44,6 +37,8 @@ for (int i = 0; i < array.length; i++) {
     array[i].process();
 }
 ```
+
+> **🎯 Interviewer Insight:** Exception creation is expensive — it captures the full stack trace. Using exceptions for control flow (parsing, loop termination) is an anti-pattern that kills performance. Always prefer validation, regex, or proper loop bounds.
 
 ---
 
@@ -76,19 +71,21 @@ try {
 }
 ```
 
+> **⚠️ Common Mistake:** `catch (Exception e)` or `catch (Throwable t)` masks programming bugs (`NullPointerException`, `IllegalArgumentException`) alongside legitimate errors. Catch the most specific exception possible.
+
 ---
 
 ### 3. Never Swallow Exceptions
 
 ```java
-// ❌ Swallowing exceptions - bugs hide here
+// ❌ Swallowing exceptions — bugs hide here
 try {
     criticalOperation();
 } catch (Exception e) {
     // Nothing! The error is completely lost
 }
 
-// ❌ Logging and swallowing - often just as bad
+// ❌ Logging and swallowing — often just as bad
 try {
     processPayment(order);
 } catch (PaymentException e) {
@@ -107,40 +104,45 @@ try {
 }
 ```
 
+> **🏭 Production Consideration:** Swallowed exceptions are the #1 cause of "it works on my machine" bugs in production. If you catch an exception, you MUST either handle it (retry, fallback, compensate) or rethrow it. Logging alone is not handling.
+
 ---
 
 ### 4. Prefer Standard Exceptions
 
 ```java
-// ✅ Use JDK exceptions for common cases - everyone knows them
-// IllegalArgumentException - bad input
+// ✅ Use JDK exceptions for common cases — everyone knows them
+
+// IllegalArgumentException — bad input
 public void setPort(int port) {
     if (port < 0 || port > 65535) {
         throw new IllegalArgumentException("Port out of range: " + port);
     }
 }
 
-// IllegalStateException - wrong state
+// IllegalStateException — wrong state
 public void start() {
     if (isRunning) {
         throw new IllegalStateException("Server already running");
     }
 }
 
-// NullPointerException - null where not allowed
+// NullPointerException — null where not allowed
 public void process(Request request) {
     Objects.requireNonNull(request, "Request must not be null");
 }
 
-// UnsupportedOperationException - operation not supported
+// UnsupportedOperationException — operation not supported
 @Override
 public void delete(Long id) {
     throw new UnsupportedOperationException("Delete not supported for audit records");
 }
 
-// ConcurrentModificationException - concurrent modification detected
-// IndexOutOfBoundsException - index out of range
+// ConcurrentModificationException — concurrent modification detected
+// IndexOutOfBoundsException — index out of range
 ```
+
+> **🎯 Interviewer Insight:** Don't create custom exceptions for standard cases. `IllegalArgumentException`, `IllegalStateException`, `NullPointerException`, `UnsupportedOperationException` are universally understood. Custom exceptions are for domain-specific errors (e.g., `InsufficientFundsException`, `OrderNotFoundException`).
 
 ---
 
@@ -164,6 +166,8 @@ public TransferResult transfer(String fromAccountId, String toAccountId, BigDeci
     // ...
 }
 ```
+
+> **🏭 Production Consideration:** IDEs and tools (SonarQube, Checkstyle) can enforce `@throws` documentation. Documenting unchecked exceptions is optional but highly recommended for public APIs — it tells callers what can go wrong without forcing them to read the source.
 
 ---
 
@@ -207,12 +211,14 @@ public class UserService {
 }
 ```
 
+> **🎯 Interviewer Insight:** This is the **exception translation pattern** — a cornerstone of clean architecture. Each layer (DAO → Repository → Service → Controller) translates exceptions to its own domain. The controller never sees `SQLException`; it sees `ServiceException` or `UserNotFoundException`.
+
 ---
 
-### 7. Logging Strategy
+### 7. Logging Strategy — Log OR Throw, Not Both
 
 ```java
-// ❌ Log AND throw - causes duplicate log entries
+// ❌ Log AND throw — causes duplicate log entries
 try {
     process();
 } catch (Exception e) {
@@ -248,12 +254,14 @@ public class GlobalExceptionHandler {
 }
 ```
 
+> **⚠️ Common Mistake:** Logging at every layer creates duplicate log entries and noise. **Log once at the boundary** (controller, message listener, scheduled job entry point). Inner layers should translate and rethrow.
+
 ---
 
 ### 8. Fail-Fast Principle
 
 ```java
-// ✅ Validate inputs immediately - fail fast
+// ✅ Validate inputs immediately — fail fast
 public Order createOrder(String customerId, List<OrderItem> items, String shippingAddress) {
     // Validate everything upfront
     Objects.requireNonNull(customerId, "customerId must not be null");
@@ -264,21 +272,23 @@ public Order createOrder(String customerId, List<OrderItem> items, String shippi
         throw new IllegalArgumentException("Shipping address is required");
     }
 
-    // All validations passed - proceed with business logic
+    // All validations passed — proceed with business logic
     return processOrder(customerId, items, shippingAddress);
 }
 
-// ❌ Failing late - harder to debug, state may be partially modified
+// ❌ Failing late — harder to debug, state may be partially modified
 public Order createOrder(String customerId, List<OrderItem> items, String shippingAddress) {
     Order order = new Order();
-    order.setCustomerId(customerId);       // Could be null - NullPointerException later
-    for (OrderItem item : items) {          // items could be null - NPE here
+    order.setCustomerId(customerId);       // Could be null — NullPointerException later
+    for (OrderItem item : items) {          // items could be null — NPE here
         order.addItem(item);
     }
     order.setShippingAddress(shippingAddress); // Blank address fails during shipping
-    return orderRepository.save(order);         // Fails in DB - too late!
+    return orderRepository.save(order);         // Fails in DB — too late!
 }
 ```
+
+> **🏭 Production Consideration:** Fail-fast prevents partially constructed objects and inconsistent state. Validate at method entry, not halfway through. This is especially critical for constructors and factory methods.
 
 ---
 
@@ -300,6 +310,8 @@ throw new ValidationException(
 throw new ConnectionException(
     String.format("Failed to connect to %s:%d after %d retries", host, port, retryCount));
 ```
+
+> **🎯 Interviewer Insight:** A good exception message answers: **What failed? What was the input? What was expected?** This turns a 30-minute debugging session into a 30-second fix.
 
 ---
 
@@ -341,13 +353,41 @@ public void processFile(String path) throws IOException {
 
 ---
 
-## Interview Tips
-- Lead with the "don't use exceptions for flow control" principle
-- Discuss the "log or throw, not both" guideline with examples
-- Explain exception translation across architectural layers
-- Mention the fail-fast principle and its connection to clean code
-- Show awareness of the performance cost of exceptions (see Q11)
+## 🎯 Interviewer Insight
+
+Interviewers test these specific areas:
+
+1. **Flow control anti-pattern** — parsing with try-catch vs regex/validation
+2. **Catch specificity** — why `catch (Exception e)` is bad
+3. **Swallowing** — log AND rethrow, or handle completely
+4. **Exception translation** — layer boundaries, don't leak implementation details
+5. **Logging strategy** — log once at the boundary
+6. **Fail-fast** — validate at entry, not halfway through
+7. **Context in messages** — what, input, expected
 
 ---
 
-[<< Previous: Q5 - Custom Exceptions](./q05-custom-exceptions.md) | [Next: Q7 - Error vs Exception >>](./q07-error-vs-exception.md)
+## ⚡ Follow-up Questions
+
+> **⚡ Follow-up:** Why is using exceptions for control flow a performance problem?
+
+> **⚡ Follow-up:** What's the difference between "handle and log" vs "translate and throw"?
+
+> **⚡ Follow-up:** How do you decide which exceptions to document with `@throws`?
+
+> **⚡ Follow-up:** When would you create a custom exception vs using a standard JDK one?
+
+> **⚡ Follow-up:** How does exception translation work in Spring's `@ControllerAdvice`?
+
+---
+
+## 📚 Related Topics
+
+- [Custom Exceptions](./05-custom-exceptions.md)
+- [Error vs Exception →](./07-error-vs-exception.md)
+- [Exception Chaining →](./08-exception-chaining.md)
+- [Exception Performance →](./11-exception-performance.md)
+
+---
+
+[← Back to Section Index](./README.md) · [Previous: Custom Exceptions ←](./05-custom-exceptions.md) · [Next: Error vs Exception →](./07-error-vs-exception.md)

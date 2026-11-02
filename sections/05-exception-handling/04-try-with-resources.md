@@ -1,13 +1,6 @@
-# Q4: What Is Try-With-Resources?
+# Q4 🟡 What Is Try-With-Resources?
 
-[Home](../../README.md) > [Exception Handling](./README.md) > Try-With-Resources
-
----
-
-## Difficulty: 🟡 Medium
-
-## Question
-> What is try-with-resources in Java? How does it work and how does it compare to traditional try-finally?
+**Question:** What is try-with-resources in Java? How does it work and how does it compare to traditional try-finally?
 
 ---
 
@@ -32,7 +25,7 @@ public interface Closeable extends AutoCloseable {
 ### Basic Syntax
 
 ```java
-// ✅ Try-with-resources - resource automatically closed
+// ✅ Try-with-resources — resource automatically closed
 try (FileReader reader = new FileReader("data.txt")) {
     int ch;
     while ((ch = reader.read()) != -1) {
@@ -48,7 +41,7 @@ try (FileReader reader = new FileReader("data.txt")) {
 ### Traditional Try-Finally vs Try-With-Resources
 
 ```java
-// ❌ Traditional approach - verbose and error-prone
+// ❌ Traditional approach — verbose and error-prone
 BufferedReader br = null;
 try {
     br = new BufferedReader(new FileReader("data.txt"));
@@ -66,19 +59,21 @@ try {
     }
 }
 
-// ✅ Try-with-resources - clean and safe
+// ✅ Try-with-resources — clean and safe
 try (BufferedReader br = new BufferedReader(new FileReader("data.txt"))) {
     String line = br.readLine();
     System.out.println(line);
 } catch (IOException e) {
     e.printStackTrace();
 }
-// br is automatically closed - even on exception
+// br is automatically closed — even on exception
 ```
+
+> **🎯 Interviewer Insight:** The traditional approach has three problems: (1) verbose boilerplate, (2) resource variable must be declared outside try, (3) close() exceptions can mask the original exception. Try-with-resources solves all three.
 
 ---
 
-### Multiple Resources (Closed in Reverse Order)
+### Multiple Resources — Closed in Reverse Order
 
 ```java
 // ✅ Multiple resources separated by semicolons
@@ -94,7 +89,7 @@ try (
         bos.write(buffer, 0, bytesRead);
     }
 }
-// Closing order: bos -> fos -> bis -> fis (REVERSE of declaration)
+// Closing order: bos → fos → bis → fis (REVERSE of declaration)
 ```
 
 #### Demonstrating Reverse Close Order
@@ -131,10 +126,12 @@ public class ReverseCloseDemo {
 // Opening: B
 // Opening: C
 // Using resources
-// Closing: C    <-- reverse order
+// Closing: C    ← reverse order
 // Closing: B
 // Closing: A
 ```
+
+> **🎯 Interviewer Insight:** Resources close in **reverse declaration order** (LIFO). This matters when resources depend on each other (e.g., `BufferedInputStream` wraps `FileInputStream` — the buffer must close first to flush, then the underlying stream).
 
 ---
 
@@ -149,7 +146,7 @@ try (BufferedReader wrapper = br) {   // ❌ Ugly workaround
 
 // ✅ Java 9+: effectively final variables can be used directly
 BufferedReader br = new BufferedReader(new FileReader("data.txt"));
-try (br) {   // br is effectively final - OK in Java 9+
+try (br) {   // br is effectively final — OK in Java 9+
     String line = br.readLine();
     System.out.println(line);
 }
@@ -214,12 +211,14 @@ try (DatabaseConnectionPool pool = new DatabaseConnectionPool(5)) {
 // Pool is automatically closed
 ```
 
+> **🏭 Production Consideration:** When implementing `AutoCloseable`, make `close()` idempotent (safe to call multiple times) and never let it throw — log and swallow cleanup exceptions to avoid masking the primary exception.
+
 ---
 
 ### Resource Leak Prevention
 
 ```java
-// ❌ Resource leak - exception during construction of second resource
+// ❌ Resource leak — exception during construction of second resource
 try {
     InputStream is = new FileInputStream("input.txt");      // Opens successfully
     OutputStream os = new FileOutputStream("/invalid/path"); // Throws!
@@ -253,6 +252,8 @@ try (
 }
 ```
 
+> **⚠️ Common Mistake:** Nesting resource construction (`new BufferedInputStream(new FileInputStream(...))`). If the outer constructor throws, the inner resource is leaked. **Always declare each resource separately** in the try-with-resources header.
+
 ---
 
 ### Try-With-Resources and Suppressed Exceptions
@@ -276,6 +277,8 @@ try (FailingResource res = new FailingResource()) {
 // The try body exception is PRIMARY
 // The close() exception is SUPPRESSED (not lost!)
 ```
+
+> **🎯 Interviewer Insight:** This is a key difference from try-finally. In try-finally, an exception in `finally` **replaces** the original. In try-with-resources, the close() exception becomes a **suppressed exception** — accessible via `getSuppressed()`. The primary exception is never lost.
 
 ---
 
@@ -314,7 +317,7 @@ public class CloseableLock implements AutoCloseable {
 }
 
 try (var ignored = new CloseableLock(myLock)) {
-    // Critical section - lock auto-released
+    // Critical section — lock auto-released
 }
 
 // ✅ HTTP connections (Java 11+)
@@ -349,15 +352,44 @@ public InputStream getStream() throws IOException {
 }
 ```
 
----
-
-## Interview Tips
-- Know that resources are closed in **reverse** declaration order
-- Explain the suppressed exceptions mechanism (body exception is primary)
-- Mention Java 9's effectively final variable enhancement
-- Emphasize resource leak prevention during construction failures
-- Never return from inside try-with-resources if the return value IS the resource
+> **⚠️ Common Mistake:** Returning a resource from inside try-with-resources. The resource is closed when the try block exits, so the caller gets a closed stream. If you need to return a resource, manage its lifecycle manually (or use a pool).
 
 ---
 
-[<< Previous: Q3 - Try-Catch-Finally](./q03-try-catch-finally.md) | [Next: Q5 - Custom Exceptions >>](./q05-custom-exceptions.md)
+## 🎯 Interviewer Insight
+
+Interviewers test these specific areas:
+
+1. **Reverse close order** — LIFO, matters for dependent resources
+2. **Suppressed exceptions** — primary vs suppressed, `getSuppressed()`
+3. **Resource leak prevention** — construction failures, nested constructors
+4. **Java 9 effectively final** — cleaner syntax for pre-existing resources
+5. **Custom AutoCloseable** — idempotent close(), don't throw from close()
+6. **Returning resources** — don't return from inside try-with-resources
+
+---
+
+## ⚡ Follow-up Questions
+
+> **⚡ Follow-up:** What happens if an exception is thrown in the try block AND in the close() method?
+
+> **⚡ Follow-up:** Why are resources closed in reverse order?
+
+> **⚡ Follow-up:** How does try-with-resources handle exceptions during resource construction?
+
+> **⚡ Follow-up:** Can you use try-with-resources with a resource that doesn't implement AutoCloseable?
+
+> **⚡ Follow-up:** What changed in Java 9 for try-with-resources?
+
+---
+
+## 📚 Related Topics
+
+- [Try-Catch-Finally](./03-try-catch-finally.md)
+- [Custom Exceptions →](./05-custom-exceptions.md)
+- [Suppressed Exceptions →](./09-suppressed-exceptions.md)
+- [Exception Best Practices →](./06-exception-best-practices.md)
+
+---
+
+[← Back to Section Index](./README.md) · [Previous: Try-Catch-Finally ←](./03-try-catch-finally.md) · [Next: Custom Exceptions →](./05-custom-exceptions.md)

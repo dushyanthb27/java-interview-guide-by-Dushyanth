@@ -1,13 +1,6 @@
-# Q7: Error vs Exception - What's the Difference?
+# Q7 🟡 Error vs Exception — What's the Difference?
 
-[Home](../../README.md) > [Exception Handling](./README.md) > Error vs Exception
-
----
-
-## Difficulty: 🟡 Medium
-
-## Question
-> What is the difference between `Error` and `Exception` in Java? When should you catch each, and why?
+**Question:** What is the difference between `Error` and `Exception` in Java? When should you catch each, and why?
 
 ---
 
@@ -19,8 +12,8 @@
 |---------|---------|-------------|
 | **Package** | `java.lang.Error` | `java.lang.Exception` |
 | **Represents** | JVM/system-level failure | Application-level problem |
-| **Recoverable?** | Generally NO | Generally YES |
-| **Should catch?** | Almost NEVER | YES (when appropriate) |
+| **Recoverable?** | Generally ❌ NO | Generally ✅ YES |
+| **Should catch?** | Almost **NEVER** | YES (when appropriate) |
 | **Who throws?** | JVM / system | Application / libraries |
 | **Examples** | `OutOfMemoryError`, `StackOverflowError` | `IOException`, `NullPointerException` |
 
@@ -72,7 +65,7 @@ assert value > 0 : "Value must be positive"; // throws AssertionError if false
 ### Why You Should NOT Catch Errors
 
 ```java
-// ❌ Catching OutOfMemoryError - the JVM is in an unstable state
+// ❌ Catching OutOfMemoryError — the JVM is in an unstable state
 try {
     byte[] hugeArray = new byte[Integer.MAX_VALUE];
 } catch (OutOfMemoryError e) {
@@ -83,16 +76,16 @@ try {
     log.error("Out of memory", e);
 }
 
-// ❌ Catching StackOverflowError - stack is corrupted
+// ❌ Catching StackOverflowError — stack is corrupted
 try {
     deepRecursion();
 } catch (StackOverflowError e) {
-    // The stack is exhausted - calling any method could fail
+    // The stack is exhausted — calling any method could fail
     // Even this catch block might not execute reliably
     System.out.println("Stack overflow");
 }
 
-// ❌ Catching Error - too broad, catches all JVM problems
+// ❌ Catching Error — too broad, catches all JVM problems
 try {
     someOperation();
 } catch (Error e) {
@@ -101,6 +94,8 @@ try {
     log.error("Error occurred", e);
 }
 ```
+
+> **🎯 Interviewer Insight:** This is a classic trap question. "Have you ever caught `Error`?" The correct answer: **"Never in application code."** Catching `Error` masks JVM failures that should crash the process so you can debug them. The only exceptions are application servers (Tomcat, Jetty) and monitoring agents that need to stay alive.
 
 ---
 
@@ -134,6 +129,8 @@ public byte[] safeAllocate(int size) {
 }
 ```
 
+> **🏭 Production Consideration:** Don't try to "recover" from `OutOfMemoryError`. The JVM is in an undefined state. Instead, **prevent** it: set appropriate `-Xmx`, use bounded collections, stream large datasets, and fix memory leaks.
+
 ---
 
 ### Legitimate Cases for Catching Error
@@ -149,14 +146,14 @@ public class AppServer {
             sendErrorResponse(req, 500);
         } catch (Error e) {
             // Log the error, attempt graceful shutdown
-            log.fatal("JVM Error - shutting down", e);
+            log.fatal("JVM Error — shutting down", e);
             initiateShutdown();
             throw e; // Always rethrow Errors!
         }
     }
 }
 
-// ✅ Unit testing - verifying assertion errors
+// ✅ Unit testing — verifying assertion errors
 @Test
 void testPrecondition() {
     assertThrows(AssertionError.class, () -> {
@@ -178,6 +175,8 @@ public class MonitoringAgent {
     }
 }
 ```
+
+> **🎯 Interviewer Insight:** The only legitimate places to catch `Error` are: (1) application servers doing graceful shutdown, (2) monitoring/logging agents that must never crash the host app, (3) unit tests verifying assertions. In all cases, **rethrow the Error** after logging.
 
 ---
 
@@ -202,28 +201,28 @@ public class ErrorVsExceptionDemo {
 
     // ===== Error scenarios (JVM-level, not much you can do) =====
 
-    // StackOverflowError - fix the recursion, don't catch it
+    // StackOverflowError — fix the recursion, don't catch it
     public int factorial(int n) {
         if (n <= 1) return 1;           // ✅ Base case prevents StackOverflowError
         return n * factorial(n - 1);
     }
 
-    // OutOfMemoryError - tune JVM settings, don't catch it
+    // OutOfMemoryError — tune JVM settings, don't catch it
     // -Xmx512m -Xms256m (set appropriate heap sizes)
 
-    // NoClassDefFoundError - fix the classpath, don't catch it
+    // NoClassDefFoundError — fix the classpath, don't catch it
     // Check Maven/Gradle dependencies
 }
 ```
 
 ---
 
-### How to Handle Errors Properly
+### How to Handle Errors Properly — Prevent, Don't Catch
 
 ```java
 // ✅ Prevent rather than catch
 
-// 1. OutOfMemoryError - use bounded collections and streaming
+// 1. OutOfMemoryError — use bounded collections and streaming
 // ❌
 List<Record> allRecords = database.fetchAll(); // Millions of records!
 
@@ -232,7 +231,7 @@ database.streamAll()
     .filter(Record::isActive)
     .forEach(this::processRecord);
 
-// 2. StackOverflowError - use iteration instead of deep recursion
+// 2. StackOverflowError — use iteration instead of deep recursion
 // ❌
 public int fibonacci(int n) {
     return fibonacci(n - 1) + fibonacci(n - 2);
@@ -249,7 +248,7 @@ public int fibonacci(int n) {
     return b;
 }
 
-// 3. NoClassDefFoundError - verify dependencies at startup
+// 3. NoClassDefFoundError — verify dependencies at startup
 public class StartupChecker {
     public static void verifyDependencies() {
         try {
@@ -263,20 +262,22 @@ public class StartupChecker {
 }
 ```
 
+> **🏭 Production Consideration:** The best way to "handle" Errors is to prevent them. Stream large datasets instead of loading into memory. Use iteration instead of deep recursion. Verify dependencies at startup. Set appropriate JVM flags (`-Xmx`, `-Xms`, `-XX:MaxMetaspaceSize`).
+
 ---
 
 ### Quick Reference
 
 ```
 Throwable
-├── Error (DON'T catch - JVM problems)
+├── Error (DON'T catch — JVM problems)
 │   ├── OutOfMemoryError      → Tune -Xmx, fix memory leaks
 │   ├── StackOverflowError    → Fix recursion, use iteration
 │   ├── NoClassDefFoundError  → Fix classpath/dependencies
 │   ├── ExceptionInInitializerError → Fix static initializers
 │   └── VirtualMachineError   → JVM is broken
 │
-└── Exception (DO catch - application problems)
+└── Exception (DO catch — application problems)
     ├── Checked (IOException, SQLException, ...)
     │   → Must handle or declare with throws
     └── RuntimeException (NPE, IAE, ...)
@@ -285,13 +286,38 @@ Throwable
 
 ---
 
-## Interview Tips
-- Be clear: `Error` = JVM/system, `Exception` = application
-- State firmly: "Never catch `Error` in application code"
-- Know the top 5 Error subclasses and what causes each
-- Explain prevention strategies over catching strategies for Errors
-- Mention that application servers may catch Errors for graceful shutdown
+## 🎯 Interviewer Insight
+
+Interviewers test these specific areas:
+
+1. **Clear distinction** — `Error` = JVM/system, `Exception` = application
+2. **Never catch Error** — in application code, period
+3. **Top 5 Error subclasses** — know causes: OOME, SOE, NoClassDefFoundError, ExceptionInInitializerError, AssertionError
+4. **Prevention over catching** — stream, iterate, verify dependencies
+5. **Legitimate exceptions** — app servers, monitoring agents, unit tests (and always rethrow)
 
 ---
 
-[<< Previous: Q6 - Exception Best Practices](./q06-exception-best-practices.md) | [Next: Q8 - Exception Chaining >>](./q08-exception-chaining.md)
+## ⚡ Follow-up Questions
+
+> **⚡ Follow-up:** Why is catching `OutOfMemoryError` dangerous even if you just log it?
+
+> **⚡ Follow-up:** What's the difference between `NoClassDefFoundError` and `ClassNotFoundException`?
+
+> **⚡ Follow-up:** When would an application server catch `Error`?
+
+> **⚡ Follow-up:** How do you prevent `StackOverflowError` in recursive algorithms?
+
+> **⚡ Follow-up:** What is `ExceptionInInitializerError` and what causes it?
+
+---
+
+## 📚 Related Topics
+
+- [Exception Best Practices](./06-exception-best-practices.md)
+- [Exception Chaining →](./08-exception-chaining.md)
+- [Exception Performance →](./11-exception-performance.md)
+
+---
+
+[← Back to Section Index](./README.md) · [Previous: Exception Best Practices ←](./06-exception-best-practices.md) · [Next: Exception Chaining →](./08-exception-chaining.md)

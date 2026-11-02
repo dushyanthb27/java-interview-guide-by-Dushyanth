@@ -1,13 +1,6 @@
-# Q5: How to Create Custom Exceptions?
+# Q5 🟡 How to Create Custom Exceptions?
 
-[Home](../../README.md) > [Exception Handling](./README.md) > Custom Exceptions
-
----
-
-## Difficulty: 🟡 Medium
-
-## Question
-> How do you create custom exceptions in Java? What are the constructor patterns and design considerations?
+**Question:** How do you create custom exceptions in Java? What are the constructor patterns and design considerations?
 
 ---
 
@@ -16,10 +9,10 @@
 ### Choosing the Superclass
 
 ```java
-// Checked exception - caller MUST handle or declare
+// Checked exception — caller MUST handle or declare
 public class OrderNotFoundException extends Exception { }
 
-// Unchecked exception - caller handling is OPTIONAL
+// Unchecked exception — caller handling is OPTIONAL
 public class InvalidOrderException extends RuntimeException { }
 ```
 
@@ -28,9 +21,11 @@ public class InvalidOrderException extends RuntimeException { }
 | `Exception` | Recoverable condition; force caller to handle |
 | `RuntimeException` | Programming error; bug in caller's code |
 
+> **🎯 Interviewer Insight:** The choice between checked and unchecked is a design decision. Checked = "caller can recover" (file not found, network timeout). Unchecked = "caller wrote buggy code" (null argument, invalid state). Most modern frameworks (Spring, Kotlin) favor unchecked with good documentation.
+
 ---
 
-### Standard Constructor Patterns
+### Standard Constructor Patterns — The 4-Constructor Rule
 
 ```java
 // ✅ Follow the 4-constructor pattern (same as JDK exceptions)
@@ -58,9 +53,11 @@ public class OrderNotFoundException extends RuntimeException {
 }
 ```
 
+> **⚠️ Common Mistake:** Forgetting the cause constructors. Without `super(message, cause)`, you lose the original exception's stack trace when wrapping. **Always include all four constructors.**
+
 ---
 
-### Adding Error Codes
+### Adding Error Codes and Metadata
 
 ```java
 public class BusinessException extends RuntimeException {
@@ -118,7 +115,7 @@ public abstract class AppException extends RuntimeException {
     public ErrorCode getErrorCode() { return errorCode; }
 }
 
-// Error code enum
+// Error code enum — single source of truth for HTTP status mapping
 public enum ErrorCode {
     RESOURCE_NOT_FOUND(404),
     VALIDATION_FAILED(400),
@@ -162,6 +159,8 @@ public class UnauthorizedException extends AppException {
 throw new ResourceNotFoundException("User", userId);
 throw new ValidationException(Map.of("email", "Invalid format", "age", "Must be positive"));
 ```
+
+> **🏭 Production Consideration:** A unified exception hierarchy with error codes enables consistent error responses across your API. The `ErrorCode` enum maps directly to HTTP status codes, making REST controllers trivial.
 
 ---
 
@@ -255,6 +254,8 @@ public class SafeException extends RuntimeException {
 }
 ```
 
+> **🎯 Interviewer Insight:** `Throwable` implements `Serializable`, so all exceptions are serializable by default. In distributed systems (RMI, JMS, Spring Cloud), non-serializable fields cause `NotSerializableException`. Always mark non-serializable fields as `transient` or avoid them entirely.
+
 ---
 
 ### Factory Methods for Clean Exception Creation
@@ -274,7 +275,7 @@ public class ApiException extends RuntimeException {
         this.statusCode = statusCode;
     }
 
-    // ✅ Static factory methods - more readable than constructors
+    // ✅ Static factory methods — more readable than constructors
     public static ApiException notFound(String resource, Object id) {
         return new ApiException(404,
             String.format("%s with id '%s' not found", resource, id));
@@ -295,11 +296,13 @@ public class ApiException extends RuntimeException {
     public int getStatusCode() { return statusCode; }
 }
 
-// Usage - reads like English:
+// Usage — reads like English:
 throw ApiException.notFound("User", userId);
 throw ApiException.badRequest("Email is required");
 throw ApiException.conflict("Username already exists");
 ```
+
+> **🎯 Interviewer Insight:** Factory methods make exception creation self-documenting. `throw ApiException.notFound("User", id)` is instantly readable vs `throw new ApiException(404, "User not found")`. This is the pattern used by Spring's `ResponseStatusException` and similar libraries.
 
 ---
 
@@ -335,15 +338,43 @@ public class ImmutableException extends RuntimeException {
 }
 ```
 
----
-
-## Interview Tips
-- Always follow the 4-constructor pattern for custom exceptions
-- Explain when to extend `Exception` vs `RuntimeException`
-- Show how to add error codes and use enums for categorization
-- Mention `serialVersionUID` for distributed system compatibility
-- Demonstrate the factory method pattern for clean exception creation
+> **⚠️ Common Mistake:** Creating a separate exception class for every entity (`UserNotFoundException`, `ProductNotFoundException`, `OrderNotFoundException`). This bloats the codebase. Use a parameterized exception like `ResourceNotFoundException(String resource, Object id)` instead.
 
 ---
 
-[<< Previous: Q4 - Try-With-Resources](./q04-try-with-resources.md) | [Next: Q6 - Exception Best Practices >>](./q06-exception-best-practices.md)
+## 🎯 Interviewer Insight
+
+Interviewers test these specific areas:
+
+1. **Checked vs unchecked choice** — recoverable vs programming error
+2. **Four constructors** — message, cause, message+cause, no-arg
+3. **Error codes** — enum-based, maps to HTTP status
+4. **Serialization** — `serialVersionUID`, `transient` fields
+5. **Factory methods** — readable exception creation
+6. **Exception hierarchy** — base class with error code, specific subclasses
+
+---
+
+## ⚡ Follow-up Questions
+
+> **⚡ Follow-up:** When would you extend `Exception` instead of `RuntimeException`?
+
+> **⚡ Follow-up:** Why is it important to include the cause constructor?
+
+> **⚡ Follow-up:** How do you handle exception serialization in distributed systems?
+
+> **⚡ Follow-up:** What's the benefit of factory methods over constructors?
+
+> **⚡ Follow-up:** How would you design a validation exception that carries field-level errors?
+
+---
+
+## 📚 Related Topics
+
+- [Try-With-Resources](./04-try-with-resources.md)
+- [Exception Best Practices →](./06-exception-best-practices.md)
+- [Exception Chaining →](./08-exception-chaining.md)
+
+---
+
+[← Back to Section Index](./README.md) · [Previous: Try-With-Resources ←](./04-try-with-resources.md) · [Next: Exception Best Practices →](./06-exception-best-practices.md)

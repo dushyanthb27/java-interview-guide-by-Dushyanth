@@ -1,13 +1,6 @@
-# Q8: What Is Exception Chaining?
+# Q8 🟡 What Is Exception Chaining?
 
-[Home](../../README.md) > [Exception Handling](./README.md) > Exception Chaining
-
----
-
-## Difficulty: 🟡 Medium
-
-## Question
-> What is exception chaining in Java? How do you preserve the root cause when translating exceptions across layers?
+**Question:** What is exception chaining in Java? How do you preserve the root cause when translating exceptions across layers?
 
 ---
 
@@ -22,7 +15,7 @@ Exception chaining (or exception wrapping) is the practice of catching one excep
 ### Two Ways to Set the Cause
 
 ```java
-// ✅ Method 1: Constructor with Throwable cause
+// ✅ Method 1: Constructor with Throwable cause (preferred)
 try {
     loadConfigFile("app.yml");
 } catch (IOException e) {
@@ -30,7 +23,7 @@ try {
     //                                                        ^ cause
 }
 
-// ✅ Method 2: initCause() - for exceptions without a cause constructor
+// ✅ Method 2: initCause() — for exceptions without a cause constructor
 try {
     parseData(input);
 } catch (ParseException e) {
@@ -45,9 +38,11 @@ ex.initCause(new IOException("first"));
 ex.initCause(new IOException("second")); // throws IllegalStateException!
 ```
 
+> **🎯 Interviewer Insight:** Always prefer the constructor approach (`new MyException("msg", cause)`). It's cleaner, immutable, and can't be called twice by accident. Use `initCause()` only when wrapping exceptions from libraries that don't provide a cause constructor.
+
 ---
 
-### Exception Translation Pattern
+### Exception Translation Pattern — Layer by Layer
 
 ```java
 // ✅ Layer-by-layer exception translation preserving the full chain
@@ -106,6 +101,8 @@ public class UserController {
 //       └── caused by RepositoryException: "Database query failed"
 //           └── caused by DataAccessException: "Connection refused"
 ```
+
+> **🏭 Production Consideration:** This is the **exception translation pattern** — a cornerstone of clean architecture. Each layer (DAO → Repository → Service → Controller) translates exceptions to its own domain. The controller never sees `SQLException`; it sees `ServiceException` or `UserNotFoundException`. The full chain is preserved for debugging.
 
 ---
 
@@ -246,12 +243,14 @@ public class GlobalExceptionHandler {
 }
 ```
 
+> **🎯 Interviewer Insight:** Walking the cause chain to determine HTTP status is a powerful pattern. It lets you handle `UserNotFoundException` at the repository layer, wrap it in `ServiceException`, and still return 404 at the controller — all without losing the original exception.
+
 ---
 
 ### Anti-Patterns
 
 ```java
-// ❌ Losing the original cause - destroys diagnostic information
+// ❌ Losing the original cause — destroys diagnostic information
 try {
     connectToDatabase();
 } catch (SQLException e) {
@@ -296,6 +295,8 @@ try {
 }
 ```
 
+> **⚠️ Common Mistake:** Creating a new exception without the cause (`throw new ServiceException("msg")` instead of `throw new ServiceException("msg", e)`). This destroys the stack trace and makes production debugging nearly impossible. **Always preserve the cause.**
+
 ---
 
 ### Stack Trace Output with Chaining
@@ -319,13 +320,39 @@ The `"... N more"` means those stack frames are identical to frames already show
 
 ---
 
-## Interview Tips
-- Explain that exception chaining preserves the root cause for debugging
-- Know both approaches: constructor parameter and `initCause()`
-- Describe the exception translation pattern across architectural layers
-- Mention that `getCause()` returns `null` at the end of the chain
-- Emphasize: **never** create a new exception without including the original as the cause
+## 🎯 Interviewer Insight
+
+Interviewers test these specific areas:
+
+1. **Two ways to set cause** — constructor vs `initCause()`
+2. **Exception translation pattern** — layer boundaries, domain exceptions
+3. **Traversing the chain** — `getCause()`, `getRootCause()`, `hasCauseOfType()`
+4. **Anti-patterns** — losing cause, circular chains, duplicate logging
+5. **Stack trace format** — understanding "Caused by" and "... N more"
 
 ---
 
-[<< Previous: Q7 - Error vs Exception](./q07-error-vs-exception.md) | [Next: Q9 - Suppressed Exceptions >>](./q09-suppressed-exceptions.md)
+## ⚡ Follow-up Questions
+
+> **⚡ Follow-up:** What's the difference between `getCause()` and `initCause()`?
+
+> **⚡ Follow-up:** How do you prevent circular cause chains?
+
+> **⚡ Follow-up:** Why is it important to preserve the cause when translating exceptions?
+
+> **⚡ Follow-up:** How does Spring's `@ExceptionHandler` interact with exception chains?
+
+> **⚡ Follow-up:** What does "... N more" mean in a chained stack trace?
+
+---
+
+## 📚 Related Topics
+
+- [Error vs Exception](./07-error-vs-exception.md)
+- [Suppressed Exceptions →](./09-suppressed-exceptions.md)
+- [Exception Best Practices](./06-exception-best-practices.md)
+- [Custom Exceptions](./05-custom-exceptions.md)
+
+---
+
+[← Back to Section Index](./README.md) · [Previous: Error vs Exception ←](./07-error-vs-exception.md) · [Next: Suppressed Exceptions →](./09-suppressed-exceptions.md)

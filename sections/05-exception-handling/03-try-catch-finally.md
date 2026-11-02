@@ -1,13 +1,6 @@
-# Q3: How Does Try-Catch-Finally Work?
+# Q3 🟢 How Does Try-Catch-Finally Work?
 
-[Home](../../README.md) > [Exception Handling](./README.md) > Try-Catch-Finally
-
----
-
-## Difficulty: 🟢 Easy
-
-## Question
-> How does the try-catch-finally mechanism work in Java? What are the execution flow rules and common gotchas?
+**Question:** How does the try-catch-finally mechanism work in Java? What are the execution flow rules and common gotchas?
 
 ---
 
@@ -30,7 +23,7 @@ try {
 
 ---
 
-### Execution Flow
+### Execution Flow — Three Paths
 
 #### Path 1: No Exception Thrown
 
@@ -87,9 +80,11 @@ public void uncaughtExceptionFlow() {
 // Output: 1, 2, 3 ... then ArithmeticException propagates up
 ```
 
+> **🎯 Interviewer Insight:** The key insight is that `finally` runs **regardless** of whether an exception was thrown, caught, or uncaught. It's your guarantee for cleanup.
+
 ---
 
-### Multiple Catch Blocks - Order Matters
+### Multiple Catch Blocks — Order Matters
 
 ```java
 // ✅ Correct: Most specific first
@@ -113,6 +108,8 @@ try {
     System.out.println("File not found");
 }
 ```
+
+> **⚠️ Common Mistake:** Putting `catch (Exception e)` before specific exceptions. The compiler catches this, but it's a classic interview question: "Why does this not compile?" Answer: `FileNotFoundException` extends `IOException`, so the first catch block already handles it.
 
 ---
 
@@ -158,7 +155,9 @@ try {
 }
 
 // 2. JVM crashes (OutOfMemoryError, etc.)
-// 3. Thread is killed (Thread.stop() - deprecated)
+
+// 3. Thread is killed (Thread.stop() — deprecated)
+
 // 4. Infinite loop or deadlock in try block
 try {
     while (true) { } // Finally never reached
@@ -167,9 +166,11 @@ try {
 }
 ```
 
+> **🏭 Production Consideration:** `System.exit()` in a `finally` block is a common anti-pattern in shutdown hooks. It prevents other shutdown hooks from running. Use `Runtime.getRuntime().addShutdownHook()` instead.
+
 ---
 
-### Return Value Gotcha in Finally (Classic Interview Question)
+### The Return-in-Finally Gotcha (Classic Interview Question)
 
 ```java
 // ❌ GOTCHA: return in finally OVERRIDES return in try/catch
@@ -190,7 +191,7 @@ public int silentException() {
         return 42;   // Exception is SWALLOWED, 42 is returned
     }
 }
-// Returns 42 - RuntimeException is completely lost!
+// Returns 42 — RuntimeException is completely lost!
 
 // ✅ Best Practice: NEVER return from finally
 public int correctApproach() {
@@ -205,6 +206,8 @@ public int correctApproach() {
     return result;
 }
 ```
+
+> **🎯 Interviewer Insight:** This is one of the most asked Java interview questions. The rule: **a `return` in `finally` overrides any `return` in `try` or `catch`, and it swallows any exception thrown in `try` or `catch`.** Never return from `finally`.
 
 ---
 
@@ -247,7 +250,7 @@ public void nestedTryCatch() {
 ### Try-Finally Without Catch
 
 ```java
-// ✅ Valid syntax - ensures cleanup even without handling the exception
+// ✅ Valid syntax — ensures cleanup even without handling the exception
 public void lockExample() {
     Lock lock = new ReentrantLock();
     lock.lock();
@@ -260,6 +263,8 @@ public void lockExample() {
     // Any exception propagates up, but lock is always released
 }
 ```
+
+> **🎯 Interviewer Insight:** This pattern is the precursor to try-with-resources. It's essential for lock management — the lock is always released even if the critical section throws.
 
 ---
 
@@ -287,7 +292,7 @@ public void safeFinally() throws IOException {
             try {
                 is.close();
             } catch (IOException e) {
-                // Log but don't throw - preserves original exception
+                // Log but don't throw — preserves original exception
                 log.warn("Failed to close stream", e);
             }
         }
@@ -296,6 +301,8 @@ public void safeFinally() throws IOException {
 
 // ✅ Better approach: use try-with-resources (see Q4)
 ```
+
+> **⚠️ Common Mistake:** Throwing an exception in `finally` without guarding it. This destroys the original exception's stack trace. Always wrap cleanup code in its own try-catch, or better yet, use try-with-resources.
 
 ---
 
@@ -338,7 +345,7 @@ try { specificOp(); } catch (Throwable t) { }
 try {
     int value = Integer.parseInt(input);
 } catch (NumberFormatException e) {
-    // Using exception as an if-else - expensive!
+    // Using exception as an if-else — expensive!
 }
 
 // ✅ Prefer validation over exception-based flow control
@@ -347,15 +354,41 @@ if (input.matches("-?\\d+")) {
 }
 ```
 
----
-
-## Interview Tips
-- Know all three execution paths: no exception, caught, uncaught
-- Explain the return-in-finally gotcha - a favorite interview question
-- Mention that `System.exit()` prevents `finally` from running
-- Emphasize: catch blocks must be ordered from most specific to most general
-- Recommend try-with-resources over try-finally for resource management
+> **⚠️ Common Mistake:** Using exceptions for control flow (e.g., parsing with try-catch instead of regex validation). Exception creation is expensive — it captures the full stack trace. Use validation for expected cases, exceptions for truly exceptional ones.
 
 ---
 
-[<< Previous: Q2 - Checked vs Unchecked](./q02-checked-vs-unchecked.md) | [Next: Q4 - Try-With-Resources >>](./q04-try-with-resources.md)
+## 🎯 Interviewer Insight
+
+Interviewers test these specific areas:
+
+1. **Three execution paths** — no exception, caught, uncaught
+2. **Return in finally** — overrides try/catch return, swallows exceptions
+3. **Finally not running** — `System.exit()`, JVM crash, infinite loop
+4. **Catch ordering** — specific to general (compile error if wrong)
+5. **Exception in finally** — replaces original exception
+6. **Try-with-resources** — the modern replacement for try-finally
+
+---
+
+## ⚡ Follow-up Questions
+
+> **⚡ Follow-up:** What happens if both `try` and `finally` have `return` statements?
+
+> **⚡ Follow-up:** Can you have a `try` block without `catch` or `finally`?
+
+> **⚡ Follow-up:** How does try-with-resources improve upon try-finally?
+
+> **⚡ Follow-up:** What is the performance cost of throwing an exception?
+
+---
+
+## 📚 Related Topics
+
+- [Checked vs Unchecked Exceptions](./02-checked-vs-unchecked.md)
+- [Try-With-Resources →](./04-try-with-resources.md)
+- [Exception Best Practices →](./06-exception-best-practices.md)
+
+---
+
+[← Back to Section Index](./README.md) · [Previous: Checked vs Unchecked ←](./02-checked-vs-unchecked.md) · [Next: Try-With-Resources →](./04-try-with-resources.md)
