@@ -6,7 +6,9 @@
 
 ## Overview
 
-Secure coding practices are defensive programming techniques that prevent vulnerabilities from being introduced into Java applications. These practices cover input validation, sensitive data handling, serialization security, immutability, and dependency management.
+Secure coding practices are defensive programming techniques that prevent vulnerabilities from being introduced into Java applications.
+
+These practices cover input validation, sensitive data handling, serialization security, immutability, and dependency management.
 
 ## Input Validation
 

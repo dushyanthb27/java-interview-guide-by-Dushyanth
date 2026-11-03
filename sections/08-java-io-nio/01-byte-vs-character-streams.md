@@ -118,7 +118,9 @@ try (Writer writer = new FileWriter("output.txt", StandardCharsets.UTF_8)) {
 
 ## Bridge Classes: InputStreamReader & OutputStreamWriter
 
-These classes bridge byte streams and character streams, handling character encoding.
+These classes bridge byte streams and character streams.
+
+They handle character encoding during the conversion process.
 
 ```java
 // ✅ Read bytes as characters with explicit encoding

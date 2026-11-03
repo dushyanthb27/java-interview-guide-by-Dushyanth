@@ -80,7 +80,7 @@ public void uncaughtExceptionFlow() {
 // Output: 1, 2, 3 ... then ArithmeticException propagates up
 ```
 
-> **🎯 Interviewer Insight:** The key insight is that `finally` runs **regardless** of whether an exception was thrown, caught, or uncaught. It's your guarantee for cleanup.
+> **🎯 Interviewer Insight:** The key insight: `finally` runs **regardless** of whether an exception was thrown, caught, or uncaught. It's your guarantee for cleanup.
 
 ---
 
@@ -109,7 +109,9 @@ try {
 }
 ```
 
-> **⚠️ Common Mistake:** Putting `catch (Exception e)` before specific exceptions. The compiler catches this, but it's a classic interview question: "Why does this not compile?" Answer: `FileNotFoundException` extends `IOException`, so the first catch block already handles it.
+> **⚠️ Common Mistake:** Putting `catch (Exception e)` before specific exceptions. The compiler catches this, but it's a classic interview question: "Why does this not compile?" 
+
+Answer: `FileNotFoundException` extends `IOException`, so the first catch block already handles it.
 
 ---
 
@@ -166,7 +168,9 @@ try {
 }
 ```
 
-> **🏭 Production Consideration:** `System.exit()` in a `finally` block is a common anti-pattern in shutdown hooks. It prevents other shutdown hooks from running. Use `Runtime.getRuntime().addShutdownHook()` instead.
+> **🏭 Production Consideration:** `System.exit()` in a `finally` block is a common anti-pattern in shutdown hooks. It prevents other shutdown hooks from running. 
+
+Use `Runtime.getRuntime().addShutdownHook()` instead.
 
 ---
 
@@ -207,7 +211,9 @@ public int correctApproach() {
 }
 ```
 
-> **🎯 Interviewer Insight:** This is one of the most asked Java interview questions. The rule: **a `return` in `finally` overrides any `return` in `try` or `catch`, and it swallows any exception thrown in `try` or `catch`.** Never return from `finally`.
+> **🎯 Interviewer Insight:** This is one of the most asked Java interview questions. The rule: **a `return` in `finally` overrides any `return` in `try` or `catch`, and it swallows any exception thrown in `try` or `catch`.**
+
+Never return from `finally`.
 
 ---
 
@@ -264,7 +270,7 @@ public void lockExample() {
 }
 ```
 
-> **🎯 Interviewer Insight:** This pattern is the precursor to try-with-resources. It's essential for lock management — the lock is always released even if the critical section throws.
+> **🎯 Interviewer Insight:** This pattern is the precursor to try-with-resources. It's essential for lock management. The lock is always released even if the critical section throws.
 
 ---
 
@@ -302,7 +308,9 @@ public void safeFinally() throws IOException {
 // ✅ Better approach: use try-with-resources (see Q4)
 ```
 
-> **⚠️ Common Mistake:** Throwing an exception in `finally` without guarding it. This destroys the original exception's stack trace. Always wrap cleanup code in its own try-catch, or better yet, use try-with-resources.
+> **⚠️ Common Mistake:** Throwing an exception in `finally` without guarding it. This destroys the original exception's stack trace. 
+
+Always wrap cleanup code in its own try-catch, or better yet, use try-with-resources.
 
 ---
 
@@ -354,7 +362,9 @@ if (input.matches("-?\\d+")) {
 }
 ```
 
-> **⚠️ Common Mistake:** Using exceptions for control flow (e.g., parsing with try-catch instead of regex validation). Exception creation is expensive — it captures the full stack trace. Use validation for expected cases, exceptions for truly exceptional ones.
+> **⚠️ Common Mistake:** Using exceptions for control flow (e.g., parsing with try-catch instead of regex validation). Exception creation is expensive. It captures the full stack trace.
+
+Use validation for expected cases, exceptions for truly exceptional ones.
 
 ---
 

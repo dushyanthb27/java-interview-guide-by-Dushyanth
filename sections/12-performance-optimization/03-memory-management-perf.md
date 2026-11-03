@@ -6,7 +6,9 @@
 
 ## Overview
 
-Memory optimization in Java involves reducing allocation rates, leveraging JVM optimizations like escape analysis and scalar replacement, and understanding when to use off-heap memory. Efficient memory usage reduces GC pressure and improves overall performance.
+Memory optimization in Java involves reducing allocation rates, leveraging JVM optimizations like escape analysis and scalar replacement, and understanding when to use off-heap memory.
+
+Efficient memory usage reduces GC pressure and improves overall performance.
 
 ---
 

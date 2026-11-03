@@ -10,13 +10,25 @@
 
 ### Answer
 
-**Packages** are Java's mechanism for organizing classes into **namespaces**, preventing naming conflicts, and providing a logical structure for large codebases. They map directly to the directory structure on disk. Package names follow the **reverse domain name convention** (e.g., `com.company.project.module`) to ensure global uniqueness.
+**Packages** are Java's mechanism for organizing classes into **namespaces**, preventing naming conflicts, and providing a logical structure for large codebases. They map directly to the directory structure on disk. 
 
-**Access modifiers** control the **visibility** of classes, interfaces, fields, methods, and constructors. Java has four access levels, from most restrictive to least: `private`, default (package-private, no keyword), `protected`, and `public`. These modifiers work hand-in-hand with packages to implement **encapsulation** — one of the four pillars of OOP.
+Package names follow the **reverse domain name convention** (e.g., `com.company.project.module`) to ensure global uniqueness.
 
-**Package conventions** — Reverse domain: `com.google.common.collect`, `org.apache.commons.lang3`. Lowercase only: package names are always lowercase. No reserved words: avoid `int`, `class`, etc. as package segments. Logical grouping: group related classes (e.g., `model`, `service`, `repository`, `controller`).
+**Access modifiers** control the **visibility** of classes, interfaces, fields, methods, and constructors. Java has four access levels, from most restrictive to least: `private`, default (package-private, no keyword), `protected`, and `public`. 
 
-**Import statements** — Single class import: `import java.util.List;` (preferred — explicit). Wildcard import: `import java.util.*;` (imports all classes in package, not sub-packages). Static import: `import static java.lang.Math.PI;` or `import static java.util.Collections.*;`. `java.lang.*` is automatically imported (String, Integer, System, etc.).
+These modifiers work hand-in-hand with packages to implement **encapsulation** — one of the four pillars of OOP.
+
+**Package conventions:**
+- **Reverse domain** — `com.google.common.collect`, `org.apache.commons.lang3`
+- **Lowercase only** — Package names are always lowercase
+- **No reserved words** — Avoid `int`, `class`, etc. as package segments
+- **Logical grouping** — Group related classes (e.g., `model`, `service`, `repository`, `controller`)
+
+**Import statements:**
+- **Single class import** — `import java.util.List;` (preferred — explicit)
+- **Wildcard import** — `import java.util.*;` (imports all classes in package, not sub-packages)
+- **Static import** — `import static java.lang.Math.PI;` or `import static java.util.Collections.*;`
+- **Automatic import** — `java.lang.*` is automatically imported (String, Integer, System, etc.)
 
 ### Access Modifier Visibility Table
 

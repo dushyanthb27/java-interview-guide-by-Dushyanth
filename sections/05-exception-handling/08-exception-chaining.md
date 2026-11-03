@@ -8,7 +8,9 @@
 
 ### What Is Exception Chaining?
 
-Exception chaining (or exception wrapping) is the practice of catching one exception and throwing a new one while preserving the original as the **cause**. This allows you to translate low-level exceptions into domain-specific ones without losing diagnostic information.
+Exception chaining (or exception wrapping) is the practice of catching one exception and throwing a new one while preserving the original as the **cause**. 
+
+This allows you to translate low-level exceptions into domain-specific ones without losing diagnostic information.
 
 ---
 
@@ -38,7 +40,9 @@ ex.initCause(new IOException("first"));
 ex.initCause(new IOException("second")); // throws IllegalStateException!
 ```
 
-> **🎯 Interviewer Insight:** Always prefer the constructor approach (`new MyException("msg", cause)`). It's cleaner, immutable, and can't be called twice by accident. Use `initCause()` only when wrapping exceptions from libraries that don't provide a cause constructor.
+> **🎯 Interviewer Insight:** Always prefer the constructor approach (`new MyException("msg", cause)`). It's cleaner, immutable, and can't be called twice by accident. 
+
+Use `initCause()` only when wrapping exceptions from libraries that don't provide a cause constructor.
 
 ---
 

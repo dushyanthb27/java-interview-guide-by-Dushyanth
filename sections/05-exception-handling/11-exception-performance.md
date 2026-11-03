@@ -15,7 +15,9 @@
 
 ### Where the Cost Comes From
 
-The most expensive part of exceptions is **NOT** throwing or catching them - it's **creating** them. Specifically, the call to `fillInStackTrace()` which walks the entire call stack.
+The most expensive part of exceptions is **NOT** throwing or catching them. It's **creating** them. 
+
+Specifically, the call to `fillInStackTrace()` which walks the entire call stack.
 
 ```java
 // The real cost: stack trace construction

@@ -12,15 +12,23 @@
 
 The **JDK**, **JRE**, and **JVM** form a layered architecture where each builds upon the previous one. Understanding their relationship is fundamental to knowing how Java programs are compiled, distributed, and executed.
 
-**JVM (Java Virtual Machine)** — The JVM is an **abstract computing machine** that executes Java bytecode. It is the foundation of Java's platform independence — the same bytecode runs on any JVM implementation regardless of the underlying OS or hardware. The JVM is responsible for:
+**JVM (Java Virtual Machine)** — The JVM is an **abstract computing machine** that executes Java bytecode. It is the foundation of Java's platform independence. The same bytecode runs on any JVM implementation regardless of the underlying OS or hardware. 
+
+The JVM is responsible for:
 
 1. **Class Loading** — The ClassLoader subsystem loads `.class` files into memory using three loaders: Bootstrap (core Java classes), Extension/Platform (extension APIs), and Application (your code + classpath).
+
 2. **Runtime Data Areas** — Memory regions used during execution: Method Area (class metadata, static variables), Heap (objects), Stack (method frames with local variables), PC Register (current instruction), and Native Method Stack.
+
 3. **Execution Engine** — Converts bytecode to native machine instructions using the **Interpreter** (line-by-line, slow but fast startup) and the **JIT Compiler** (compiles hot methods to native code for peak performance). It also includes the **Garbage Collector** for automatic memory reclamation.
 
-**JRE (Java Runtime Environment)** — The JRE = **JVM + Standard Class Libraries + Supporting Files**. It provides everything needed to **run** a compiled Java program but nothing to **develop** one. The JRE bundles the `java.lang`, `java.util`, `java.io`, and other standard API packages. Before Java 9, the JRE was distributed separately; since Java 9 and the module system (JPMS), you can create custom runtimes with `jlink`.
+**JRE (Java Runtime Environment)** — The JRE = **JVM + Standard Class Libraries + Supporting Files**. It provides everything needed to **run** a compiled Java program but nothing to **develop** one. 
 
-**JDK (Java Development Kit)** — The JDK = **JRE + Development Tools**. It is the full toolkit for developing, compiling, debugging, and packaging Java applications. Key tools include `javac` (compiler), `java` (launcher), `javadoc` (documentation generator), `jar` (archive tool), `jdb` (debugger), `jshell` (REPL), `jlink` (custom runtime builder), and `jfr` (flight recorder).
+The JRE bundles the `java.lang`, `java.util`, `java.io`, and other standard API packages. Before Java 9, the JRE was distributed separately. Since Java 9 and the module system (JPMS), you can create custom runtimes with `jlink`.
+
+**JDK (Java Development Kit)** — The JDK = **JRE + Development Tools**. It is the full toolkit for developing, compiling, debugging, and packaging Java applications. 
+
+Key tools include `javac` (compiler), `java` (launcher), `javadoc` (documentation generator), `jar` (archive tool), `jdb` (debugger), `jshell` (REPL), `jlink` (custom runtime builder), and `jfr` (flight recorder).
 
 **Architecture Diagram:**
 

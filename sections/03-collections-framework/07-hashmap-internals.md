@@ -10,7 +10,7 @@
 
 ### Answer
 
-HashMap is the most widely used Map implementation in Java, and understanding its internals is a classic interview question. It stores key-value pairs in an array of buckets, where each bucket can hold a linked list or a red-black tree of entries. The magic lies in how it handles collisions, resizes, and optimizes for performance.
+HashMap is the most widely used Map implementation in Java, and understanding its internals is a classic interview question. It stores key-value pairs in an array of buckets. Each bucket can hold a linked list or a red-black tree of entries. The magic lies in how it handles collisions, resizes, and optimizes for performance.
 
 ### Internal Structure
 

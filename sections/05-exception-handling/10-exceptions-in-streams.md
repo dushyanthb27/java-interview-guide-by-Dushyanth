@@ -15,7 +15,9 @@
 
 ### The Problem
 
-Java's built-in functional interfaces (`Function`, `Consumer`, `Supplier`, etc.) do **not** declare checked exceptions. This creates a fundamental incompatibility with methods that throw checked exceptions.
+Java's built-in functional interfaces (`Function`, `Consumer`, `Supplier`, etc.) do **not** declare checked exceptions. 
+
+This creates a fundamental incompatibility with methods that throw checked exceptions.
 
 ```java
 // ❌ Won't compile - Function.apply() doesn't declare throws

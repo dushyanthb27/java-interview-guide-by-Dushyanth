@@ -10,17 +10,19 @@
 
 ### Answer
 
-Java provides a rich set of **operators** that work on operands to produce results. Operators are categorized by function — arithmetic, relational, logical, bitwise, assignment, ternary, and type-checking. Understanding **operator precedence** (which operator evaluates first) and **short-circuit evaluation** (skipping unnecessary evaluations) is essential for writing correct and efficient code.
+Java provides a rich set of **operators** that work on operands to produce results. Operators are categorized by function — arithmetic, relational, logical, bitwise, assignment, ternary, and type-checking.
+
+Understanding **operator precedence** (which operator evaluates first) and **short-circuit evaluation** (skipping unnecessary evaluations) is essential for writing correct and efficient code.
 
 **Arithmetic operators** — `+`, `-`, `*`, `/`, `%` (modulo). Integer division truncates (`7 / 2 = 3`). The `%` operator returns the remainder. The `+` operator is overloaded for String concatenation.
 
-**Relational operators** — `==`, `!=`, `>`, `<`, `>=`, `<=`. For primitives, `==` compares values. For objects, `==` compares **references** (memory addresses), not content — use `.equals()` for value comparison.
+**Relational operators** — `==`, `!=`, `>`, `<`, `>=`, `<=`. For primitives, `==` compares values. For objects, `==` compares **references** (memory addresses), not content. Use `.equals()` for value comparison.
 
 **Logical operators** — `&&` (short-circuit AND), `||` (short-circuit OR), `!` (NOT). Also `&` and `|` for non-short-circuit logical operations (both sides always evaluated).
 
 **Bitwise operators** — `&` (AND), `|` (OR), `^` (XOR), `~` (complement), `<<` (left shift), `>>` (signed right shift), `>>>` (unsigned right shift). Used for low-level operations, flags, and performance-critical code.
 
-**Assignment operators** — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `<<=`, `>>=`, `>>>=`. Compound assignments include an implicit cast: `byte b = 10; b += 5;` works, but `b = b + 5;` requires explicit `(byte)` cast because `b + 5` is promoted to `int`.
+**Assignment operators** — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `<<=`, `>>=`, `>>>=`. Compound assignments include an implicit cast: `byte b = 10; b += 5;` works. But `b = b + 5;` requires explicit `(byte)` cast because `b + 5` is promoted to `int`.
 
 **Ternary operator** — `condition ? valueIfTrue : valueIfFalse` — a concise alternative to simple `if-else` statements.
 

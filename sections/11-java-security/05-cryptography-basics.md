@@ -6,7 +6,9 @@
 
 ## Overview
 
-The **Java Cryptography Architecture (JCA)** provides a framework and implementations for encryption, hashing, digital signatures, and key management. It uses a **provider-based** architecture where cryptographic algorithms are supplied by pluggable security providers.
+The **Java Cryptography Architecture (JCA)** provides a framework and implementations for encryption, hashing, digital signatures, and key management.
+
+It uses a **provider-based** architecture where cryptographic algorithms are supplied by pluggable security providers.
 
 ## JCA Provider Model
 

@@ -6,7 +6,9 @@
 
 ## Overview
 
-Injection attacks occur when **untrusted data is sent to an interpreter as part of a command or query**. They are consistently ranked among the top vulnerabilities in the OWASP Top 10. Java applications must guard against SQL injection, XSS, path traversal, XXE, LDAP injection, and command injection.
+Injection attacks occur when **untrusted data is sent to an interpreter as part of a command or query**. They are consistently ranked among the top vulnerabilities in the OWASP Top 10.
+
+Java applications must guard against SQL injection, XSS, path traversal, XXE, LDAP injection, and command injection.
 
 ## SQL Injection
 

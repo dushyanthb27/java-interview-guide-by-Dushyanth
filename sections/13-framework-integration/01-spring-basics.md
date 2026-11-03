@@ -6,7 +6,9 @@
 
 ## Overview
 
-The Spring Framework is built around the **Inversion of Control (IoC)** principle. Instead of your code creating and managing objects, the Spring IoC container takes over that responsibility, assembling your application from loosely coupled components.
+The Spring Framework is built around the **Inversion of Control (IoC)** principle.
+
+Instead of your code creating and managing objects, the Spring IoC container takes over that responsibility, assembling your application from loosely coupled components.
 
 ---
 

@@ -6,7 +6,9 @@
 
 ## Overview
 
-JVM tuning is the process of adjusting runtime parameters to optimize application throughput, latency, and resource utilization. Effective tuning starts with understanding workload characteristics and selecting appropriate JVM flags.
+JVM tuning adjusts runtime parameters to optimize application throughput, latency, and resource utilization.
+
+Effective tuning starts with understanding workload characteristics and selecting appropriate JVM flags.
 
 ---
 

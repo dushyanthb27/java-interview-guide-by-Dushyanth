@@ -111,7 +111,9 @@ public void process(Order order) {
 }
 ```
 
-> **🎯 Interviewer Insight:** The key distinction: **checked = "caller must deal with this" (recoverable)**, **unchecked = "you wrote buggy code" (programming error)**. If the caller can meaningfully recover (retry, use fallback, show user-friendly error), use checked. If it's a bug (null, bad argument, wrong state), use unchecked — the fix is in the code, not in exception handling.
+> **🎯 Interviewer Insight:** The key distinction: **checked = "caller must deal with this" (recoverable)**, **unchecked = "you wrote buggy code" (programming error)**. 
+
+If the caller can meaningfully recover (retry, use fallback, show user-friendly error), use checked. If it's a bug (null, bad argument, wrong state), use unchecked. The fix is in the code, not in exception handling.
 
 ---
 
@@ -129,7 +131,7 @@ try {
 }
 
 // Problem 2: Throws clause pollution
-// ❌ Every method in the call chain must declare throws
+// Every method in the call chain must declare throws
 public void methodA() throws IOException, SQLException {
     methodB();
 }
@@ -141,7 +143,7 @@ public void methodC() throws IOException, SQLException {
 }
 
 // Problem 3: Incompatible with functional interfaces
-// ❌ Won't compile — Function doesn't declare throws
+// Won't compile — Function doesn't declare throws
 Function<String, String> reader = path -> Files.readString(Path.of(path));
 ```
 
@@ -157,7 +159,9 @@ public Connection connect(String url) throws ConnectionException {
 // The compiler ensures you at least acknowledge the exception
 ```
 
-> **🏭 Production Consideration:** Checked exceptions force API consumers to acknowledge failure modes. In large teams, this prevents "it works on my machine" surprises. However, they create boilerplate. Modern frameworks (Spring) and languages (Kotlin) favor unchecked with good documentation.
+> **🏭 Production Consideration:** Checked exceptions force API consumers to acknowledge failure modes. In large teams, this prevents "it works on my machine" surprises. However, they create boilerplate.
+
+Modern frameworks (Spring) and languages (Kotlin) favor unchecked exceptions with good documentation.
 
 ---
 
@@ -187,7 +191,9 @@ public User findById(long id) {
 }
 ```
 
-> **🎯 Interviewer Insight:** Spring's approach is pragmatic: wrap checked exceptions in unchecked ones at the framework boundary. This gives you the best of both worlds — the framework handles the boilerplate, and your business logic stays clean. Know this pattern; it's widely used in enterprise Java.
+> **🎯 Interviewer Insight:** Spring's approach is pragmatic. Wrap checked exceptions in unchecked ones at the framework boundary. This gives you the best of both worlds: the framework handles the boilerplate, and your business logic stays clean. 
+
+Know this pattern. It's widely used in enterprise Java.
 
 ---
 
@@ -274,7 +280,9 @@ try {
 }
 ```
 
-> **⚠️ Common Mistake:** Wrapping an exception without passing the cause (`throw new RuntimeException("msg")` instead of `throw new RuntimeException("msg", e)`). This destroys the stack trace and makes debugging production issues nearly impossible. **Always preserve the cause.**
+> **⚠️ Common Mistake:** Wrapping an exception without passing the cause (`throw new RuntimeException("msg")` instead of `throw new RuntimeException("msg", e)`). This destroys the stack trace. It makes debugging production issues nearly impossible. 
+
+**Always preserve the cause.**
 
 ---
 

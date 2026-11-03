@@ -10,13 +10,24 @@
 
 ### Answer
 
-`String` in Java is a **final, immutable class** that represents a sequence of characters. Once a `String` object is created, its content **cannot be changed** — any operation that appears to modify a String actually creates a **new String object**. This immutability is a deliberate design choice that enables thread safety, caching, security, and hash code optimization.
+`String` in Java is a **final, immutable class** that represents a sequence of characters. Once a `String` object is created, its content **cannot be changed**. Any operation that appears to modify a String actually creates a **new String object**. 
 
-**String immutability** — The `String` class is declared as `final class String` (cannot be subclassed) and stores characters in a `private final byte[]` array (since Java 9; previously `char[]`). There are no setter methods. When you call `str.toUpperCase()`, `str.concat()`, or use `+`, a **new** String is created — the original is untouched.
+This immutability is a deliberate design choice that enables thread safety, caching, security, and hash code optimization.
 
-**Why immutable?** — Thread safety (Strings can be shared across threads without synchronization), String pool (immutability makes interning safe — if one reference could change the String, all references would see the change), security (Strings are used for class loading, file paths, network connections, and DB URLs — immutability prevents tampering after validation), and hash code caching (`String.hashCode()` is computed once and cached, making Strings ideal `HashMap` keys).
+**String immutability** — The `String` class is declared as `final class String` (cannot be subclassed) and stores characters in a `private final byte[]` array (since Java 9; previously `char[]`). There are no setter methods. 
 
-**String Pool (Intern Pool)** — The String Pool is a special **memory area** (in the heap since Java 7; previously in PermGen) where Java stores unique String literals. When you write `"Hello"` in source code, the JVM checks the pool first — if an identical String exists, the existing reference is returned instead of creating a new object. This saves memory when the same strings appear frequently. String literals are automatically interned: `String s = "Hello";` → goes to pool. `new String("Hello")` creates a new object on the heap **outside** the pool (even if "Hello" is already in the pool). `str.intern()` explicitly adds a String to the pool (or returns the existing pooled instance).
+When you call `str.toUpperCase()`, `str.concat()`, or use `+`, a **new** String is created. The original is untouched.
+
+**Why immutable?** Several reasons make immutability essential:
+
+- **Thread safety** — Strings can be shared across threads without synchronization
+- **String pool** — Immutability makes interning safe (if one reference could change the String, all references would see the change)
+- **Security** — Strings are used for class loading, file paths, network connections, and DB URLs. Immutability prevents tampering after validation
+- **Hash code caching** — `String.hashCode()` is computed once and cached, making Strings ideal `HashMap` keys
+
+**String Pool (Intern Pool)** — The String Pool is a special **memory area** (in the heap since Java 7; previously in PermGen) where Java stores unique String literals. When you write `"Hello"` in source code, the JVM checks the pool first. If an identical String exists, the existing reference is returned instead of creating a new object. This saves memory when the same strings appear frequently. 
+
+String literals are automatically interned: `String s = "Hello";` → goes to pool. `new String("Hello")` creates a new object on the heap **outside** the pool (even if "Hello" is already in the pool). `str.intern()` explicitly adds a String to the pool (or returns the existing pooled instance).
 
 ### String vs StringBuilder vs StringBuffer
 

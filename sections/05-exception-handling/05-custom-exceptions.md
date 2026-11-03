@@ -21,7 +21,9 @@ public class InvalidOrderException extends RuntimeException { }
 | `Exception` | Recoverable condition; force caller to handle |
 | `RuntimeException` | Programming error; bug in caller's code |
 
-> **🎯 Interviewer Insight:** The choice between checked and unchecked is a design decision. Checked = "caller can recover" (file not found, network timeout). Unchecked = "caller wrote buggy code" (null argument, invalid state). Most modern frameworks (Spring, Kotlin) favor unchecked with good documentation.
+> **🎯 Interviewer Insight:** The choice between checked and unchecked is a design decision. 
+
+Checked exceptions signal "caller can recover" (file not found, network timeout). Unchecked exceptions signal "caller wrote buggy code" (null argument, invalid state). Most modern frameworks (Spring, Kotlin) favor unchecked with good documentation.
 
 ---
 
@@ -53,7 +55,9 @@ public class OrderNotFoundException extends RuntimeException {
 }
 ```
 
-> **⚠️ Common Mistake:** Forgetting the cause constructors. Without `super(message, cause)`, you lose the original exception's stack trace when wrapping. **Always include all four constructors.**
+> **⚠️ Common Mistake:** Forgetting the cause constructors. Without `super(message, cause)`, you lose the original exception's stack trace when wrapping. 
+
+**Always include all four constructors.**
 
 ---
 

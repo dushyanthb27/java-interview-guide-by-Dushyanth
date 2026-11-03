@@ -6,7 +6,9 @@
 
 ## Overview
 
-Java's permission model uses **Permission** objects to represent access rights, **Policy** files to configure what code gets which permissions, and **ProtectionDomain** to associate permissions with code sources. While the SecurityManager is deprecated, understanding this model is essential for legacy systems.
+Java's permission model uses **Permission** objects to represent access rights. **Policy** files configure what code gets which permissions. **ProtectionDomain** associates permissions with code sources.
+
+While the SecurityManager is deprecated, understanding this model is essential for legacy systems.
 
 ## Core Permission Classes
 

@@ -12,7 +12,7 @@
 
 The Java Collections Framework is built around a hierarchy of interfaces that define contracts for different types of data structures. At the root is `Iterable`, which enables for-each loop support. Everything extends from there — except `Map`, which lives in its own separate hierarchy.
 
-Let me walk you through the complete structure:
+Here's the complete structure:
 
 ```
                         Iterable<T>
@@ -52,7 +52,7 @@ public interface Iterable<T> {
 }
 ```
 
-Next is `Collection<T>`, the base interface for all collections (except Map). It defines the core operations that every collection must support:
+Next is `Collection<T>`, the base interface for all collections except Map. It defines the core operations that every collection must support:
 
 ```java
 public interface Collection<T> extends Iterable<T> {
@@ -185,6 +185,8 @@ public interface Map<K, V> {
 ### Sequenced Collections (Java 21)
 
 Java 21 introduced the Sequenced Collections API to unify first/last element access across Lists, Sets, and Maps. Before this, each collection type had different methods for accessing the first and last elements.
+
+This new API provides a consistent way to work with ordered collections:
 
 ```java
 // New interfaces in Java 21

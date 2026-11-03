@@ -9,7 +9,9 @@ Explain advanced JVM garbage collection tuning strategies for G1, ZGC, and Shena
 
 ## 💡 Answer
 
-GC tuning is both art and science. The right configuration depends on your workload characteristics, latency requirements, and hardware resources. Modern JVMs offer sophisticated collectors that can handle most workloads with minimal tuning, but understanding the internals is crucial for production systems.
+GC tuning is both art and science.
+
+The right configuration depends on your workload characteristics, latency requirements, and hardware resources. Modern JVMs offer sophisticated collectors that can handle most workloads with minimal tuning. However, understanding the internals is crucial for production systems.
 
 ### G1 GC Tuning Strategies
 
@@ -87,7 +89,9 @@ G1 is the default since Java 9 and provides a good balance between throughput an
 
 ### ZGC Tuning Strategies
 
-ZGC (Z Garbage Collector) is designed for sub-millisecond pause times and multi-terabyte heaps. It's production-ready since Java 15.
+ZGC (Z Garbage Collector) is designed for sub-millisecond pause times and multi-terabyte heaps.
+
+It's production-ready since Java 15.
 
 **Key ZGC Parameters:**
 
@@ -156,7 +160,9 @@ jcmd <pid> GC.zgc
 
 ### Shenandoah Tuning Strategies
 
-Shenandoah is similar to ZGC but available in OpenJDK distributions. It uses Brooks pointers for concurrent compaction.
+Shenandoah is similar to ZGC but available in OpenJDK distributions.
+
+It uses Brooks pointers for concurrent compaction.
 
 **Key Shenandoah Parameters:**
 
@@ -452,7 +458,10 @@ java -Xlog:gc*:file=gc.log:time,uptime,level,tags -jar app.jar
 
 ### ⚡ Performance Tip
 
-**Start with defaults, then tune incrementally.** Modern GCs are well-tuned for most workloads. Only adjust parameters when you have:
+**Start with defaults, then tune incrementally.**
+
+Modern GCs are well-tuned for most workloads. Only adjust parameters when you have:
+
 1. Measured performance issues (GC logs, metrics)
 2. Clear requirements (latency SLA, throughput goals)
 3. A baseline to compare against
@@ -466,9 +475,13 @@ java -Xlog:gc*:file=gc.log:time,uptime,level,tags -jar app.jar
 
 ### 🔧 JVM Internals
 
-**G1's region-based layout** allows it to collect only the most garbage-filled regions first. The `-XX:MaxGCPauseMillis` goal drives the collector to select regions that can be collected within the target time. The concurrent marking phase identifies live objects and builds a collection set.
+**G1's region-based layout** allows it to collect only the most garbage-filled regions first.
 
-**ZGC's colored pointers** use unused bits in 64-bit object references to store marking information (Marked0, Marked1, Remapped, Finalizable). Load barriers check these bits and perform fix-up operations, allowing almost all GC work to be concurrent.
+The `-XX:MaxGCPauseMillis` goal drives the collector to select regions that can be collected within the target time. The concurrent marking phase identifies live objects and builds a collection set.
+
+**ZGC's colored pointers** use unused bits in 64-bit object references to store marking information (Marked0, Marked1, Remapped, Finalizable).
+
+Load barriers check these bits and perform fix-up operations, allowing almost all GC work to be concurrent.
 
 **Shenandoah's Brooks pointers** add an indirection to every object, allowing the object to be moved while references are updated concurrently via CAS operations.
 
@@ -476,7 +489,9 @@ java -Xlog:gc*:file=gc.log:time,uptime,level,tags -jar app.jar
 
 ## 🎯 Interviewer Insight
 
-GC tuning questions test your understanding of JVM internals and production experience. Interviewers want to see that you:
+GC tuning questions test your understanding of JVM internals and production experience.
+
+Interviewers want to see that you:
 - Know the strengths and weaknesses of each collector
 - Can make data-driven tuning decisions based on requirements
 - Understand the trade-offs between latency, throughput, and memory

@@ -10,11 +10,13 @@
 
 ### Answer
 
-Vector and Stack are legacy classes from Java 1.0 that predate the Collections Framework (Java 1.2). They're still in the JDK for backward compatibility, but you should never use them in new code. Understanding why they're legacy — and what to use instead — is a common interview topic.
+Vector and Stack are legacy classes from Java 1.0 that predate the Collections Framework (Java 1.2). They're still in the JDK for backward compatibility, but you should never use them in new code. 
+
+Understanding why they're legacy and what to use instead is a common interview topic.
 
 ### Vector — The Synchronized ArrayList
 
-Vector is essentially a synchronized ArrayList. Every method is synchronized, which makes it thread-safe but slow:
+Vector is essentially a synchronized ArrayList. Every method is synchronized. This makes it thread-safe but slow:
 
 ```java
 // Vector internal structure (simplified)

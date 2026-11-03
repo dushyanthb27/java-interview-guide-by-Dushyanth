@@ -6,7 +6,7 @@
 
 ## Answer
 
-Java's exception hierarchy is rooted at `java.lang.Throwable` and splits into two fundamentally different branches: **Errors** (JVM-level failures you should never catch) and **Exceptions** (application-level problems you can handle).
+Java's exception hierarchy starts at `java.lang.Throwable`. It splits into two fundamentally different branches: **Errors** (JVM-level failures you should never catch) and **Exceptions** (application-level problems you can handle).
 
 ```
 java.lang.Object
@@ -56,7 +56,7 @@ java.lang.Throwable  ← implements Serializable
 
 ```java
 // Throwable is the superclass of ALL errors and exceptions
-// It implements Serializable — crucial for RMI / distributed systems
+// Implements Serializable — crucial for RMI / distributed systems
 public class Throwable implements Serializable {
     private String message;                    // Detail message
     private Throwable cause;                   // The cause (for chaining)
@@ -65,13 +65,13 @@ public class Throwable implements Serializable {
 }
 ```
 
-> **🎯 Interviewer Insight:** The fact that `Throwable` implements `Serializable` isn't trivia — it's what allows exceptions to cross JVM boundaries in RMI, EJB, and distributed systems. Senior candidates should know this.
+> **🎯 Interviewer Insight:** The fact that `Throwable` implements `Serializable` isn't trivia. It allows exceptions to cross JVM boundaries in RMI, EJB, and distributed systems. Senior candidates should know this.
 
 #### `Error` — When the JVM Gives Up
 
 ```java
 // Errors indicate serious problems that applications should NOT catch
-// These represent JVM or system-level failures — catching them is almost always wrong
+// JVM or system-level failures — catching them is almost always wrong
 
 OutOfMemoryError        // Heap exhausted — your app is dead anyway
 StackOverflowError      // Infinite recursion — fix the code, don't catch
@@ -79,7 +79,7 @@ NoClassDefFoundError    // Class missing at runtime — deployment/config issue
 VirtualMachineError     // JVM is broken or out of resources
 ```
 
-> **⚠️ Common Mistake:** Catching `Error` or `Throwable` to "handle everything." This masks `OutOfMemoryError` and `StackOverflowError`, preventing the JVM from crashing cleanly and making debugging impossible. **Never do this.**
+> **⚠️ Common Mistake:** Catching `Error` or `Throwable` to "handle everything." This masks `OutOfMemoryError` and `StackOverflowError`. It prevents the JVM from crashing cleanly and makes debugging impossible. **Never do this.**
 
 #### `Exception` — Application-Level Problems You Can Handle
 
@@ -129,7 +129,7 @@ public class ExceptionHierarchyDemo {
 }
 ```
 
-> **🎯 Interviewer Insight:** Interviewers love asking "Does `catch (Exception e)` catch `Error`?" The answer is **no** — `Error` is not a subclass of `Exception`. This is a classic trap question.
+> **🎯 Interviewer Insight:** Interviewers love asking "Does `catch (Exception e)` catch `Error`?" The answer is **no**. `Error` is not a subclass of `Exception`. This is a classic trap question.
 
 ---
 
@@ -230,7 +230,7 @@ public class HierarchyTraversalDemo {
 }
 ```
 
-> **🏭 Production Consideration:** Exception chaining (`throw new RuntimeException("msg", cause)`) preserves the root cause for debugging. **Always pass the cause** — losing the original exception makes production debugging a nightmare.
+> **🏭 Production Consideration:** Exception chaining (`throw new RuntimeException("msg", cause)`) preserves the root cause for debugging. **Always pass the cause.** Losing the original exception makes production debugging a nightmare.
 
 ---
 
@@ -263,7 +263,7 @@ try {
 }
 ```
 
-> **⚠️ Common Mistake:** Using `catch (Exception e)` as a "catch-all." This catches programming bugs (`NullPointerException`, `IllegalArgumentException`) alongside legitimate I/O errors, masking bugs that should crash the app so you can fix them.
+> **⚠️ Common Mistake:** Using `catch (Exception e)` as a "catch-all." This catches programming bugs (`NullPointerException`, `IllegalArgumentException`) alongside legitimate I/O errors. It masks bugs that should crash the app so you can fix them.
 
 ---
 

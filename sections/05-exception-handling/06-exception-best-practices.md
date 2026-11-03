@@ -38,7 +38,9 @@ for (int i = 0; i < array.length; i++) {
 }
 ```
 
-> **🎯 Interviewer Insight:** Exception creation is expensive — it captures the full stack trace. Using exceptions for control flow (parsing, loop termination) is an anti-pattern that kills performance. Always prefer validation, regex, or proper loop bounds.
+> **🎯 Interviewer Insight:** Exception creation is expensive — it captures the full stack trace. Using exceptions for control flow (parsing, loop termination) is an anti-pattern that kills performance. 
+
+Always prefer validation, regex, or proper loop bounds.
 
 ---
 
@@ -71,7 +73,9 @@ try {
 }
 ```
 
-> **⚠️ Common Mistake:** `catch (Exception e)` or `catch (Throwable t)` masks programming bugs (`NullPointerException`, `IllegalArgumentException`) alongside legitimate errors. Catch the most specific exception possible.
+> **⚠️ Common Mistake:** `catch (Exception e)` or `catch (Throwable t)` masks programming bugs (`NullPointerException`, `IllegalArgumentException`) alongside legitimate errors. 
+
+Catch the most specific exception possible.
 
 ---
 
@@ -104,7 +108,9 @@ try {
 }
 ```
 
-> **🏭 Production Consideration:** Swallowed exceptions are the #1 cause of "it works on my machine" bugs in production. If you catch an exception, you MUST either handle it (retry, fallback, compensate) or rethrow it. Logging alone is not handling.
+> **🏭 Production Consideration:** Swallowed exceptions are the #1 cause of "it works on my machine" bugs in production. 
+
+If you catch an exception, you MUST either handle it (retry, fallback, compensate) or rethrow it. Logging alone is not handling.
 
 ---
 

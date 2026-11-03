@@ -10,7 +10,9 @@
 
 ### Answer
 
-Java has **8 primitive data types** that are not objects — they hold values directly on the stack (when local) rather than as references on the heap. Each primitive has a corresponding **wrapper class** in `java.lang` that allows primitives to be used in object-oriented contexts (collections, generics, etc.).
+Java has **8 primitive data types** that are not objects. They hold values directly on the stack (when local) rather than as references on the heap. 
+
+Each primitive has a corresponding **wrapper class** in `java.lang` that allows primitives to be used in object-oriented contexts (collections, generics, etc.).
 
 **Primitive types table**
 
@@ -25,9 +27,13 @@ Java has **8 primitive data types** that are not objects — they hold values di
 | `char` | 16 bits | '\u0000' (0) | '\uffff' (65,535) | `'\u0000'` | `Character` |
 | `boolean` | JVM-specific | `false` | `true` | `false` | `Boolean` |
 
-**Autoboxing** is the automatic conversion from a primitive to its wrapper class (`int` → `Integer`). **Unboxing** is the reverse (`Integer` → `int`). Introduced in Java 5, these conversions happen implicitly but carry performance costs — each autobox creates (or retrieves) an object on the heap.
+**Autoboxing** is the automatic conversion from a primitive to its wrapper class (`int` → `Integer`). **Unboxing** is the reverse (`Integer` → `int`). 
 
-**Integer cache** — Java caches `Integer` objects for values **-128 to 127** (and `Byte`, `Short`, `Long` in the same range, plus `Character` 0-127 and `Boolean`). This means `Integer.valueOf(127) == Integer.valueOf(127)` returns `true`, but `Integer.valueOf(128) == Integer.valueOf(128)` returns `false` — a classic interview trap.
+Introduced in Java 5, these conversions happen implicitly but carry performance costs. Each autobox creates (or retrieves) an object on the heap.
+
+**Integer cache** — Java caches `Integer` objects for values **-128 to 127** (and `Byte`, `Short`, `Long` in the same range, plus `Character` 0-127 and `Boolean`). 
+
+This means `Integer.valueOf(127) == Integer.valueOf(127)` returns `true`, but `Integer.valueOf(128) == Integer.valueOf(128)` returns `false`. This is a classic interview trap.
 
 Primitives cannot be `null` and cannot be used as generic type parameters (`List<int>` is illegal; use `List<Integer>`). They also don't have methods — you must use the wrapper class for utility methods like `Integer.parseInt()`, `Double.isNaN()`, etc.
 

@@ -10,11 +10,15 @@
 
 ### Answer
 
-Arrays in Java are **fixed-size, contiguous data structures** that store elements of the same type. Unlike C/C++, Java arrays are **objects** — they are allocated on the heap, have a `length` field, and perform **bounds checking** at runtime (throwing `ArrayIndexOutOfBoundsException` for invalid indices). Arrays are **covariant**: `String[]` is a subtype of `Object[]`, which can lead to runtime `ArrayStoreException` issues.
+Arrays in Java are **fixed-size, contiguous data structures** that store elements of the same type. Unlike C/C++, Java arrays are **objects**. They are allocated on the heap, have a `length` field, and perform **bounds checking** at runtime (throwing `ArrayIndexOutOfBoundsException` for invalid indices). 
+
+Arrays are **covariant**: `String[]` is a subtype of `Object[]`, which can lead to runtime `ArrayStoreException` issues.
 
 **Declaration and initialization** — Arrays can be declared with the type before or after the variable name (`int[] arr` or `int arr[]`, though the former is preferred). They can be initialized with `new` (specifying size), with an initializer list, or anonymously.
 
-**Multi-dimensional arrays** — Java supports multi-dimensional arrays as "arrays of arrays." Unlike languages with true 2D memory layouts, Java's multi-dimensional arrays are **jagged** by default — each row can have a different length. This means a `int[][]` is an array of `int[]` references, each pointing to a separately allocated array.
+**Multi-dimensional arrays** — Java supports multi-dimensional arrays as "arrays of arrays." Unlike languages with true 2D memory layouts, Java's multi-dimensional arrays are **jagged** by default. Each row can have a different length. 
+
+This means a `int[][]` is an array of `int[]` references, each pointing to a separately allocated array.
 
 **Key difference — Array vs ArrayList** — Arrays have a **fixed size** set at creation, use `[]` syntax, and can hold primitives. `ArrayList` is dynamically resizable, uses generics (objects only), and provides richer APIs. Use arrays for performance-critical, fixed-size data; use `ArrayList` for flexibility.
 

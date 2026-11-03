@@ -6,7 +6,9 @@
 
 ## Overview
 
-`SecureRandom` is Java's **cryptographically strong random number generator (CSPRNG)**. Unlike `java.util.Random`, it produces unpredictable output suitable for security-sensitive operations like key generation, tokens, nonces, and password salts.
+`SecureRandom` is Java's **cryptographically strong random number generator (CSPRNG)**. Unlike `java.util.Random`, it produces unpredictable output suitable for security-sensitive operations.
+
+Use it for key generation, tokens, nonces, and password salts.
 
 ## SecureRandom vs Random
 

@@ -10,7 +10,7 @@
 
 ### Answer
 
-ArrayList is the workhorse of Java collections — it's backed by a resizable array and provides O(1) random access, which makes it the default choice for most list operations. But understanding what happens under the hood helps you avoid performance pitfalls in production code.
+ArrayList is the workhorse of Java collections. It's backed by a resizable array and provides O(1) random access, making it the default choice for most list operations. Understanding what happens under the hood helps you avoid performance pitfalls in production code.
 
 ### Internal Structure
 
@@ -30,7 +30,9 @@ public class ArrayList<E> extends AbstractList<E>
 }
 ```
 
-The key distinction here is between **capacity** (the length of the backing array) and **size** (the number of actual elements). When you create a new ArrayList without specifying capacity, it starts with an empty array and doesn't allocate until you add the first element:
+The key distinction is between **capacity** (the length of the backing array) and **size** (the number of actual elements).
+
+When you create a new ArrayList without specifying capacity, it starts with an empty array. It doesn't allocate until you add the first element:
 
 ```java
 ArrayList<String> list = new ArrayList<>();
@@ -48,7 +50,9 @@ list.add("second");
 
 ### Growth Strategy — The 1.5x Factor
 
-When the internal array fills up, ArrayList doesn't just double in size like Vector does. Instead, it grows by 1.5x — a deliberate design choice that balances memory waste against resize frequency. The resize operation creates a new array and copies elements using `System.arraycopy()`, which is a native method optimized for speed:
+When the internal array fills up, ArrayList doesn't just double in size like Vector does. Instead, it grows by 1.5x — a deliberate design choice that balances memory waste against resize frequency.
+
+The resize operation creates a new array and copies elements using `System.arraycopy()`, which is a native method optimized for speed:
 
 ```java
 // Simplified grow logic from OpenJDK source

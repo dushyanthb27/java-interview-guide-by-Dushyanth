@@ -69,7 +69,7 @@ try (BufferedReader br = new BufferedReader(new FileReader("data.txt"))) {
 // br is automatically closed — even on exception
 ```
 
-> **🎯 Interviewer Insight:** The traditional approach has three problems: (1) verbose boilerplate, (2) resource variable must be declared outside try, (3) close() exceptions can mask the original exception. Try-with-resources solves all three.
+> **🎯 Interviewer Insight:** The traditional approach has three problems. First, verbose boilerplate. Second, resource variable must be declared outside try. Third, close() exceptions can mask the original exception. Try-with-resources solves all three.
 
 ---
 
@@ -131,7 +131,7 @@ public class ReverseCloseDemo {
 // Closing: A
 ```
 
-> **🎯 Interviewer Insight:** Resources close in **reverse declaration order** (LIFO). This matters when resources depend on each other (e.g., `BufferedInputStream` wraps `FileInputStream` — the buffer must close first to flush, then the underlying stream).
+> **🎯 Interviewer Insight:** Resources close in **reverse declaration order** (LIFO). This matters when resources depend on each other. For example, `BufferedInputStream` wraps `FileInputStream` — the buffer must close first to flush, then the underlying stream.
 
 ---
 
@@ -211,7 +211,7 @@ try (DatabaseConnectionPool pool = new DatabaseConnectionPool(5)) {
 // Pool is automatically closed
 ```
 
-> **🏭 Production Consideration:** When implementing `AutoCloseable`, make `close()` idempotent (safe to call multiple times) and never let it throw — log and swallow cleanup exceptions to avoid masking the primary exception.
+> **🏭 Production Consideration:** When implementing `AutoCloseable`, make `close()` idempotent (safe to call multiple times). Never let it throw — log and swallow cleanup exceptions to avoid masking the primary exception.
 
 ---
 
@@ -252,7 +252,9 @@ try (
 }
 ```
 
-> **⚠️ Common Mistake:** Nesting resource construction (`new BufferedInputStream(new FileInputStream(...))`). If the outer constructor throws, the inner resource is leaked. **Always declare each resource separately** in the try-with-resources header.
+> **⚠️ Common Mistake:** Nesting resource construction (`new BufferedInputStream(new FileInputStream(...))`). If the outer constructor throws, the inner resource is leaked. 
+
+**Always declare each resource separately** in the try-with-resources header.
 
 ---
 
@@ -278,7 +280,9 @@ try (FailingResource res = new FailingResource()) {
 // The close() exception is SUPPRESSED (not lost!)
 ```
 
-> **🎯 Interviewer Insight:** This is a key difference from try-finally. In try-finally, an exception in `finally` **replaces** the original. In try-with-resources, the close() exception becomes a **suppressed exception** — accessible via `getSuppressed()`. The primary exception is never lost.
+> **🎯 Interviewer Insight:** This is a key difference from try-finally. In try-finally, an exception in `finally` **replaces** the original. 
+
+In try-with-resources, the close() exception becomes a **suppressed exception** — accessible via `getSuppressed()`. The primary exception is never lost.
 
 ---
 
@@ -352,7 +356,9 @@ public InputStream getStream() throws IOException {
 }
 ```
 
-> **⚠️ Common Mistake:** Returning a resource from inside try-with-resources. The resource is closed when the try block exits, so the caller gets a closed stream. If you need to return a resource, manage its lifecycle manually (or use a pool).
+> **⚠️ Common Mistake:** Returning a resource from inside try-with-resources. The resource is closed when the try block exits, so the caller gets a closed stream. 
+
+If you need to return a resource, manage its lifecycle manually (or use a pool).
 
 ---
 

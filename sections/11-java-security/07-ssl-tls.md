@@ -6,7 +6,9 @@
 
 ## Overview
 
-Java provides built-in support for SSL/TLS through the **Java Secure Socket Extension (JSSE)**. It enables encrypted communication between clients and servers using `SSLContext`, `SSLSocketFactory`, `TrustManager`, and `KeyManager`.
+Java provides built-in support for SSL/TLS through the **Java Secure Socket Extension (JSSE)**.
+
+It enables encrypted communication between clients and servers using `SSLContext`, `SSLSocketFactory`, `TrustManager`, and `KeyManager`.
 
 ## TLS Handshake Flow
 

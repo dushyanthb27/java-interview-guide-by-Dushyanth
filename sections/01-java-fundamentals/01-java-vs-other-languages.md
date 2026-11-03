@@ -10,13 +10,21 @@
 
 ### Answer
 
-Java trades direct low-level control for managed memory, static typing, and a portable runtime. Those choices often suit long-lived services and large teams, while C++, Python, and C# make different trade-offs. Avoid claiming that one language is universally faster or safer — the workload, runtime, libraries, and team matter.
+Java trades direct low-level control for managed memory, static typing, and a portable runtime. Those choices often suit long-lived services and large teams, while C++, Python, and C# make different trade-offs. 
 
-**Portability** — Java source compiles to **bytecode** (`.class` files) that runs on a compatible JVM. This reduces platform-specific builds, but doesn't make every application portable: native libraries, filesystem assumptions, encodings, and runtime differences can still matter. C++ commonly compiles to platform-specific native binaries; Python and modern .NET also run across platforms.
+Avoid claiming that one language is universally faster or safer — the workload, runtime, libraries, and team matter.
 
-**Memory management** — Java manages ordinary heap-object reclamation with garbage collection, reducing use-after-free and double-free risks. It doesn't prevent memory leaks (reachable objects can accumulate), and resources such as files and sockets still need explicit lifecycle management. C++ offers deterministic lifetime management through RAII and smart pointers as well as manual allocation; Python and C# also have garbage-collected runtimes.
+**Portability** — Java source compiles to **bytecode** (`.class` files) that runs on any compatible JVM. This reduces platform-specific builds, but doesn't make every application portable. Native libraries, filesystem assumptions, encodings, and runtime differences can still matter. 
 
-**Type System** — Java is **statically typed** — every variable's type is known at compile time. Python is dynamically typed, catching type errors only at runtime. C++ is also statically typed but offers more low-level type manipulation (pointer arithmetic, unions). C# is statically typed with some dynamic capabilities via `dynamic`.
+C++ commonly compiles to platform-specific native binaries. Python and modern .NET also run across platforms.
+
+**Memory management** — Java manages ordinary heap-object reclamation with garbage collection, reducing use-after-free and double-free risks. It doesn't prevent memory leaks (reachable objects can accumulate), and resources such as files and sockets still need explicit lifecycle management. 
+
+C++ offers deterministic lifetime management through RAII and smart pointers as well as manual allocation. Python and C# also have garbage-collected runtimes.
+
+**Type System** — Java is **statically typed**. Every variable's type is known at compile time. Python is dynamically typed, catching type errors only at runtime. 
+
+C++ is also statically typed but offers more low-level type manipulation (pointer arithmetic, unions). C# is statically typed with some dynamic capabilities via `dynamic`.
 
 **Runtime model** — Java compiles source to bytecode, which a JVM interprets and may JIT-compile based on runtime behavior. C++ is commonly compiled ahead of time to native code; Python implementations and .NET have their own compilation and runtime strategies. These are common paths, not absolute rules.
 

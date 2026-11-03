@@ -2,7 +2,9 @@
 
 ## Overview
 
-A comprehensive guide to building effective daily study habits and routines for Java interview preparation. This document provides structured routines, time management strategies, and habit formation techniques that can be applied to any study plan.
+A comprehensive guide to building effective daily study habits and routines for Java interview preparation.
+
+This document provides structured routines, time management strategies, and habit formation techniques that can be applied to any study plan.
 
 **Who this is for:**
 - Anyone following a study plan wanting to build consistent habits

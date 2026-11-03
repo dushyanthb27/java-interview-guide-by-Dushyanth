@@ -6,7 +6,9 @@
 
 ## Overview
 
-JAAS (Java Authentication and Authorization Service) is Java's standard framework for **authenticating** users (verifying identity) and **authorizing** actions (checking permissions). It provides a pluggable architecture based on PAM (Pluggable Authentication Modules).
+JAAS (Java Authentication and Authorization Service) is Java's standard framework for **authenticating** users (verifying identity) and **authorizing** actions (checking permissions).
+
+It provides a pluggable architecture based on PAM (Pluggable Authentication Modules).
 
 ## JAAS Architecture
 

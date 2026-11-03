@@ -6,7 +6,9 @@
 
 ## Overview
 
-With the deprecation of `SecurityManager` (JEP 411), the **Java Platform Module System (JPMS / Project Jigsaw)** has become the primary mechanism for enforcing encapsulation and access control at the code level. JPMS provides **strong encapsulation** that prevents unauthorized access to internal APIs at both compile time and runtime.
+With the deprecation of `SecurityManager` (JEP 411), the **Java Platform Module System (JPMS / Project Jigsaw)** has become the primary mechanism for enforcing encapsulation and access control at the code level.
+
+JPMS provides **strong encapsulation** that prevents unauthorized access to internal APIs at both compile time and runtime.
 
 ## Module System (JPMS) for Encapsulation
 

@@ -36,7 +36,7 @@ public void java6Problem() throws Exception {
 
 ### Java 7+ Solution: Suppressed Exceptions
 
-With try-with-resources, the **try body exception is primary** and any **close() exceptions are suppressed** (attached to the primary exception, not lost).
+With try-with-resources, the **try body exception is primary**. Any **close() exceptions are suppressed** (attached to the primary exception, not lost).
 
 ```java
 // ✅ Java 7+: Both exceptions are preserved

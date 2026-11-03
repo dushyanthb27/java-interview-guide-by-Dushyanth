@@ -12,11 +12,17 @@
 
 Control flow statements determine the **order of execution** in a Java program. They fall into three categories — **selection** (choosing which code to execute), **iteration** (repeating code), and **transfer** (jumping to a different point in execution).
 
-**Selection statements** — `if` / `else if` / `else` is the fundamental conditional construct. Conditions must be boolean expressions (Java doesn't allow truthy/falsy values like JavaScript/Python). The traditional `switch` matches a value against multiple `case` labels. Modern **switch expressions** (Java 14+) use arrow syntax (`->`) with no fall-through, can return values, support `yield` for multi-statement blocks, and the compiler enforces exhaustiveness.
+**Selection statements** — `if` / `else if` / `else` is the fundamental conditional construct. Conditions must be boolean expressions (Java doesn't allow truthy/falsy values like JavaScript/Python). 
 
-**Iteration statements** — Classic C-style `for` loop with initialization, condition, and update. The `for-each` (enhanced for) iterates over arrays and `Iterable` objects with cleaner syntax and no index management. The `while` loop checks the condition before each iteration (may never execute), while `do-while` checks after each iteration (always executes at least once).
+The traditional `switch` matches a value against multiple `case` labels. Modern **switch expressions** (Java 14+) use arrow syntax (`->`) with no fall-through and can return values. They support `yield` for multi-statement blocks, and the compiler enforces exhaustiveness.
 
-**Transfer statements** — `break` exits the current loop or switch statement. With a label, it exits the labeled outer loop. `continue` skips the rest of the current iteration and moves to the next. With a label, it continues the labeled outer loop. `return` exits the current method, optionally returning a value.
+**Iteration statements** — Classic C-style `for` loop with initialization, condition, and update. The `for-each` (enhanced for) iterates over arrays and `Iterable` objects with cleaner syntax and no index management. 
+
+The `while` loop checks the condition before each iteration (may never execute). The `do-while` checks after each iteration (always executes at least once).
+
+**Transfer statements** — `break` exits the current loop or switch statement. With a label, it exits the labeled outer loop. 
+
+`continue` skips the rest of the current iteration and moves to the next. With a label, it continues the labeled outer loop. `return` exits the current method, optionally returning a value.
 
 ```java
 package com.interview.fundamentals;

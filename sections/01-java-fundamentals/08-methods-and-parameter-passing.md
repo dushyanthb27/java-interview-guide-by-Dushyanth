@@ -10,12 +10,16 @@
 
 ### Answer
 
-Java is **always pass-by-value**. There are no exceptions to this rule. However, the confusion arises because when you pass an object, you are passing the **value of the reference** (a copy of the pointer to the object), not the object itself and not a reference to the reference. This means:
+Java is **always pass-by-value**. There are no exceptions to this rule. 
+
+However, the confusion arises because when you pass an object, you are passing the **value of the reference** (a copy of the pointer to the object), not the object itself and not a reference to the reference. This means:
 
 - **Primitives** — A **copy of the value** is passed. Changing the parameter inside the method has **no effect** on the original variable.
 - **Objects** — A **copy of the reference** (memory address) is passed. You **can modify the object's state** through the copied reference (since both references point to the same object), but you **cannot make the original reference point to a different object** by reassigning the parameter.
 
-This is the single most misunderstood concept in Java. Many developers say "Java passes objects by reference" — this is **incorrect**. If Java were truly pass-by-reference, reassigning the parameter inside a method would change the caller's variable. It doesn't.
+This is the single most misunderstood concept in Java. Many developers say "Java passes objects by reference" — this is **incorrect**. 
+
+If Java were truly pass-by-reference, reassigning the parameter inside a method would change the caller's variable. It doesn't.
 
 **The litmus test** — If you can write a `swap(a, b)` method that swaps the caller's variables, the language supports pass-by-reference. You **cannot** write such a method in Java — proving it is pass-by-value.
 

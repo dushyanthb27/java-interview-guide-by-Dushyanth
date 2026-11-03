@@ -6,7 +6,9 @@
 
 ## Overview
 
-Code signing in Java is the process of digitally signing JAR files to verify their **integrity** (the code hasn't been tampered with) and **authenticity** (the code comes from a trusted source). It uses public-key cryptography with certificates stored in a **KeyStore**.
+Code signing in Java digitally signs JAR files to verify two things: **integrity** (the code hasn't been tampered with) and **authenticity** (the code comes from a trusted source).
+
+It uses public-key cryptography with certificates stored in a **KeyStore**.
 
 ## Code Signing Workflow
 

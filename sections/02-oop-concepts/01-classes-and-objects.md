@@ -35,7 +35,12 @@ public class Employee {
 
 **Object Creation Process**
 
-When you write `new Employee()`, several things happen in order — memory allocation, field initialization, constructor execution, and reference return. The JVM allocates space on the **heap** for the object, sets fields to default values (`null`, `0`, `false`), runs the constructor body to initialize state, and returns a reference (pointer) to the heap object stored on the **stack**.
+When you write `new Employee()`, several things happen in order:
+
+1. **Memory allocation** — JVM allocates space on the heap
+2. **Field initialization** — Sets fields to default values (`null`, `0`, `false`)
+3. **Constructor execution** — Runs constructor body to initialize state
+4. **Reference return** — Returns a reference (pointer) to the heap object, stored on the stack
 
 ```java
 public class ObjectCreationDemo {

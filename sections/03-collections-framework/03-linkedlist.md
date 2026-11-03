@@ -10,7 +10,9 @@
 
 ### Answer
 
-LinkedList is a doubly-linked list implementation — each element is wrapped in a `Node` object with pointers to both the previous and next nodes. While it offers O(1) insertions at the ends, it's almost never the right choice in practice due to poor cache locality and high memory overhead.
+LinkedList is a doubly-linked list implementation where each element is wrapped in a `Node` object with pointers to both the previous and next nodes. 
+
+While it offers O(1) insertions at the ends, it's almost never the right choice in practice. The reason: poor cache locality and high memory overhead.
 
 ### Internal Structure — Doubly-Linked List
 
@@ -39,7 +41,7 @@ public class LinkedList<E> extends AbstractSequentialList<E>
 }
 ```
 
-The key difference from ArrayList is memory layout — ArrayList stores elements contiguously in an array, while LinkedList scatters nodes across the heap:
+The key difference from ArrayList is memory layout. ArrayList stores elements contiguously in an array. LinkedList scatters nodes across the heap:
 
 ```
 ArrayList (contiguous memory):
@@ -100,7 +102,7 @@ int index = list.indexOf("B");
 
 ### How get(index) Works Internally
 
-LinkedList optimizes random access by traversing from the closer end — if you request index 7 in a list of 10 elements, it starts from the head; if you request index 8, it starts from the tail:
+LinkedList optimizes random access by traversing from the closer end. If you request index 7 in a list of 10 elements, it starts from the head. If you request index 8, it starts from the tail:
 
 ```java
 // LinkedList optimizes by traversing from the CLOSER end
@@ -151,7 +153,9 @@ deque.pollLast();
 
 ### Cache Locality Problem
 
-The real performance killer for LinkedList is poor cache locality — ArrayList elements are stored contiguously, so CPU cache lines load multiple elements together. LinkedList nodes are scattered across the heap, causing cache misses on nearly every access:
+The real performance killer for LinkedList is poor cache locality. 
+
+ArrayList elements are stored contiguously, so CPU cache lines load multiple elements together. LinkedList nodes are scattered across the heap, causing cache misses on nearly every access:
 
 ```java
 // ArrayList: elements stored contiguously in memory
@@ -169,7 +173,7 @@ The real performance killer for LinkedList is poor cache locality — ArrayList 
 
 ### When LinkedList Beats ArrayList (Rare Cases)
 
-There are a few edge cases where LinkedList might make sense — but they're rare:
+There are a few edge cases where LinkedList might make sense. But they're rare:
 
 ```java
 // Case 1: Frequent insertions/removals at BOTH ends (use as Deque)

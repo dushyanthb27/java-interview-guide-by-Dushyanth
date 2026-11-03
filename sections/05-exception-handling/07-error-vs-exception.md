@@ -95,7 +95,9 @@ try {
 }
 ```
 
-> **🎯 Interviewer Insight:** This is a classic trap question. "Have you ever caught `Error`?" The correct answer: **"Never in application code."** Catching `Error` masks JVM failures that should crash the process so you can debug them. The only exceptions are application servers (Tomcat, Jetty) and monitoring agents that need to stay alive.
+> **🎯 Interviewer Insight:** This is a classic trap question. "Have you ever caught `Error`?" The correct answer: **"Never in application code."** 
+
+Catching `Error` masks JVM failures that should crash the process so you can debug them. The only exceptions are application servers (Tomcat, Jetty) and monitoring agents that need to stay alive.
 
 ---
 

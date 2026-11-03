@@ -6,7 +6,9 @@
 
 ## Overview
 
-Garbage collection optimization is critical for achieving consistent application performance. The goal is to minimize GC pause times while maintaining adequate throughput, choosing the right trade-off for your workload.
+Garbage collection optimization is critical for achieving consistent application performance.
+
+The goal is to minimize GC pause times while maintaining adequate throughput, choosing the right trade-off for your workload.
 
 ---
 
