@@ -1,6 +1,7 @@
 # Q1: Explain JVM Architecture
 
 ## 📋 Question
+
 Explain the architecture of the Java Virtual Machine. What are its major components and how do they interact?
 
 ## Difficulty: 🟡 Medium
@@ -87,7 +88,9 @@ Source.java  ──▶  javac  ──▶  Source.class  ──▶  Class Loader 
 ```
 
 - **Loading** — Reads `.class` files and creates binary data in the Method Area
+
 - **Linking** — Verifies bytecode, prepares static variables, resolves symbolic references
+
 - **Initialization** — Executes static initializers and `<clinit>` method
 
 ### 2. Runtime Data Areas
@@ -121,9 +124,11 @@ public class ExecutionExample {
 ```
 
 - **Interpreter** — Reads and executes bytecode instructions one at a time. Fast startup, slower execution.
+
 - **JIT Compiler** — Compiles frequently-executed (hot) bytecode into native machine code at runtime. Slow to compile, but very fast execution thereafter.
   - **C1 (Client Compiler)** — Quick compilation with basic optimizations
   - **C2 (Server Compiler)** — Slower compilation with aggressive optimizations
+
 - **Garbage Collector** — Automatically reclaims memory from unreachable objects on the heap.
 
 ### Data Flow Through the JVM
@@ -213,23 +218,31 @@ java -XX:+PrintFlagsFinal -version | grep -i "heapsize\|metaspace\|stacksize"
 ```
 
 ### ⚠️ Common Mistake
+
 Confusing the JVM with the JRE or JDK. The **JVM** is the virtual machine that executes bytecode. The **JRE** is the JVM plus core libraries. The **JDK** is the JRE plus development tools (javac, javap, jdb). Since Java 11, Oracle distributes only the JDK — there is no separate JRE download.
 
 ### ⚡ Performance Tip
+
 Understanding JVM architecture directly impacts performance tuning. Knowing that the **Heap** is shared and GC-managed tells you to minimize unnecessary object creation. Knowing the **JIT compiler** optimizes hot paths tells you that microbenchmarks must include warm-up phases. Knowing the **Stack** is per-thread and has a fixed size (`-Xss`) tells you to watch recursion depth.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 This is a foundational question that interviewers use to gauge your depth of JVM knowledge. A strong answer walks through all three subsystems with clear explanations of what each component does and how they interact. Drawing the architecture diagram (even on a whiteboard) makes a strong impression. Senior candidates should mention JIT tiered compilation and GC algorithms.
 
 ## ⚡ Follow-up Questions
+
 1. What happens internally when you run `java MyApp`?
 2. How does the JIT compiler decide which methods to compile?
 3. What is the difference between the Method Area and the Heap?
 
 ## 📚 Related Topics
+
 - [Class Loading Mechanism](./q02-class-loading-mechanism.md)
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)
+
 - [JIT Compilation](./q07-jit-compilation.md)
+
 - [GC Algorithms](./q05-gc-algorithms.md)

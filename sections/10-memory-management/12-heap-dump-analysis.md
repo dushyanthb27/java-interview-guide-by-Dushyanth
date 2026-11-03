@@ -185,7 +185,6 @@ Retained Size:
   Memory that would be freed if THIS object were garbage collected
   Includes all objects exclusively reachable from this object
 
-
 Example:
   HashMap (shallow: 48 bytes)
     └── Node[] (shallow: 8,192 bytes)
@@ -299,6 +298,7 @@ Steps:
 ## Practical Walkthrough: Finding a Memory Leak
 
 ### Scenario
+
 A Spring Boot application's Old Gen keeps growing, eventually causing OOM.
 
 ### Step 1: Capture heap dumps at intervals
@@ -441,11 +441,17 @@ java -Xlog:gc*:file=gc.log:time \
 ---
 
 ## Interview Tips
+
 - A heap dump captures **all live objects** — it's the definitive tool for memory leak diagnosis
+
 - **Dominator tree** shows which objects keep the most memory alive — start there
+
 - **Shallow size** = the object alone; **Retained size** = the object + everything it exclusively holds
+
 - **GC roots** are the starting points of reachability — static fields and thread stacks are the most common
+
 - Always use `-XX:+HeapDumpOnOutOfMemoryError` in production — you won't get a second chance
+
 - **Eclipse MAT** is the industry standard for heap analysis; **OQL** lets you query the dump like a database
 
 ---

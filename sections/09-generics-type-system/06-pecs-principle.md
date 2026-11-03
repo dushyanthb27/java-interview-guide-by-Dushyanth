@@ -7,11 +7,13 @@
 ## 🟠 Difficulty: Advanced
 
 ## Question
+
 > What is the PECS principle? How does it guide wildcard usage in API design?
 
 ---
 
 ## Quick Answer
+
 **PECS** stands for **Producer Extends, Consumer Super** (from Joshua Bloch's *Effective Java*). If a parameterized type **produces** values (you read from it), use `? extends T`. If it **consumes** values (you write to it), use `? super T`. If it does both, use an exact type `T` (no wildcard). This principle maximizes API flexibility while maintaining type safety.
 
 ---
@@ -316,11 +318,17 @@ public <T> List<T> filter(List<? extends T> input, Predicate<? super T> test) {
 ---
 
 ## Interview Tips
+
 - PECS = **P**roducer **E**xtends, **C**onsumer **S**uper
+
 - The perspective is from the **collection**, not the method
+
 - Return types should **never** use wildcards
+
 - `Collections.copy(dest, src)` is the textbook PECS example
+
 - `Comparator<? super T>` and `Consumer<? super T>` are consumer patterns
+
 - When in doubt: if you only **get** values, use `extends`; if you only **put** values, use `super`
 
 ---

@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > What are the constraints and limitations of Java generics? What can't you do with type parameters?
 
 ---
 
 ## Quick Answer
+
 Due to type erasure, Java generics have several limitations: you cannot instantiate type parameters (`new T()`), use primitives as type arguments, create generic arrays (`new T[]`), use `instanceof` with parameterized types, declare static fields of a type parameter, or catch/throw type parameters. Each limitation has established workarounds.
 
 ---
@@ -303,10 +305,15 @@ public static <T> T createOrDefault(Supplier<T> factory, T defaultValue) {
 ---
 
 ## Interview Tips
+
 - All generic limitations stem from **type erasure** (backward compatibility with pre-Java 5)
+
 - The `Class<T>` token is the universal workaround for runtime type info
+
 - `@SuppressWarnings("unchecked")` should be as narrow as possible with a comment
+
 - Prefer `List<T>` over `T[]` — it avoids the generic array creation problem
+
 - Know at least 4-5 limitations and their workarounds for interviews
 
 ---

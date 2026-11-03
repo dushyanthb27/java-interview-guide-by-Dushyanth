@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > What are lower-bounded wildcards (`? super`) in Java generics? When should you use them?
 
 ---
 
 ## Quick Answer
+
 `? super T` is a **lower-bounded wildcard** that matches T or any supertype of T. A `List<? super Integer>` can reference a `List<Integer>`, `List<Number>`, or `List<Object>`. You can safely **write** (add) Integer values to it, but when you **read**, you only get `Object` back because the compiler doesn't know the exact supertype. This makes `? super` ideal for **consumer** parameters — destinations that receive data.
 
 ---
@@ -274,10 +276,15 @@ public static <T> void transfer(
 ---
 
 ## Interview Tips
+
 - `? super T` makes the structure a **consumer** — you can write T (or subtypes) into it
+
 - Reading from `? super T` always returns `Object`
+
 - `Comparable<? super T>` is essential for classes that inherit their Comparable from a parent
+
 - You can add T and any **subtype** of T to a `List<? super T>`
+
 - The mnemonic: **extends = read, super = write** (formalized as PECS in Q6)
 
 ---

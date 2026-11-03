@@ -7,11 +7,13 @@
 ## 🟢 Difficulty: Basic
 
 ## Question
+
 > How do generic classes and methods work in Java? What are the conventions and scope rules for type parameters?
 
 ---
 
 ## Quick Answer
+
 Generics allow classes, interfaces, and methods to operate on parameterized types. A **generic class** declares type parameters in angle brackets after the class name (`class Box<T>`). A **generic method** declares type parameters before the return type (`<T> T method(T t)`). Type parameters are replaced with actual types at compile time, providing type safety without casting.
 
 ---
@@ -282,9 +284,13 @@ public class Cache<T> {
 ---
 
 ## Interview Tips
+
 - Generics are a **compile-time** feature — erased at runtime
+
 - Type parameters on **static** members must be declared on the method itself
+
 - Always use parameterized types; raw types exist only for backward compatibility
+
 - The compiler inserts casts automatically when you use generics
 
 ---

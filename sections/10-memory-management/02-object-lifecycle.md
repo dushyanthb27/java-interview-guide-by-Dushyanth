@@ -151,9 +151,13 @@ public void process() {
 An object becomes eligible for garbage collection when no strong reference chain from any **GC root** reaches it.
 
 ### GC Roots include:
+
 - Local variables and parameters of currently executing methods
+
 - Active thread objects
+
 - Static fields of loaded classes
+
 - JNI references
 
 ```java
@@ -375,9 +379,13 @@ largeCache = null;   // Help GC in long-running methods
 ---
 
 ## Interview Tips
+
 - Know all four creation mechanisms and which ones skip the constructor
+
 - Understand the five reachability states and their ordering
+
 - Be ready to explain why `finalize()` is deprecated and what replaces it
+
 - Circular references are NOT a problem in Java — the GC uses reachability, not reference counting
 
 ---

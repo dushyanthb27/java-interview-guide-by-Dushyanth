@@ -7,11 +7,13 @@
 ## 🟠 Difficulty: Advanced
 
 ## Question
+
 > What are covariance, contravariance, and invariance? How do they apply to Java's arrays, generics, and wildcards?
 
 ---
 
 ## Quick Answer
+
 **Covariance** preserves the type hierarchy (`Dog → Animal` means `List<Dog> → List<? extends Animal>`). **Contravariance** reverses it (`Dog → Animal` means `Consumer<Animal> → Consumer<? super Dog>`). **Invariance** means no subtype relationship exists (`List<Dog>` has NO relation to `List<Animal>`). Java arrays are covariant by design, generics are invariant by default, and wildcards provide **use-site variance** (`? extends` for covariance, `? super` for contravariance).
 
 ---
@@ -153,7 +155,6 @@ void addDogs(List<? super Dog> destination) { }
 
 // At usage site 3: invariant (read + write)
 void processExactly(List<Dog> dogs) { }
-
 
 // KOTLIN: Declaration-site variance (applied once at class definition)
 // interface Source<out T> {   // Always covariant — "out" = produces T
@@ -320,11 +321,17 @@ void swapFirst(List<Dog> dogs) {
 ---
 
 ## Interview Tips
+
 - Arrays: **covariant** with runtime checks (`ArrayStoreException`)
+
 - Generics: **invariant** by default, variance via wildcards at use-site
+
 - `? extends` = covariance (read/produce), `? super` = contravariance (write/consume)
+
 - Java has **use-site** variance; Kotlin/Scala have **declaration-site** variance
+
 - Covariant return types are supported in method overriding
+
 - Know the comparison: Java `? extends`/`? super` vs Kotlin `out`/`in` vs Scala `+`/`-`
 
 ---

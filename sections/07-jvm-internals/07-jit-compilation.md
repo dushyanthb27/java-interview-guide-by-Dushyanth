@@ -1,6 +1,7 @@
 # Q7: How Does JIT Compilation Work?
 
 ## 📋 Question
+
 Explain how Just-In-Time (JIT) compilation works in the JVM. What are C1 and C2 compilers, and what optimizations does the JIT perform?
 
 ## Difficulty: 🟠 Hard
@@ -207,22 +208,29 @@ java -XX:+PrintCompilation MyApp
 ```
 
 ### ⚠️ Common Mistake
+
 Writing microbenchmarks without JIT warm-up. The first few thousand invocations of a method run in the interpreter, which is much slower than JIT-compiled code. Always use **JMH (Java Microbenchmark Harness)** for benchmarks — it handles warm-up, dead code elimination prevention, and statistical analysis.
 
 ### ⚡ Performance Tip
+
 Monitor code cache usage (`jcmd <pid> Compiler.codecache`) — if the code cache fills up, the JIT stops compiling and performance degrades severely. Increase it with `-XX:ReservedCodeCacheSize=512m` for large applications. Also, very large methods (> 8000 bytes of bytecode) are never JIT-compiled — keep methods small and focused to enable JIT optimizations.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to hear about tiered compilation (C1 + C2), hot spot detection via counters, and at least two JIT optimizations (inlining and escape analysis are the most important). Strong candidates explain OSR, devirtualization, and the code cache.
 
 ## ⚡ Follow-up Questions
+
 1. What is the difference between AOT and JIT compilation?
 2. How does escape analysis eliminate object allocations?
 3. What happens when the code cache is full?
 
 ## 📚 Related Topics
+
 - [JVM Architecture](./01-jvm-architecture.md)
+
 - [Bytecode Understanding](./08-bytecode-understanding.md)
+
 - [JVM Tuning Parameters](./12-jvm-tuning-parameters.md)

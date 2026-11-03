@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > What are upper-bounded wildcards (`? extends`) in Java generics? Why can't you add elements to a `List<? extends Number>`?
 
 ---
 
 ## Quick Answer
+
 `? extends T` is an **upper-bounded wildcard** that matches T or any subtype of T. A `List<? extends Number>` can hold a `List<Integer>`, `List<Double>`, or `List<Number>`. You can **read** elements as Number, but you **cannot add** elements (except `null`) because the compiler doesn't know the exact subtype the list holds — adding an Integer to what might be a `List<Double>` would be type-unsafe.
 
 ---
@@ -261,10 +263,15 @@ List<? extends Number> readOnly = Collections.unmodifiableList(integers);
 ---
 
 ## Interview Tips
+
 - `? extends T` makes the structure a **producer** — you can only read from it
+
 - The compiler blocks writes because it cannot guarantee type safety
+
 - `null` is the only value that can be added to `? extends` collections
+
 - Unbounded wildcard `<?>` is shorthand for `<? extends Object>`
+
 - Use type parameters instead of wildcards when you need to reference the type
 
 ---

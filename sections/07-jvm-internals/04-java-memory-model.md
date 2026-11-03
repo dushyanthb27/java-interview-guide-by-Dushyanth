@@ -1,6 +1,7 @@
 # Q4: Explain the Java Memory Model (JMM)
 
 ## 📋 Question
+
 What is the Java Memory Model? Explain happens-before relationships, memory ordering, and visibility guarantees.
 
 ## Difficulty: 🔴 Expert
@@ -285,6 +286,7 @@ public class Singleton {
 ```
 
 ### ⚠️ Common Mistake
+
 Relying on timing or `Thread.sleep()` for visibility. Without a happens-before relationship, a thread may **never** see another thread's writes — not just a delay, but **never**. The JIT compiler can hoist a non-volatile field read out of a loop, making it effectively invisible to updates from other threads:
 
 ```java
@@ -299,14 +301,17 @@ while (running) { /* correctly checks each iteration */ }
 ```
 
 ### ⚡ Performance Tip
+
 `volatile` is cheaper than `synchronized` — it only inserts memory barriers without blocking. Use `volatile` for simple flags and single-variable visibility. Use `synchronized` or `Lock` when you need atomicity across multiple operations. For atomic counters, prefer `AtomicInteger` which uses `CAS` (Compare-And-Swap) — even cheaper than `volatile` writes in some cases.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 The JMM is an expert-level topic. Interviewers want to hear about happens-before rules, not just "volatile makes things visible." Strong candidates explain **why** volatile fixes double-checked locking (instruction reordering), describe memory barriers, and know the difference between visibility and atomicity. Mentioning the transitivity rule and final field semantics demonstrates deep understanding.
 
 ## ⚡ Follow-up Questions
+
 1. Why is double-checked locking broken without `volatile`, and what specific reordering causes the bug?
 2. What's the difference between visibility and atomicity, and give an example where you need both?
 3. Can `volatile` replace `synchronized`? If not, explain a scenario where `volatile` is insufficient.
@@ -316,6 +321,9 @@ The JMM is an expert-level topic. Interviewers want to hear about happens-before
 7. What is the difference between happens-before and synchronizes-with in the JMM?
 
 ## 📚 Related Topics
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)
+
 - [JVM Architecture](./q01-jvm-architecture.md)
+
 - [Multithreading & Concurrency](../04-multithreading-concurrency/README.md)

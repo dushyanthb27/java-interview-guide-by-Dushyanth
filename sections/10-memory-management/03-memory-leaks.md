@@ -362,9 +362,13 @@ map.get(new ImmutableKey(1));   // Returns "value" — always consistent
 ---
 
 ## Interview Tips
+
 - Memory leaks in Java are not "forgotten `free()` calls" — they are **unintended strong references**
+
 - The most common leaks in enterprise apps: `ThreadLocal`, listeners, and static caches
+
 - Heap dumps are the definitive tool for diagnosing leaks — look for the dominator tree
+
 - A rising baseline after GC cycles is the telltale sign of a leak
 
 ---

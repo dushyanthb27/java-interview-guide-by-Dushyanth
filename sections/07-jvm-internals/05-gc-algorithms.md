@@ -1,6 +1,7 @@
 # Q5: What GC Algorithms Are Used?
 
 ## 📋 Question
+
 What garbage collection algorithms does the JVM use? Explain generational collection, minor vs major GC, and how objects are promoted.
 
 ## Difficulty: 🟠 Hard
@@ -252,9 +253,11 @@ public class CardTableDemo {
 ```
 
 ### ⚠️ Common Mistake
+
 Calling `System.gc()` explicitly. This is merely a **suggestion** to the JVM — it may be ignored entirely. Even when honored, it typically triggers a **Full GC** which causes the longest stop-the-world pause. Use `-XX:+DisableExplicitGC` in production to ignore `System.gc()` calls. Let the JVM manage GC timing.
 
 ### ⚡ Performance Tip
+
 Tune the Young Generation size to ensure most short-lived objects die before reaching Old Gen. A properly-sized Young Gen (`-XX:NewRatio`, `-XX:NewSize`) reduces the frequency of expensive Major/Full GCs. Monitor the **promotion rate** — if too many objects are promoted to Old Gen, either increase Young Gen size or increase the tenuring threshold.
 
 ```bash
@@ -268,9 +271,11 @@ Tune the Young Generation size to ensure most short-lived objects die before rea
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want you to explain the three core algorithms and then how they map to the generational heap. Strong candidates explain **why** copying is used for Young Gen (most objects die, so copying few survivors is cheap), **why** Mark-Compact is used for Old Gen (live object ratio is high), and the card table mechanism for cross-generational references. Mentioning GC roots demonstrates deep understanding.
 
 ## ⚡ Follow-up Questions
+
 1. Why is the copying algorithm ideal for Young Generation, and what happens if the live object ratio is high?
 2. What causes a Full GC, and how can you prevent it through sizing and tuning?
 3. How does the card table work, and what is the overhead of maintaining it?
@@ -280,6 +285,9 @@ Interviewers want you to explain the three core algorithms and then how they map
 7. How does escape analysis affect garbage collection by allowing stack allocation?
 
 ## 📚 Related Topics
+
 - [GC Collectors (G1, ZGC, Shenandoah)](./q06-gc-collectors.md)
+
 - [JVM Tuning Parameters](./q12-jvm-tuning-parameters.md)
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)

@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > How does Java infer generic types? How has type inference evolved from Java 5 through Java 10+?
 
 ---
 
 ## Quick Answer
+
 **Type inference** is the compiler's ability to determine type arguments automatically from context — method arguments, return type, or assignment target. Java 7 introduced the **diamond operator** (`<>`) for constructor inference. Java 8 added **target-type inference** for lambdas and method references. Java 10 added `var` for local variable type inference. Each version has reduced boilerplate while maintaining full type safety.
 
 ---
@@ -273,11 +275,17 @@ List<String> empty = Collections.<String>emptyList();  // Only if needed
 ---
 
 ## Interview Tips
+
 - Type inference is **compile-time only** — runtime behavior is unchanged
+
 - Diamond operator (`<>`) infers from the **left-hand side** (assignment target)
+
 - Java 8 target-type inference works through **method parameter context**
+
 - `var` infers from the **right-hand side** — it's the opposite of diamond
+
 - `var` is NOT dynamic typing — the type is fixed at compile time
+
 - `var` + `<>` together = `ArrayList<Object>` — avoid this combination
 
 ---

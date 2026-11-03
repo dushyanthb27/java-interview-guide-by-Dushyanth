@@ -7,11 +7,13 @@
 ## 🟠 Difficulty: Advanced
 
 ## Question
+
 > How do you design custom generic classes and interfaces? What patterns enable type-safe, reusable APIs?
 
 ---
 
 ## Quick Answer
+
 Designing custom generic types involves choosing appropriate type parameters, applying bounds for safety, implementing generic interfaces correctly, and using patterns like **type-safe heterogeneous containers**, **generic builders**, and **generic factory methods**. Good generic design maximizes reusability while maintaining compile-time type safety. The key is to genericize only what varies and keep the API intuitive.
 
 ---
@@ -442,11 +444,17 @@ public interface Repository<T, ID> { }
 ---
 
 ## Interview Tips
+
 - Good generic design: genericize what **varies**, keep the rest concrete
+
 - Use **factory methods** (`Result.success(data)`) for clean type inference
+
 - **Type-safe heterogeneous containers** use `Class<T>` as keys for mixed-type storage
+
 - The **self-type pattern** (recursive bounds) enables fluent APIs with inheritance
+
 - Avoid over-genericizing — if a type parameter is used once, a wildcard may suffice
+
 - Always apply **PECS** to method parameters in your generic APIs
 
 ---

@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > What are bounded type parameters in Java generics? How do upper bounds, multiple bounds, and recursive type bounds work?
 
 ---
 
 ## Quick Answer
+
 **Bounded type parameters** restrict the types that can be used as type arguments. An **upper bound** (`<T extends Number>`) limits T to Number or its subclasses. **Multiple bounds** (`<T extends Comparable<T> & Serializable>`) require T to satisfy all listed types. **Recursive type bounds** (`<T extends Comparable<T>>`) constrain T to be comparable with itself — a pattern used in sorting and fluent APIs.
 
 ---
@@ -306,10 +308,15 @@ public abstract class Builder<B extends Builder<B>> {
 ---
 
 ## Interview Tips
+
 - Upper bounds restrict acceptable type arguments and expose methods of the bound
+
 - Multiple bounds use `&` syntax; **at most one class**, which must come first
+
 - Recursive bounds (`T extends Comparable<T>`) are used in enums, builders, and sort APIs
+
 - After erasure, T is replaced by its **first bound** (or `Object` if unbounded)
+
 - `<T extends Comparable<? super T>>` is the idiomatic pattern for sort methods
 
 ---

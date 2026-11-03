@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > How do you mix generic code with pre-Java 5 legacy code that uses raw types? What are the risks and migration strategies?
 
 ---
 
 ## Quick Answer
+
 Java generics are designed for **backward compatibility** through erasure — generic and legacy raw-type code can coexist. Raw types (`List` instead of `List<String>`) compile but generate **unchecked warnings**. When passing generic collections to legacy code, you risk **heap pollution** — the legacy code might insert wrong types. Migration should be incremental, using `@SuppressWarnings("unchecked")` judiciously, and verifying with `Collections.checkedXxx()` wrappers where needed.
 
 ---
@@ -336,11 +338,17 @@ void legacyServiceReturnsCorrectTypes() {
 ---
 
 ## Interview Tips
+
 - Raw types exist **solely for backward compatibility** — never use them in new code
+
 - Type erasure ensures **binary compatibility** between generic and pre-generic bytecode
+
 - `@SuppressWarnings("unchecked")` should be as narrow as possible with a justifying comment
+
 - `Collections.checkedList/Map/Set()` adds **runtime** type enforcement
+
 - Migration should be incremental — add generics to interfaces first, then implementations
+
 - Heap pollution occurs when legacy code corrupts a typed collection
 
 ---

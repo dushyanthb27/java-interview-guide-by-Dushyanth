@@ -7,11 +7,13 @@
 ## 🟠 Difficulty: Advanced
 
 ## Question
+
 > Why can't you create generic arrays in Java? What is the difference between array covariance and generic invariance?
 
 ---
 
 ## Quick Answer
+
 Java **arrays are covariant** (a `String[]` is an `Object[]`) and carry runtime type information, while **generics are invariant** (a `List<String>` is NOT a `List<Object>`) and are erased at runtime. If generic arrays were allowed, the combination of covariance and erasure would break type safety silently — the array store check that normally catches `ArrayStoreException` would fail because the generic type is erased. This is why `new T[]` and `new List<String>[]` are forbidden.
 
 ---
@@ -318,10 +320,15 @@ public static <T> Set<T> setOf(T... elements) {
 ---
 
 ## Interview Tips
+
 - Arrays are **covariant and reified**; generics are **invariant and erased**
+
 - `new T[]` is forbidden because erasure would make it `new Object[]` — breaking array store checks
+
 - Heap pollution = a generic variable references an object of the wrong parameterized type
+
 - Three workarounds: `Object[]` with cast, `Array.newInstance()`, or `List<T>` (preferred)
+
 - `@SafeVarargs` suppresses heap pollution warnings; use only on methods that don't modify the varargs array
 
 ---

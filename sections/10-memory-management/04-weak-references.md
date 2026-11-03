@@ -1,6 +1,7 @@
 # Q4: What Are Weak References in Java?
 
 ## 📋 Question
+
 What are Weak References in Java? When should you use them, and what are the common use cases?
 
 ## Difficulty: 🟠 Intermediate
@@ -184,14 +185,21 @@ if (d != null) {
 ---
 
 ## Interview Tips
+
 - WeakReferences are collected eagerly — at the **next** GC cycle, not under memory pressure (that's SoftReference)
+
 - `WeakHashMap` is the most common practical use of weak references in the JDK
+
 - ClassLoader uses weak references internally to allow class unloading
+
 - `ThreadLocal` entries use weak references to the `ThreadLocal` key (but values are strong — hence the leak risk)
 
 ---
 
 ## 📚 Related Topics
+
 - [Memory Leaks](./03-memory-leaks.md)
+
 - [Object Lifecycle](./02-object-lifecycle.md)
+
 - [Stack vs Heap](../07-jvm-internals/09-stack-vs-heap.md)

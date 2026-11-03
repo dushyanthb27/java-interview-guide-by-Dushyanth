@@ -308,11 +308,17 @@ java -XX:StringTableSize=1000003 MyApp
 ---
 
 ## Interview Tips
+
 - String Pool moved from PermGen to the main heap in Java 7 — pooled strings can be GC'd
+
 - `"abc"` creates 1 object (pool); `new String("abc")` creates up to 2 objects
+
 - The compiler folds string concatenation of compile-time constants (`final` + literals)
+
 - `intern()` is useful for bounded, repetitive strings but harmful for unique strings
+
 - String deduplication (G1 GC) shares the internal `byte[]` — different from `intern()` which shares the String object
+
 - Compact Strings (Java 9+) use `byte[]` instead of `char[]`, halving ASCII string memory
 
 ---

@@ -1,6 +1,7 @@
 # Q12: Key JVM Tuning Parameters
 
 ## 📋 Question
+
 What are the most important JVM tuning parameters? How do you configure heap size, GC behavior, and other critical settings?
 
 ## Difficulty: 🟠 Hard
@@ -316,9 +317,11 @@ jinfo -flags <pid>                   # Flag values
 ```
 
 ### ⚠️ Common Mistake
+
 Setting `-Xms` much smaller than `-Xmx`. This causes the JVM to repeatedly resize the heap (allocate memory from OS, move objects), which adds latency. For production servers, always set `-Xms` equal to `-Xmx` so the heap is fully allocated at startup. Similarly, not setting `-XX:MaxMetaspaceSize` is dangerous — it allows class loader leaks to consume unbounded native memory.
 
 ### ⚡ Performance Tip
+
 Start with a minimal configuration and add flags based on observed behavior:
 1. Set heap size (`-Xms` = `-Xmx`)
 2. Enable GC logging
@@ -330,15 +333,21 @@ Avoid copying JVM flag configurations from the internet — every application ha
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you know the essential flags (heap sizing, GC selection, GC logging, OOM diagnostics) and understand **why** each flag matters. Strong candidates explain the relationship between flags (e.g., `NewRatio` affects Young Gen size which affects Minor GC frequency) and can describe a production-ready configuration. Container-aware settings are increasingly important.
 
 ## ⚡ Follow-up Questions
+
 1. Why should `-Xms` equal `-Xmx` in production?
 2. What happens if you don't set `-XX:MaxMetaspaceSize`?
 3. How do you configure JVM flags in a Kubernetes pod?
 
 ## 📚 Related Topics
+
 - [GC Collectors](./q06-gc-collectors.md)
+
 - [Monitoring JVM](./q13-monitoring-jvm.md)
+
 - [Metaspace](./q10-metaspace.md)
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)

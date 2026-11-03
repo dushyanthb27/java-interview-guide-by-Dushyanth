@@ -1,6 +1,7 @@
 # Q6: What Are Reference Queues in Java?
 
 ## 📋 Question
+
 What are Reference Queues in Java? How do they work with different reference types, and when should you use them?
 
 ## Difficulty: 🟠 Intermediate
@@ -171,17 +172,25 @@ public class PhantomReferenceDemo {
 ### Use Cases
 
 **WeakReference + ReferenceQueue:**
+
 - Metadata caches that need cleanup when objects are GC'd
+
 - Observer/listener patterns to remove stale listeners
+
 - Canonical mapping to clean up unused entries
 
 **SoftReference + ReferenceQueue:**
+
 - Memory-sensitive caches with eviction notification
+
 - Resource cleanup when cached data is evicted under memory pressure
 
 **PhantomReference + ReferenceQueue:**
+
 - Releasing native resources (file handles, sockets) when objects are GC'd
+
 - Implementing finalizers without the finalizer problems
+
 - Tracking object lifecycle for debugging
 
 ### Common Pitfalls
@@ -225,14 +234,21 @@ queue.remove(1000);  // Wait up to 1 second
 ---
 
 ## Interview Tips
+
 - ReferenceQueue is the only way to know when a reference's referent has been collected
+
 - PhantomReference.get() always returns null — they're for post-mortem cleanup only
+
 - ReferenceQueue is essential for implementing resource cleanup tied to object lifecycle
+
 - Common pattern: custom reference subclass that stores the key for map cleanup
 
 ---
 
 ## 📚 Related Topics
+
 - [Weak References](./04-weak-references.md)
+
 - [Soft References](./05-soft-references.md)
+
 - [Memory Leaks](./03-memory-leaks.md)

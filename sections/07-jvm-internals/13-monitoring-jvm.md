@@ -1,6 +1,7 @@
 # Q13: How to Monitor JVM Performance?
 
 ## 📋 Question
+
 What tools and techniques are available for monitoring JVM performance? How do you diagnose memory leaks, thread issues, and performance bottlenecks?
 
 ## Difficulty: 🟠 Hard
@@ -335,9 +336,11 @@ Performance Issue Detected
 ```
 
 ### ⚠️ Common Mistake
+
 Using `jmap -dump` on a production JVM during peak traffic. Heap dumps trigger a Full GC and pause the application for the duration of the dump (which can be minutes for large heaps). Use **JFR** instead for continuous production monitoring — it has < 2% overhead and doesn't stop the application. If you must take a heap dump, do it during low-traffic periods or on a single node behind a load balancer.
 
 ### ⚡ Performance Tip
+
 Set up **proactive monitoring** rather than reactive debugging. Configure GC logging from day one (`-Xlog:gc*`), enable JFR continuous recording (`-XX:StartFlightRecording`), and expose JMX metrics to Prometheus/Grafana. When problems occur, you'll have historical data to compare against. For Spring Boot, add `micrometer-registry-prometheus` and expose the `/actuator/prometheus` endpoint for automatic JVM metrics collection.
 
 ```bash
@@ -354,14 +357,19 @@ java \
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you have hands-on experience with JVM monitoring tools. Mentioning `jcmd`, `jstat`, `jstack`, and `jmap` with specific use cases shows practical knowledge. Knowing about JFR for production profiling is a strong differentiator. The best candidates can describe a complete diagnostic workflow: "I would start with jstat to check GC, then take a thread dump with jstack, and if needed, create a heap dump for MAT analysis."
 
 ## ⚡ Follow-up Questions
+
 1. How would you diagnose a memory leak in production?
 2. What is the overhead of Java Flight Recorder?
 3. How do you detect a deadlock?
 
 ## 📚 Related Topics
+
 - [JVM Tuning Parameters](./q12-jvm-tuning-parameters.md)
+
 - [GC Collectors](./q06-gc-collectors.md)
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)

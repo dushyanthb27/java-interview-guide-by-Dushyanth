@@ -1,6 +1,7 @@
 # Q15: Native Methods and JNI
 
 ## 📋 Question
+
 What are native methods in Java? Explain JNI (Java Native Interface), its use cases, and the modern alternatives like Project Panama.
 
 ## Difficulty: 🟠 Hard
@@ -392,9 +393,11 @@ public static native double sin(double a);  // Uses CPU's FPU instructions
 ```
 
 ### ⚠️ Common Mistake
+
 Using JNI for performance optimization without measuring first. JNI has significant call overhead, so it only pays off when the native computation is substantial (processing large datasets, complex algorithms). For simple operations, the JNI overhead can make native code **slower** than pure Java. Always benchmark with realistic workloads before committing to JNI.
 
 ### ⚡ Performance Tip
+
 If you're targeting Java 22+, use the **Foreign Function & Memory API** (Project Panama) instead of JNI. It offers ~4x better performance than JNI for native calls, safer memory management, and requires no C boilerplate. For Java 21 and earlier, consider JNA (Java Native Access) as a simpler (though slower) alternative to JNI that doesn't require writing C code.
 
 ```java
@@ -416,14 +419,19 @@ int len = CLibrary.INSTANCE.strlen("hello");
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers ask this to assess your understanding of JVM boundaries and native interop. Key points: explain the `native` keyword, `System.loadLibrary()`, JNI data type mapping, and the performance/safety trade-offs. Strong candidates mention that the JDK itself uses JNI extensively and can discuss Project Panama as the modern alternative. Knowing the pitfalls (JVM crashes, memory leaks, threading issues) shows production experience.
 
 ## ⚡ Follow-up Questions
+
 1. Why can native code crash the entire JVM?
 2. What is Project Panama and how does it improve on JNI?
 3. How does `System.loadLibrary()` find the native library?
 
 ## 📚 Related Topics
+
 - [JVM Architecture](./q01-jvm-architecture.md)
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)
+
 - [JVM Security](./q14-jvm-security.md)

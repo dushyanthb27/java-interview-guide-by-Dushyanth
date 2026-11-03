@@ -38,9 +38,13 @@ visualvm
 ```
 
 ### Key features:
+
 - **Monitor tab**: real-time heap/metaspace/threads
+
 - **Sampler tab**: CPU and memory sampling with low overhead
+
 - **Profiler tab**: allocation tracking with call trees
+
 - **Heap dump**: capture and analyze heap snapshots
 
 ```
@@ -133,7 +137,9 @@ public class MemoryMetrics {
 └─────────────────────────────────────────────────────┘
 
 - Used:      Memory actually occupied by live objects
+
 - Committed: Memory allocated from the OS (may include free space after GC)
+
 - Max:       Upper limit the JVM will allocate (-Xmx)
 ```
 
@@ -329,14 +335,22 @@ jcmd <pid> VM.native_memory summary.diff
 Total:  reserved=4500MB, committed=1200MB
 
 -                 Java Heap (reserved=2048MB, committed=512MB)
+
 -                     Class (reserved=1100MB, committed=80MB)
+
 -                    Thread (reserved=256MB, committed=256MB)
                              (thread #250)                      ← 250 threads × ~1MB each
+
 -                      Code (reserved=250MB, committed=60MB)
+
 -                        GC (reserved=200MB, committed=150MB)
+
 -                  Internal (reserved=50MB, committed=30MB)
+
 -                    Symbol (reserved=20MB, committed=20MB)
+
 -    Native Memory Tracking (reserved=5MB, committed=5MB)
+
 -           Direct Buffers  (reserved=100MB, committed=100MB)   ← Off-heap buffers
 ```
 
@@ -467,10 +481,15 @@ public class MemoryAlertSystem {
 ---
 
 ## Interview Tips
+
 - **JFR** is the go-to for production profiling — <1% overhead, built into the JVM
+
 - **VisualVM** is the best free GUI tool for development-time profiling
+
 - A **sawtooth** heap pattern is healthy; a **rising baseline** indicates a leak
+
 - **NMT** tracks native memory — essential for diagnosing thread stacks, direct buffers, and JNI allocations
+
 - Know the difference between **used**, **committed**, and **max** heap
 
 ---

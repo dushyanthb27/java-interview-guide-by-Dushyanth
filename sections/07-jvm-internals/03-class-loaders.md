@@ -1,6 +1,7 @@
 # Q3: What Are the Different Class Loaders?
 
 ## 📋 Question
+
 What are the different types of class loaders in Java? Explain the parent delegation model and how to create custom class loaders.
 
 ## Difficulty: 🟠 Hard
@@ -299,22 +300,29 @@ System.out.println(class1.equals(class2));       // false
 ```
 
 ### ⚠️ Common Mistake
+
 Overriding `loadClass()` instead of `findClass()` in custom class loaders. You should override `findClass()` to preserve parent delegation. Override `loadClass()` only if you intentionally want to break delegation (like Tomcat does). Also, forgetting that class identity includes the class loader — two classes with the same name from different loaders are not assignment-compatible.
 
 ### ⚡ Performance Tip
+
 Class loaders hold strong references to all classes they load, and each class holds a reference back to its class loader. When using custom class loaders for hot reloading, ensure the old class loader and ALL references to its classes are released — otherwise you get a **class loader leak**, which manifests as a Metaspace/PermGen `OutOfMemoryError` after repeated redeployments (common in Tomcat).
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to hear the three built-in loaders, parent delegation, and why it exists (security + uniqueness). Strong candidates explain when and why to break delegation (Tomcat, OSGi), the context class loader for SPI, and class identity rules. Be ready to explain `ClassCastException` due to class loader mismatch.
 
 ## ⚡ Follow-up Questions
+
 1. Why does `String.class.getClassLoader()` return `null`?
 2. How does Tomcat isolate web applications?
 3. What is a class loader leak and how do you fix it?
 
 ## 📚 Related Topics
+
 - [Class Loading Mechanism](./q02-class-loading-mechanism.md)
+
 - [Metaspace](./q10-metaspace.md)
+
 - [JVM Security](./q14-jvm-security.md)

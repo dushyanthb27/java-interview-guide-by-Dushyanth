@@ -7,11 +7,13 @@
 ## 🟡 Difficulty: Intermediate
 
 ## Question
+
 > What is type erasure in Java? How does it affect generic code at runtime?
 
 ---
 
 ## Quick Answer
+
 **Type erasure** is the process by which the Java compiler removes all generic type information during compilation. Unbounded type parameters are replaced with `Object`, bounded type parameters are replaced with their first bound, and casts are inserted where necessary. At runtime, a `List<String>` and a `List<Integer>` are both just `List` — there is no way to distinguish them.
 
 ---
@@ -284,10 +286,15 @@ System.out.println(ref.getType());  // java.util.List<java.lang.String>
 ---
 
 ## Interview Tips
+
 - Type erasure exists for **backward compatibility** with pre-Java 5 code
+
 - Generic type info is erased from **instances** but preserved in **class metadata**
+
 - `List<String>.class` does not exist — only `List.class`
+
 - Reflection via `ParameterizedType` can recover declared generic signatures
+
 - Bridge methods are generated to preserve polymorphism after erasure (see Q10)
 
 ---

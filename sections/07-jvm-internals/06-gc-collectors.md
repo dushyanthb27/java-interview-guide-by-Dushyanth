@@ -1,6 +1,7 @@
 # Q6: Compare Garbage Collectors (G1, ZGC, Shenandoah)
 
 ## 📋 Question
+
 Compare the major JVM garbage collectors — G1, ZGC, Shenandoah, Serial, Parallel, and CMS. When should you use each?
 
 ## Difficulty: 🔴 Expert
@@ -309,9 +310,11 @@ public class GCMonitor {
 ```
 
 ### ⚠️ Common Mistake
+
 Choosing ZGC/Shenandoah without understanding the trade-offs. While they offer sub-millisecond pauses, they consume more CPU and memory overhead for their concurrent operations. For batch processing or small-heap applications, Parallel or Serial GC may deliver better overall throughput. Also, ZGC is only available on 64-bit platforms and was experimental before Java 15.
 
 ### ⚡ Performance Tip
+
 Start with the **default G1 GC** and tune `MaxGCPauseMillis` before switching collectors. If G1 can't meet your latency requirements, then consider ZGC. Always benchmark with **production-representative workloads** — GC behavior varies dramatically with allocation patterns, object lifetimes, and heap sizes. Use GC logs (`-Xlog:gc*`) to make data-driven decisions.
 
 ```bash
@@ -325,14 +328,19 @@ java -XX:+UseZGC -Xms4g -Xmx4g -jar myapp.jar
 ---
 
 ## 🎯 Interviewer Insight
+
 This is an expert-level question. Interviewers want to see that you can compare collectors along multiple dimensions (throughput, latency, heap size) and justify your choice for a given scenario. Strong candidates explain the key innovation of each modern collector (G1: regions + pause goals, ZGC: colored pointers, Shenandoah: Brooks pointers) and know that G1 is the default since Java 9.
 
 ## ⚡ Follow-up Questions
+
 1. Why was CMS removed from the JVM?
 2. How does ZGC achieve sub-millisecond pauses?
 3. When would you choose Parallel GC over G1?
 
 ## 📚 Related Topics
+
 - [GC Algorithms](./q05-gc-algorithms.md)
+
 - [JVM Tuning Parameters](./q12-jvm-tuning-parameters.md)
+
 - [Monitoring JVM](./q13-monitoring-jvm.md)

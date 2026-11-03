@@ -1,6 +1,7 @@
 # Q10: What Is Metaspace?
 
 ## 📋 Question
+
 What is Metaspace in the JVM? What does it store, how is it managed, and how do you configure and monitor it?
 
 ## Difficulty: 🟡 Medium
@@ -218,8 +219,11 @@ New request for 5K → No single free block is big enough!
 → Must request more OS memory even though 7K is free total
 
 Mitigation:
+
 - Avoid frequent class loader creation/destruction
+
 - Use -XX:MaxMetaspaceSize to detect leaks early
+
 - JDK improvements reduce fragmentation over versions
 ```
 
@@ -245,9 +249,11 @@ Mitigation:
 ```
 
 ### ⚠️ Common Mistake
+
 Not setting `-XX:MaxMetaspaceSize` in production. Without a limit, Metaspace can grow until the OS runs out of native memory, potentially crashing the entire server (not just the JVM). Always set a reasonable limit and monitor usage. A growing Metaspace that never shrinks usually indicates a class loader leak.
 
 ### ⚡ Performance Tip
+
 For Spring Boot applications, set `MetaspaceSize` equal to `MaxMetaspaceSize` to avoid the overhead of repeated Metaspace GC cycles during startup (when many classes are loaded rapidly):
 
 ```bash
@@ -263,15 +269,21 @@ java -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m -jar myapp.jar
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to hear that Metaspace stores class metadata in native memory, replaces PermGen from Java 8, and grows dynamically. Strong candidates explain the relationship between class loaders and Metaspace chunks, class unloading requirements, and the importance of setting `MaxMetaspaceSize`. Mentioning class loader leaks in application servers shows practical experience.
 
 ## ⚡ Follow-up Questions
+
 1. What happens when Metaspace runs out of memory?
 2. How do you detect a class loader leak?
 3. Why does Spring Boot use so much Metaspace?
 
 ## 📚 Related Topics
+
 - [PermGen vs Metaspace](./q11-permgen-vs-metaspace.md)
+
 - [Class Loaders](./q03-class-loaders.md)
+
 - [JVM Tuning Parameters](./q12-jvm-tuning-parameters.md)
+
 - [Monitoring JVM](./q13-monitoring-jvm.md)

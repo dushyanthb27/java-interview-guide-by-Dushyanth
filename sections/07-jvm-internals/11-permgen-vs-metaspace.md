@@ -1,6 +1,7 @@
 # Q11: PermGen vs Metaspace Evolution
 
 ## 📋 Question
+
 What was PermGen and why was it replaced by Metaspace in Java 8? What changed with the String pool?
 
 ## Difficulty: 🟡 Medium
@@ -266,9 +267,11 @@ public class MetaspaceLeakDemo {
 ```
 
 ### ⚠️ Common Mistake
+
 Thinking that Metaspace eliminates all PermGen problems. While Metaspace removes the fixed-size limitation, class loader leaks still cause `OutOfMemoryError: Metaspace`. The leak just takes longer to manifest because Metaspace can grow. Always set `-XX:MaxMetaspaceSize` to detect leaks early rather than letting them consume all native memory.
 
 ### ⚡ Performance Tip
+
 When migrating from Java 7 to Java 8+, remove all PermGen flags (`-XX:PermSize`, `-XX:MaxPermGenSize`) and replace with Metaspace equivalents. Also increase the heap size slightly because the string pool and static variables that were in PermGen are now counted against the heap (`-Xmx`). Monitor Metaspace usage during the first few weeks after migration to establish a baseline.
 
 ```bash
@@ -281,14 +284,19 @@ jstat -gcmetacapacity <pid> 5000    # Every 5 seconds
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers ask this to test your understanding of JVM evolution. Key points: PermGen was fixed-size on the heap and caused frequent OOMs; Metaspace uses native memory and grows dynamically. Mentioning the string pool move (PermGen → Heap in Java 7) and static variable move (PermGen → Heap in Java 8) shows deep knowledge. Senior candidates should know the flag migration path.
 
 ## ⚡ Follow-up Questions
+
 1. Why was the string pool moved to the heap before PermGen was removed?
 2. Can you still get OutOfMemoryError with Metaspace?
 3. How do you migrate JVM flags from Java 7 to Java 8?
 
 ## 📚 Related Topics
+
 - [Metaspace](./q10-metaspace.md)
+
 - [Stack vs Heap](./q09-stack-vs-heap.md)
+
 - [JVM Tuning Parameters](./q12-jvm-tuning-parameters.md)

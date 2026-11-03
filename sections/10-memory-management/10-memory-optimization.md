@@ -392,10 +392,15 @@ public enum Status {
 ---
 
 ## Interview Tips
+
 - Every Java object has a 12-16 byte header — storing an `int` in an `Integer` costs 24 bytes vs 4 bytes
+
 - `HashMap` has ~32 bytes overhead per entry (Node object) on top of key/value objects
+
 - Compact Strings (Java 9+) are enabled by default and halve ASCII string memory
+
 - Off-heap memory (`ByteBuffer.allocateDirect`) avoids GC but is harder to manage
+
 - JOL (Java Object Layout) by Aleksey Shipilëv is the definitive tool for measuring object sizes
 
 ---

@@ -7,11 +7,13 @@
 ## 🟢 Difficulty: Basic
 
 ## Question
+
 > What is the diamond operator (`<>`) in Java? How has it evolved across Java versions?
 
 ---
 
 ## Quick Answer
+
 The **diamond operator** (`<>`) was introduced in Java 7 to eliminate redundant type arguments on the right-hand side of generic declarations. Instead of repeating `new HashMap<String, List<Integer>>()`, you write `new HashMap<>()` — the compiler infers the type arguments from the left-hand side. Java 9 extended diamond to work with **anonymous inner classes**.
 
 ---
@@ -247,11 +249,17 @@ var b = new ArrayList<String>();         // var from RHS ✅
 ---
 
 ## Interview Tips
+
 - Diamond (`<>`) infers type arguments from the **assignment target** (left-hand side)
+
 - Diamond is **not** a raw type — it preserves full type safety
+
 - Java 9 extended diamond to anonymous inner classes
+
 - `var` + `<>` together defaults to `Object` — avoid this combination
+
 - Diamond only applies to **constructors**, not method calls
+
 - For methods, Java uses **type inference** automatically (no special syntax needed)
 
 ---

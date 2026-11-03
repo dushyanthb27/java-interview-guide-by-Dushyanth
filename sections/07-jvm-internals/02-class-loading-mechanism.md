@@ -1,6 +1,7 @@
 # Q2: How Does Class Loading Work?
 
 ## 📋 Question
+
 Explain the class loading mechanism in the JVM. What are the different phases, and when does class loading occur?
 
 ## Difficulty: 🟠 Hard
@@ -72,10 +73,15 @@ Class.forName("Employee");        // 3. Reflective loading
 Linking has three sub-phases:
 
 #### 2a. Verification
+
 Ensures bytecode is structurally correct and safe:
+
 - **File format** — Magic number `0xCAFEBABE`, valid version
+
 - **Metadata** — Class has a superclass (except Object), no circular inheritance
+
 - **Bytecode** — Valid opcodes, correct stack usage, type safety
+
 - **Symbolic references** — References can be resolved
 
 ```java
@@ -87,6 +93,7 @@ Ensures bytecode is structurally correct and safe:
 ```
 
 #### 2b. Preparation
+
 Allocates memory for **static fields** and sets them to **default values** (not assigned values):
 
 ```java
@@ -113,6 +120,7 @@ public class Config {
 | `reference` | `null` |
 
 #### 2c. Resolution
+
 Replaces **symbolic references** in the constant pool with **direct references** (memory addresses):
 
 ```java
@@ -129,7 +137,9 @@ Replaces **symbolic references** in the constant pool with **direct references**
 ### Phase 3: Initialization
 
 Executes the class's **`<clinit>`** (class initialization) method, which contains:
+
 - All static variable assignments
+
 - All static initializer blocks — in **textual order**
 
 ```java
@@ -265,9 +275,11 @@ java -Xlog:class+load=info MyApp
 ```
 
 ### ⚠️ Common Mistake
+
 Assuming all classes are loaded at startup. The JVM loads classes **lazily** — only when they are first actively used. This is why you might not discover a missing class until a specific code path is executed in production. Always ensure your test coverage exercises all class references.
 
 ### ⚡ Performance Tip
+
 Class loading involves I/O (reading `.class` files) and computation (verification). For applications with many classes (e.g., large Spring Boot apps), startup time can be dominated by class loading. **Application Class-Data Sharing (AppCDS)** in Java 10+ caches loaded classes in a shared archive, dramatically reducing startup time for subsequent launches.
 
 ```bash
@@ -284,14 +296,19 @@ java -Xshare:on -XX:SharedArchiveFile=app-cds.jsa -jar myapp.jar
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to hear the three phases (Loading, Linking, Initialization) with the sub-phases of Linking. The best candidates explain lazy loading, the difference between `ClassNotFoundException` and `NoClassDefFoundError`, and can describe the static initialization order. Bonus points for mentioning `<clinit>` and the JLS active-use rules.
 
 ## ⚡ Follow-up Questions
+
 1. What triggers the `<clinit>` method to execute?
 2. Can a class be loaded more than once in the same JVM?
 3. How does AppCDS improve startup time?
 
 ## 📚 Related Topics
+
 - [Class Loaders](./q03-class-loaders.md)
+
 - [JVM Architecture](./q01-jvm-architecture.md)
+
 - [Metaspace](./q10-metaspace.md)

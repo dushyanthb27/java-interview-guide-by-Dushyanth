@@ -1,6 +1,7 @@
 # Q14: JVM Security Architecture
 
 ## 📋 Question
+
 How does the JVM enforce security? Explain bytecode verification, the SecurityManager, the module system's security features, and the sandbox model.
 
 ## Difficulty: 🟡 Medium
@@ -295,9 +296,11 @@ public record AuthToken(String token, Instant expiry) {
 ```
 
 ### ⚠️ Common Mistake
+
 Relying on the SecurityManager for application security. The SecurityManager is deprecated (Java 17) and will be removed. Modern Java security should rely on **module system encapsulation**, **container isolation**, **input validation**, and **OS-level security**. If you're maintaining a legacy system with SecurityManager, plan your migration path now.
 
 ### ⚡ Performance Tip
+
 Bytecode verification adds ~10-15% to class loading time. For production systems where you trust the code source (your own builds), you can disable verification for specific packages. However, **never** disable verification for untrusted code. Java's AppCDS (Application Class-Data Sharing) pre-verifies classes in the shared archive, eliminating verification overhead on subsequent startups.
 
 ```bash
@@ -312,14 +315,19 @@ java -XX:SharedArchiveFile=app-cds.jsa -jar myapp.jar
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to hear about bytecode verification, the class loader's parent delegation for security, and the module system's encapsulation. The fact that SecurityManager is deprecated is important — it shows you're current with JVM evolution. Strong candidates discuss modern security alternatives (containers, modules, OS-level security) rather than just the deprecated SecurityManager.
 
 ## ⚡ Follow-up Questions
+
 1. What replaced SecurityManager in modern Java?
 2. How does the module system prevent reflection attacks?
 3. What is a VerifyError and when does it occur?
 
 ## 📚 Related Topics
+
 - [Class Loaders](./q03-class-loaders.md)
+
 - [Class Loading Mechanism](./q02-class-loading-mechanism.md)
+
 - [Bytecode Understanding](./q08-bytecode-understanding.md)

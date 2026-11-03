@@ -287,9 +287,13 @@ pool_size = (core_count * 2) + effective_spindle_count
 ```
 
 ### HikariCP key design choices:
+
 - **ConcurrentBag**: lock-free, thread-local affinity for borrowed connections
+
 - **No `Statement` caching**: delegates to JDBC driver (more efficient)
+
 - **Bytecode generation**: uses Javassist to create fast proxy classes
+
 - **Connection validation**: `isValid()` or a lightweight test query
 
 ---
@@ -382,10 +386,15 @@ Should I pool this object?
 ---
 
 ## Interview Tips
+
 - Modern JVMs allocate objects in ~10ns and collect short-lived objects in minor GC — pooling lightweight objects is counterproductive
+
 - Connection pools (HikariCP) and thread pools (ExecutorService) are the two most important pools in Java
+
 - HikariCP uses `ConcurrentBag` with thread-local affinity for near-zero contention
+
 - Pool sizing is usually `(cores * 2) + spindles` for database connections
+
 - Object pooling adds complexity (reset logic, validation, leak detection) — use only when justified
 
 ---

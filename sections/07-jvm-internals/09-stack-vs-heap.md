@@ -1,6 +1,7 @@
 # Q9: Stack vs Heap in JVM
 
 ## 📋 Question
+
 Explain the difference between Stack and Heap memory in the JVM. What is stored where, and what errors are associated with each?
 
 ## Difficulty: 🟡 Medium
@@ -273,9 +274,11 @@ public int sumCoordinates(int x1, int y1, int x2, int y2) {
 ```
 
 ### ⚠️ Common Mistake
+
 Thinking that primitives are always on the stack. **Primitives that are instance fields** are stored on the **heap** (as part of the object). Only **local primitive variables** within methods are on the stack. Similarly, thinking that `new` always allocates on the heap — with escape analysis, the JIT may optimize the allocation to the stack or eliminate it entirely.
 
 ### ⚡ Performance Tip
+
 Each thread's stack consumes **native memory** (not heap). With 1000 threads at 1 MB each, that's 1 GB of native memory just for stacks. In thread-heavy applications, reduce stack size with `-Xss256k` (if you don't have deep call chains) or switch to virtual threads (Java 21) which use much smaller stacks that grow dynamically.
 
 ```bash
@@ -290,15 +293,21 @@ java -Xss256k -Xmx4g -jar myapp.jar
 ---
 
 ## 🎯 Interviewer Insight
+
 This is a fundamental question that tests your understanding of JVM memory layout. Interviewers want to hear that the **stack is per-thread with primitives and references**, while the **heap is shared with objects**. Strong candidates explain stack frames, the difference between `StackOverflowError` and `OutOfMemoryError`, and mention escape analysis for stack allocation.
 
 ## ⚡ Follow-up Questions
+
 1. Where are static variables stored?
 2. What happens to the stack when a method returns?
 3. Can an object be allocated on the stack?
 
 ## 📚 Related Topics
+
 - [JVM Architecture](./q01-jvm-architecture.md)
+
 - [GC Algorithms](./q05-gc-algorithms.md)
+
 - [Metaspace](./q10-metaspace.md)
+
 - [JVM Tuning Parameters](./q12-jvm-tuning-parameters.md)

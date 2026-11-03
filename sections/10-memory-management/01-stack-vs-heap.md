@@ -15,9 +15,13 @@ Java uses two primary memory regions — the **stack** and the **heap** — each
 The stack is a **per-thread**, LIFO (Last-In-First-Out) data structure that stores **method frames**.
 
 ### What lives on the stack?
+
 - Local primitive variables (`int`, `boolean`, `double`, etc.)
+
 - Local reference variables (the pointer, not the object)
+
 - Method parameters
+
 - Return addresses and partial results
 
 ### Stack frame lifecycle
@@ -71,9 +75,13 @@ java -Xss2m MyApp
 The heap is a **shared** memory region where all **objects and arrays** are allocated.
 
 ### What lives on the heap?
+
 - All objects created with `new`
+
 - All arrays (even `int[]`)
+
 - Instance variables of objects
+
 - Static variables (stored in the Class object on the heap)
 
 ### Heap structure (Generational)
@@ -255,9 +263,13 @@ public long factorial(int n) {
 ---
 
 ## Interview Tips
+
 - Stack memory is always faster because it's just pointer arithmetic (push/pop)
+
 - Primitives declared as local variables go on the stack; as fields they live on the heap inside the object
+
 - Escape analysis is a JIT optimization — it only kicks in after warmup
+
 - Each thread has its own stack but shares the heap with all other threads
 
 ---

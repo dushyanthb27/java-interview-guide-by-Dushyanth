@@ -1,6 +1,7 @@
 # Q5: What Are Soft References in Java?
 
 ## 📋 Question
+
 What are Soft References in Java? When should you use them, and how do they differ from Weak References?
 
 ## Difficulty: 🟠 Intermediate
@@ -114,7 +115,9 @@ interval (ms) = free_heap_MB * SoftRefLRUPolicyMSPerMB
 ```
 
 - Default `SoftRefLRUPolicyMSPerMB` = **1000** (1 second per MB of free heap)
+
 - Recently accessed soft references survive longer
+
 - Least-recently accessed are cleared first
 
 ### JVM tuning
@@ -161,15 +164,23 @@ if (c == null) {
 ---
 
 ## Interview Tips
+
 - Soft references are the JVM's way of saying "keep this if you can, discard if you must"
+
 - The GC guarantees all soft references are cleared **before** throwing `OutOfMemoryError`
+
 - Soft references have LRU-like behavior — recently accessed ones survive longer
+
 - In practice, cache libraries (Caffeine) are preferred over raw `SoftReference`
+
 - `SoftRefLRUPolicyMSPerMB` controls the aggressiveness of soft reference eviction
 
 ---
 
 ## 📚 Related Topics
+
 - [Weak References](./04-weak-references.md)
+
 - [Memory Leaks](./03-memory-leaks.md)
+
 - [Object Lifecycle](./02-object-lifecycle.md)

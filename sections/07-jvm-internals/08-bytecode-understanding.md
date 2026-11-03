@@ -1,6 +1,7 @@
 # Q8: How to Understand Java Bytecode?
 
 ## 📋 Question
+
 How can you read and understand Java bytecode? What are the common opcodes and how does the stack-based execution model work?
 
 ## Difficulty: 🟠 Hard
@@ -216,22 +217,29 @@ Common patterns:
 ```
 
 ### ⚠️ Common Mistake
+
 Assuming bytecode maps 1:1 to source code. The Java compiler applies its own optimizations (constant folding, dead code elimination) before generating bytecode, and the JIT compiler applies even more optimizations at runtime. The bytecode you see in `javap` output is the **starting point**, not the final executed code.
 
 ### ⚡ Performance Tip
+
 Short methods (< 35 bytes of bytecode by default) are automatically inlined by the JIT compiler. Keep methods small and focused — the JIT can then inline them, enabling further optimizations like escape analysis and dead code elimination across the combined inlined code. Use `javap -c` to check method bytecode sizes if you're optimizing hot paths.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers ask this to gauge low-level JVM understanding. You don't need to memorize every opcode, but you should be able to read simple `javap` output — explain `iload`, `istore`, `invokevirtual`, and the `new` + `dup` + `invokespecial` pattern. Knowing about `invokedynamic` for lambdas is a strong differentiator. Being comfortable with bytecode shows you can debug at the JVM level.
 
 ## ⚡ Follow-up Questions
+
 1. Why does object creation need `dup` before `invokespecial`?
 2. How are lambdas represented in bytecode?
 3. What is the difference between `invokevirtual` and `invokespecial`?
 
 ## 📚 Related Topics
+
 - [JIT Compilation](./07-jit-compilation.md)
+
 - [JVM Architecture](./01-jvm-architecture.md)
+
 - [Stack vs Heap](./09-stack-vs-heap.md)
