@@ -10,7 +10,7 @@
 
 ### Answer
 
-Vector and Stack are legacy classes from Java 1.0 that predate the Collections Framework (Java 1.2). They're still in the JDK for backward compatibility, but you should never use them in new code. 
+Vector and Stack are legacy classes from Java 1.0 that predate the Collections Framework (Java 1.2). They're still in the JDK for backward compatibility, but you should never use them in new code.
 
 Understanding why they're legacy and what to use instead is a common interview topic.
 

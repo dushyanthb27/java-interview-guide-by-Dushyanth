@@ -326,14 +326,14 @@ list.sort(Comparator.comparing(Person::getCity)
                     .thenComparing(Person::getName));
 
 // Sort with null safety
-list.sort(Comparator.comparing(Person::getName, 
+list.sort(Comparator.comparing(Person::getName,
           Comparator.nullsLast(Comparator.naturalOrder())));
 
 // Sort with custom key extraction
 list.sort(Comparator.comparing(p -> p.getName().toLowerCase()));
 
 // Min/Max using Comparator
-Employee youngest = Collections.min(employees, 
+Employee youngest = Collections.min(employees,
                     Comparator.comparingInt(Employee::getAge));
 ```
 

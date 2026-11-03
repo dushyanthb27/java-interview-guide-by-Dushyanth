@@ -10,7 +10,7 @@
 
 ### Answer
 
-LinkedList is a doubly-linked list implementation where each element is wrapped in a `Node` object with pointers to both the previous and next nodes. 
+LinkedList is a doubly-linked list implementation where each element is wrapped in a `Node` object with pointers to both the previous and next nodes.
 
 While it offers O(1) insertions at the ends, it's almost never the right choice in practice. The reason: poor cache locality and high memory overhead.
 
@@ -153,7 +153,7 @@ deque.pollLast();
 
 ### Cache Locality Problem
 
-The real performance killer for LinkedList is poor cache locality. 
+The real performance killer for LinkedList is poor cache locality.
 
 ArrayList elements are stored contiguously, so CPU cache lines load multiple elements together. LinkedList nodes are scattered across the heap, causing cache misses on nearly every access:
 
