@@ -12,8 +12,8 @@ How does file I/O work in Java? Compare traditional `java.io.File` with the mode
 ## Answer
 
 Java provides two APIs for file operations:
-- **Legacy**: `java.io.File` + `FileInputStream`/`FileOutputStream`
-- **Modern (NIO.2)**: `java.nio.file.Path` + `java.nio.file.Files` (preferred since Java 7+)
+- **Legacy**: `java.io.File` and stream classes.
+- **Modern (NIO.2)**: `java.nio.file.Path` and `java.nio.file.Files`. This approach is preferred since Java 7+.
 
 ---
 
