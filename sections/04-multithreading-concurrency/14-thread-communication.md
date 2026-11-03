@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 How do `wait()`, `notify()`, and `notifyAll()` work? How do threads communicate with each other?
 
 ---

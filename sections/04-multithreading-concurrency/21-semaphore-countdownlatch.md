@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 How do `Semaphore` and `CountDownLatch` work? What are their use cases?
 
 ---

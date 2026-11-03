@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What are the common patterns for achieving thread safety in Java?
 
 ---

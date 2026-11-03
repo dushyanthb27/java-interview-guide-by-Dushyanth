@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What are thread pools? What types are available and how do you configure them?
 
 ---
@@ -69,6 +70,7 @@ Task Submission Flow:
 ### Types of Thread Pools
 
 #### 1. Fixed Thread Pool
+
 ```java
 // Creates a pool with exactly N threads
 ExecutorService fixedPool = Executors.newFixedThreadPool(4);
@@ -81,6 +83,7 @@ ExecutorService cpuPool = Executors.newFixedThreadPool(cores);
 ```
 
 #### 2. Cached Thread Pool
+
 ```java
 // Creates threads as needed, reuses idle threads
 ExecutorService cachedPool = Executors.newCachedThreadPool();
@@ -92,6 +95,7 @@ ExecutorService cachedPool = Executors.newCachedThreadPool();
 ```
 
 #### 3. Single Thread Executor
+
 ```java
 // Guarantees sequential execution
 ExecutorService singlePool = Executors.newSingleThreadExecutor();
@@ -101,6 +105,7 @@ ExecutorService singlePool = Executors.newSingleThreadExecutor();
 ```
 
 #### 4. Scheduled Thread Pool
+
 ```java
 ScheduledExecutorService scheduledPool = Executors.newScheduledThreadPool(2);
 
@@ -118,6 +123,7 @@ scheduledPool.scheduleWithFixedDelay(() -> System.out.println("Fixed delay"),
 ```
 
 #### 5. Work-Stealing Pool (Java 8+)
+
 ```java
 // Uses ForkJoinPool with parallelism = available processors
 ExecutorService stealingPool = Executors.newWorkStealingPool();
@@ -293,6 +299,7 @@ try {
 ---
 
 ## ⚡ Follow-up Questions
+
 1. How does `ThreadPoolExecutor` decide when to create a new thread vs. enqueue a task, and what are the configuration thresholds?
 2. What happens if a task throws an unchecked exception — does the worker thread die or continue processing?
 3. How would you implement a scheduled thread pool (like `ScheduledExecutorService`) from scratch?
@@ -302,6 +309,7 @@ try {
 7. How does the ForkJoinPool differ from a standard ThreadPoolExecutor in terms of work-stealing?
 
 ## 📚 Related Topics
+
 - [Executor Framework](./06-executor-framework.md)
 - [Runnable vs Callable](./04-runnable-vs-callable.md)
 - [CompletableFuture](./15-completable-future.md)

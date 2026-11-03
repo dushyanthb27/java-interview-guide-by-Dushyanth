@@ -1,6 +1,7 @@
 # Q12: Repeating and Type Annotations
 
 ## 📋 Question
+
 What are repeating annotations and type annotations in Java? Explain the @Repeatable meta-annotation, container annotations, and the TYPE_USE and TYPE_PARAMETER annotation targets.
 
 ## Difficulty: 🟡 Medium
@@ -277,25 +278,31 @@ public class AnnotationProcessingDemo {
 ```
 
 ### ⚠️ Common Mistake
+
 **Forgetting the container annotation**: When creating a `@Repeatable` annotation, you **must** define a container annotation with a `value()` method that returns an array of the repeatable annotation. The container must have the same (or broader) `@Target` and `@Retention` as the repeatable annotation. Mismatched retention policies cause the repeating annotations to silently disappear at runtime — a debugging nightmare.
 
 ### ⚡ Performance Tip
+
 Annotation processing via reflection (`getAnnotation()`, `getAnnotationsByType()`) has a cost — each call involves reading class metadata and creating annotation proxy objects. For hot paths, **cache annotation values** at startup rather than reading them on every invocation. Frameworks like Spring do this: they scan annotations once during context initialization and store the results in internal caches, avoiding repeated reflection overhead.
 
 ### 🔧 JVM Internals
+
 Annotations are stored in the class file's **attributes section** (`RuntimeVisibleAnnotations`, `RuntimeInvisibleAnnotations`). Type annotations use a separate attribute `RuntimeVisibleTypeAnnotations` (added in Java 8 class file format). The `@Repeatable` mechanism is syntactic sugar — the compiler transforms multiple `@Schedule` annotations into a single `@Schedules` container annotation in the bytecode. At runtime, `getAnnotationsByType()` checks both the repeatable annotation directly and unwraps the container annotation transparently.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers test whether you understand the **two-part setup** of repeating annotations (repeatable + container). For type annotations, the key insight is that `TYPE_USE` enables tools like **Checker Framework** and **NullAway** to perform null-safety analysis that catches bugs at compile time. Knowing the practical difference between `getAnnotation()` (returns container) and `getAnnotationsByType()` (unwraps repeats) demonstrates attention to API details.
 
 ## ⚡ Follow-up Questions
+
 1. Can you use `@Repeatable` without defining a container annotation?
 2. How do annotation processors work during compilation?
 3. What's the difference between `getAnnotation` and `getAnnotationsByType`?
 
 ## 📚 Related Topics
+
 - [Lambda Expressions](./q01-lambda-expressions.md)
 - [Records](./q14-records-detail.md)
 - [Sealed Classes](./q16-sealed-classes-detail.md)

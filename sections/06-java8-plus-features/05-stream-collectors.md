@@ -1,6 +1,7 @@
 # Q5: How Do Stream Collectors Work?
 
 ## 📋 Question
+
 How do Stream Collectors work in Java? Explain the built-in collectors, downstream collectors, groupingBy/partitioningBy, and how to implement a custom Collector.
 
 ## Difficulty: 🟠 Senior
@@ -309,25 +310,31 @@ public class CustomCollectorDemo {
 | `IDENTITY_FINISH` | Finisher is identity function | Skips finisher step (cast accumulator to result) |
 
 ### ⚠️ Common Mistake
+
 **Using `toMap()` without a merge function when duplicates exist**: `Collectors.toMap(keyMapper, valueMapper)` throws `IllegalStateException` on duplicate keys. Always provide a merge function `(v1, v2) -> ...` when key collisions are possible. Similarly, **`groupingBy` cannot have null keys** — if your classifier function returns null, use a wrapper or filter nulls before grouping.
 
 ### ⚡ Performance Tip
+
 Use `Collectors.toUnmodifiableList()` or `Stream.toList()` (Java 16+) when you don't need to modify the resulting list — unmodifiable collections use less memory and enable internal optimizations. For large-scale aggregations, `summarizingDouble()` computes count, sum, min, max, and average in a **single pass** rather than requiring five separate terminal operations. When using `groupingBy` with `Collectors.toSet()` as a downstream, the resulting sets are `HashSet`s by default — use `toCollection(TreeSet::new)` if you need sorted results.
 
 ### 🔧 JVM Internals
+
 The `Collector` interface is the bridge between the Stream API's `collect()` method and the reduction logic. For parallel streams, each thread gets its own accumulator from the supplier, fills it independently, and the combiner merges them. The `IDENTITY_FINISH` characteristic allows the JVM to skip the finisher step entirely — the accumulator itself is cast to the result type. This is why `Collectors.toList()` has `IDENTITY_FINISH` — the internal `ArrayList` accumulator is the final result, requiring no transformation.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers expect you to fluently use `groupingBy` with downstream collectors — it's the most common real-world scenario. A strong answer chains downstream collectors (e.g., `groupingBy(dept, mapping(name, toList()))`). Being able to implement a custom `Collector` with all four functions demonstrates mastery. Know the `teeing` collector (Java 12) — it impresses interviewers and solves dual-aggregation problems elegantly.
 
 ## ⚡ Follow-up Questions
+
 1. What's the difference between `reduce()` and `collect()`?
 2. How does `groupingByConcurrent` differ from `groupingBy`?
 3. When would you implement a custom Collector vs using built-in ones?
 
 ## 📚 Related Topics
+
 - [Stream API Operations](./q04-stream-api-operations.md)
 - [Functional Interfaces](./q03-functional-interfaces-detail.md)
 - [Optional API](./q06-optional-api.md)

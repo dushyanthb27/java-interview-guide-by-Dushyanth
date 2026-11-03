@@ -1,6 +1,7 @@
 # Q4: Explain Stream API Operations
 
 ## 📋 Question
+
 Explain the Stream API operations in Java. Differentiate between intermediate and terminal operations, and describe lazy evaluation, short-circuiting, and stream pipeline optimization.
 
 ## Difficulty: 🟠 Senior
@@ -278,20 +279,25 @@ public class ShortCircuitDemo {
 | `noneMatch` | Terminal | **Yes** | `boolean` |
 
 ### ⚠️ Common Mistake
+
 **Reusing a stream**: Streams are **single-use** — once a terminal operation is called, the stream is consumed. Calling a second terminal operation on the same stream throws `IllegalStateException`. If you need to perform multiple operations on the same data, either create a new stream each time or collect intermediate results. Also, **`peek` should never be used for business logic** — only for debugging. Its execution is not guaranteed by the JVM in all scenarios (e.g., short-circuiting may skip elements).
 
 ### ⚡ Performance Tip
+
 **Order your operations for maximum short-circuiting**: Place `filter()` before `map()` and `sorted()` to reduce the number of elements processed by expensive operations. Use `mapToInt/Long/Double` to avoid autoboxing in numeric pipelines. Avoid `sorted()` on large streams unless necessary — it's a stateful operation that must buffer all elements (O(n log n) time and O(n) space). Prefer `parallel()` streams only for CPU-intensive operations on large datasets (>10,000 elements); the overhead of parallel setup outweighs gains for small collections or I/O-bound operations.
 
 ### 🔧 JVM Internals
+
 The Stream API uses **loop fusion** internally — multiple intermediate operations are merged into a single pass over the data rather than creating intermediate collections. The `Spliterator` interface underlies the splitting and traversal logic, enabling parallel decomposition. Stateful operations (`sorted`, `distinct`) introduce **pipeline barriers** that force buffering of upstream elements. The JVM can also optimize `stream().count()` on `ArrayList` to return `.size()` directly, bypassing the entire pipeline when no intermediate operations are present.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers love to test your understanding of **lazy evaluation** and **short-circuiting**. A strong candidate can trace through a stream pipeline and predict exactly which elements are processed and in what order. Knowing the difference between stateless (`filter`, `map`) and stateful (`sorted`, `distinct`) operations is crucial for performance discussions. Be ready to explain why `parallelStream()` isn't always faster.
 
 ## ⚡ Follow-up Questions
+
 1. What happens if you call two terminal operations on the same stream, and how do you reuse stream logic?
 2. When is `parallelStream()` beneficial, and when is it harmful? What are the overhead considerations?
 3. How does `flatMap` differ from `map` in practical usage, and when would you choose one over the other?
@@ -301,6 +307,7 @@ Interviewers love to test your understanding of **lazy evaluation** and **short-
 7. How do primitive streams (IntStream, LongStream, DoubleStream) improve performance by avoiding boxing?
 
 ## 📚 Related Topics
+
 - [Stream Collectors](./q05-stream-collectors.md)
 - [Functional Interfaces](./q03-functional-interfaces-detail.md)
 - [Optional API](./q06-optional-api.md)

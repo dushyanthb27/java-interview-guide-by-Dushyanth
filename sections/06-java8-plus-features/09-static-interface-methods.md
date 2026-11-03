@@ -1,6 +1,7 @@
 # Q9: Static Methods in Interfaces
 
 ## 📋 Question
+
 What are static methods in interfaces? How are they used for factory methods and utility functions, and how do they differ from helper/utility classes?
 
 ## Difficulty: 🟡 Medium
@@ -279,25 +280,31 @@ public class StaticNotOverriddenDemo {
 | **Use case** | Factories, common operations | Cross-cutting utilities |
 
 ### ⚠️ Common Mistake
+
 **Expecting static interface methods to be inherited**: Unlike static methods in classes, static interface methods are **NOT inherited** by implementing classes or sub-interfaces. You must call them using the declaring interface name: `MyInterface.staticMethod()`. Attempting to call them via `implementingClass.staticMethod()` results in a compile error. This is by design — it prevents ambiguity when a class implements multiple interfaces with same-named static methods.
 
 ### ⚡ Performance Tip
+
 Static interface methods compile to `invokestatic` bytecode — the same as static methods in classes. There is **zero overhead** compared to utility class methods. They are resolved at compile time, not runtime, and are prime candidates for JIT inlining. Using static factory methods (`List.of()`, `Map.of()`) instead of constructors also enables internal optimizations — the JDK returns optimized immutable implementations based on the number of elements.
 
 ### 🔧 JVM Internals
+
 At the bytecode level, static interface methods are invoked using `invokestatic` with the interface's class reference. They are stored in the interface's class file alongside default methods. Since they cannot be overridden, no virtual dispatch is needed — the call target is always known at compile time. This makes them slightly more efficient than default methods (which use `invokevirtual`) in theory, though the JIT compiler's inlining typically eliminates this difference.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you understand the **cohesion benefit** of static interface methods — putting factory methods where they logically belong, alongside the type they create. Knowing real JDK examples (`Comparator.comparing()`, `Stream.of()`, `List.of()`) demonstrates practical familiarity. The key insight to mention: static interface methods replaced the old "companion utility class" pattern (e.g., `Collections` companion to `Collection`).
 
 ## ⚡ Follow-up Questions
+
 1. Why aren't static interface methods inherited by implementing classes?
 2. How do `List.of()` and `Map.of()` (Java 9) leverage static interface methods?
 3. Can static interface methods access default methods of the same interface?
 
 ## 📚 Related Topics
+
 - [Default Methods](./q08-default-methods.md)
 - [Private Interface Methods](./q10-private-interface-methods.md)
 - [Functional Interfaces](./q03-functional-interfaces-detail.md)

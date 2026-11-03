@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What is `ThreadLocal`? What are its use cases and pitfalls?
 
 ---

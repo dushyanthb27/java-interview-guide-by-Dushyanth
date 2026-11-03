@@ -1,6 +1,7 @@
 # Q8: How Do Default Methods Enable Interface Evolution?
 
 ## 📋 Question
+
 How do default methods work in Java interfaces? Explain their purpose for interface evolution, the diamond problem resolution, and when to use them vs abstract classes.
 
 ## Difficulty: 🟡 Medium
@@ -247,25 +248,31 @@ public class DefaultVsAbstractDemo {
 ```
 
 ### ⚠️ Common Mistake
+
 **Treating interfaces with default methods as abstract classes**: Default methods should provide **sensible defaults** or **convenience methods** built on top of abstract methods. They should NOT contain complex business logic, maintain state (via workarounds), or create deep default method hierarchies. If you need state, constructors, or protected methods, use an abstract class. Default methods are for **horizontal composition** (mix-ins), not vertical inheritance.
 
 ### ⚡ Performance Tip
+
 Default methods are dispatched via `invokevirtual` (same as regular instance methods) when the implementing class doesn't override them. There is **no performance penalty** compared to concrete class methods. The JVM's JIT compiler can inline default methods just as effectively as regular methods. However, avoid creating default methods that call other default methods in deep chains — this adds indirection that makes the code harder to debug, even though the JIT compiler typically handles it efficiently.
 
 ### 🔧 JVM Internals
+
 When a class inherits a default method without overriding it, the JVM creates a **bridge** in the class's vtable (virtual method table) that points to the interface's default implementation. The resolution follows the **most specific** rule at the bytecode level — the compiler determines which default to use and encodes it in the class file. At runtime, `invokevirtual` dispatches just like a regular method call. The `InterfaceName.super.method()` syntax compiles to `invokespecial`, directly targeting the specific interface's default implementation.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want you to explain the **motivation** for default methods (backward-compatible interface evolution — e.g., adding `stream()` to `Collection`) and the **diamond problem resolution rules**. Knowing the three resolution rules (class wins, specific wins, otherwise error) is essential. A strong answer contrasts default methods with abstract classes and identifies appropriate use cases for each.
 
 ## ⚡ Follow-up Questions
+
 1. Can a default method call an abstract method of the same interface?
 2. What happens if a class inherits the same default method from an interface directly and via a superclass?
 3. How did the JDK team add `forEach` to `Iterable` without breaking existing code?
 
 ## 📚 Related Topics
+
 - [Static Interface Methods](./q09-static-interface-methods.md)
 - [Private Interface Methods](./q10-private-interface-methods.md)
 - [Sealed Classes](./q16-sealed-classes-detail.md)

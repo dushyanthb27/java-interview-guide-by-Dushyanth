@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 How does `ReentrantLock` work? What advantages does it have over `synchronized`?
 
 ---

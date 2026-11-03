@@ -1,6 +1,7 @@
 # Q10: Private Methods in Interfaces (Java 9)
 
 ## 📋 Question
+
 What are private methods in interfaces? How do they enable code reuse between default methods, and what are the rules for private static methods in interfaces?
 
 ## Difficulty: 🟡 Medium
@@ -238,25 +239,31 @@ public class InterfaceEvolutionTimeline {
 ```
 
 ### ⚠️ Common Mistake
+
 **Over-engineering interfaces with too many default and private methods**: If your interface has multiple default methods, several private helpers, and complex internal logic, it's likely doing too much. An interface with extensive implementation logic is essentially becoming an abstract class — consider whether an abstract class would be more appropriate. Private interface methods are best used for **small, focused helper functions** that eliminate duplication between 2-3 default methods, not for complex business logic.
 
 ### ⚡ Performance Tip
+
 Private interface methods compile to the same bytecode as private methods in classes — they're dispatched via `invokespecial` (direct call, no virtual lookup). Since they cannot be overridden, the JIT compiler can always **inline** them, eliminating call overhead entirely. The encapsulation they provide is a zero-cost abstraction at runtime — the same performance as duplicated code, but with better maintainability.
 
 ### 🔧 JVM Internals
+
 At the bytecode level, private interface methods are stored in the interface's class file with the `ACC_PRIVATE` flag. Default methods calling private methods use `invokespecial` (Java 9+ adjusted this to allow `invokespecial` on interface private methods, which was previously restricted). The private method's bytecode is identical to a private method in a regular class. Since interfaces are loaded by the same classloader mechanism as classes, private methods have the same visibility enforcement at the JVM level.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 This question tests your knowledge of Java's version history and the progressive enhancement of interfaces. Interviewers expect you to explain the **problem** (code duplication in default methods) and the **solution** (private methods). Knowing the full timeline (Java 8: default + static, Java 9: + private) demonstrates awareness of language evolution. The key insight: private interface methods make interfaces more maintainable without expanding their public API surface.
 
 ## ⚡ Follow-up Questions
+
 1. Can a private interface method call an abstract method of the same interface?
 2. Why can't a static method call a private (non-static) method?
 3. What was the workaround before Java 9 for sharing logic between default methods?
 
 ## 📚 Related Topics
+
 - [Default Methods](./q08-default-methods.md)
 - [Static Interface Methods](./q09-static-interface-methods.md)
 - [Functional Interfaces](./q03-functional-interfaces-detail.md)

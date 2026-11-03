@@ -1,6 +1,7 @@
 # Q6: How to Use Optional API Effectively?
 
 ## 📋 Question
+
 How should the Optional API be used in Java? Explain creation, transformation, retrieval methods, and the common anti-patterns to avoid.
 
 ## Difficulty: 🟡 Medium
@@ -281,25 +282,31 @@ public class OptionalAntiPatternsDemo {
 | Performance-critical hot paths | ❌ No | Use null checks (avoid object creation) |
 
 ### ⚠️ Common Mistake
+
 **Using `orElse()` with an expensive computation**: `orElse()` **always evaluates** its argument, even when the Optional has a value. This means `opt.orElse(expensiveQuery())` runs the query even when `opt` is present. Use `orElseGet(() -> expensiveQuery())` instead — the `Supplier` is only invoked when the value is actually absent. This is a subtle but important performance difference in production code.
 
 ### ⚡ Performance Tip
+
 Each `Optional.of()` or `Optional.ofNullable()` with a non-null value allocates a new object on the heap. In hot loops or high-throughput code paths, this GC pressure can be significant. `Optional.empty()` returns a cached singleton (no allocation), but wrapping a value always allocates. For performance-critical code, consider using null checks directly. The JVM's escape analysis can sometimes eliminate Optional allocations, but this optimization is not guaranteed.
 
 ### 🔧 JVM Internals
+
 `Optional` is a **value-based class** — its identity should not be relied upon. Do not use `==` to compare Optionals, do not synchronize on them, and do not serialize them. Java's Project Valhalla plans to make Optional a **value type** (inline class), which would eliminate the heap allocation overhead entirely. Until then, Optional has the same memory footprint as any small object: 16 bytes header + 8 bytes reference field = 24 bytes per instance.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers test whether you know the **anti-patterns** as well as the correct usage. The key signals: never using `Optional.get()` without checking, knowing the `orElse` vs `orElseGet` difference, and understanding that Optional is for **return types only** — not fields or parameters. Demonstrating the `or()` chaining pattern (Java 9) and `Optional::stream` for flattening shows modern Java fluency.
 
 ## ⚡ Follow-up Questions
+
 1. Why is Optional not Serializable?
 2. When should you use `orElse` vs `orElseGet` vs `orElseThrow`?
 3. How does Optional interact with Stream's `flatMap`?
 
 ## 📚 Related Topics
+
 - [Stream API Operations](./q04-stream-api-operations.md)
 - [Stream Collectors](./q05-stream-collectors.md)
 - [Records](./q14-records-detail.md)

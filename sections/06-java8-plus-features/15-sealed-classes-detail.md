@@ -1,6 +1,7 @@
 # Q15: Sealed Classes in Java 17+ - Advanced Usage
 
 ## 📋 Question
+
 Explain advanced usage of sealed classes in Java 17+, including the permits clause, exhaustive pattern matching, and integration with records.
 
 ## Difficulty: 🟠 Intermediate
@@ -149,14 +150,17 @@ static String describe(Shape shape) {
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you understand sealed classes enable exhaustive pattern matching and type-safe hierarchies. Strong candidates can explain the three modifiers (final, sealed, non-sealed) and when to use sealed classes vs enums.
 
 ## ⚡ Follow-up Questions
+
 1. What happens if you try to extend a sealed class without being in the permits clause?
 2. Can sealed classes be used across different modules?
 3. How do sealed classes improve pattern matching?
 
 ## 📚 Related Topics
+
 - [Sealed Classes in Java 15+](../01-java-fundamentals/15-sealed-classes-java15.md)
 - [Records](../01-java-fundamentals/14-records-java14.md)
 - [Pattern Matching](./15-pattern-matching.md)

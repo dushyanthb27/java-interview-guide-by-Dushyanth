@@ -1,6 +1,7 @@
 # Q7: What's New in the Date/Time API?
 
 ## 📋 Question
+
 What are the key classes in the Java 8 Date/Time API? How do they compare to the old Date/Calendar API, and how do you handle time zones, formatting, and temporal adjustments?
 
 ## Difficulty: 🟡 Medium
@@ -259,25 +260,31 @@ LocalDate jan = LocalDate.of(2026, Month.JANUARY, 1);  // 1 = January
 ```
 
 ### ⚠️ Common Mistake
+
 **Using `LocalDateTime` to store timestamps in databases**: `LocalDateTime` has **no time zone information** — it represents a "wall clock" reading. If your server is in UTC and a user is in IST, `LocalDateTime.now()` gives different values on each machine. For timestamps (event occurred at), use `Instant` or `ZonedDateTime`. For human-readable dates (birthday, appointment), use `LocalDate` or `LocalDateTime`. Mixing these up causes bugs when servers are in different time zones.
 
 ### ⚡ Performance Tip
+
 `DateTimeFormatter` is **immutable and thread-safe** — create it once as a `static final` field and reuse it. Unlike the old `SimpleDateFormat` (which required `ThreadLocal` or synchronization), `DateTimeFormatter` can safely be shared across all threads. This eliminates both the performance overhead of creating new formatters and the risk of thread-safety bugs.
 
 ### 🔧 JVM Internals
+
 The `java.time` classes store dates as **epoch-day counts** (`LocalDate` stores a single `long` for days since epoch) and times as **nanosecond-of-day** (`LocalTime` stores two fields: second-of-day and nano-of-second). This representation is compact and makes arithmetic operations (addition, subtraction, comparison) extremely fast — they reduce to simple long arithmetic. `Instant` stores epoch-seconds + nano adjustment, making it directly convertible to/from `System.currentTimeMillis()` and database timestamps.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers test whether you know **which class to use for which scenario**: `LocalDate` for birthdays, `Instant` for event timestamps, `ZonedDateTime` for scheduling across time zones. Knowing the problems with the old API (mutability, 0-based months, thread-unsafe formatting) and how the new API solves them is essential. Mentioning `Clock` injection for testability shows production experience.
 
 ## ⚡ Follow-up Questions
+
 1. How do you convert between `Date` (old) and `Instant` (new)?
 2. What happens to `ZonedDateTime` during daylight saving time transitions?
 3. Why should you use `Instant` instead of `System.currentTimeMillis()`?
 
 ## 📚 Related Topics
+
 - [Lambda Expressions](./q01-lambda-expressions.md)
 - [Optional API](./q06-optional-api.md)
 - [Records](./q14-records-detail.md)

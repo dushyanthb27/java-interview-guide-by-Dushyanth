@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What are the different states in a thread's lifecycle? How do threads transition between states?
 
 ---
@@ -235,15 +236,19 @@ Found one Java-level deadlock:
 **How to capture a thread dump:**
 ```bash
 # Method 1: jstack
+
 jstack <pid>
 
 # Method 2: kill signal (Linux/Mac)
+
 kill -3 <pid>
 
 # Method 3: jcmd
+
 jcmd <pid> Thread.print
 
 # Method 4: Programmatic
+
 ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
 ```

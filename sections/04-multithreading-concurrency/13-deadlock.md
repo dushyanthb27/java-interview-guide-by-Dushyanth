@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What is deadlock? What are the four necessary conditions? How do you detect and prevent it?
 
 ---
@@ -82,6 +83,7 @@ public class DeadlockExample {
 
 ```bash
 # Get thread dump
+
 jstack <pid>
 
 # Output:
@@ -93,6 +95,7 @@ jstack <pid>
 # "Thread-2":
 #   waiting to lock monitor 0x00007f...  (object 0x000000076...)
 #   which is held by "Thread-1"
+
 ```
 
 #### Programmatic Detection

@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What is a thread? How does it differ from a process? Why do we need multithreading in Java?
 
 ---

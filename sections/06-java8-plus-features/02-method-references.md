@@ -1,6 +1,7 @@
 # Q2: What Are Method References?
 
 ## 📋 Question
+
 What are method references in Java? Explain the four types, how type inference works, and when to prefer method references over lambdas.
 
 ## Difficulty: 🟡 Medium
@@ -209,25 +210,31 @@ public class WhenToUseMethodRefDemo {
 | Readability is unclear with method ref | ✅ Use lambda |
 
 ### ⚠️ Common Mistake
+
 **Confusing unbound instance references with static references**: `String::toUpperCase` looks like a static call, but it's actually an unbound instance method reference. It's equivalent to `(String s) -> s.toUpperCase()`. The key tell: `toUpperCase()` is an instance method of `String`, not a static method. If the method is instance-level, the first parameter of the functional interface becomes the receiver object.
 
 ### ⚡ Performance Tip
+
 Method references and equivalent lambdas compile to the **same `invokedynamic` bytecode** and have identical runtime performance. The choice between them is purely a readability decision. However, bound instance method references (`obj::method`) capture the object reference and may prevent its garbage collection — be cautious with long-lived functional objects referencing short-lived instances.
 
 ### 🔧 JVM Internals
+
 Method references use the same `LambdaMetafactory` infrastructure as lambdas. The `invokedynamic` call site is linked to a bootstrap method that generates a lightweight class implementing the target functional interface. For non-capturing method references (static and unbound instance types), the JVM creates a **singleton instance** — no allocation on each use. For capturing references (bound instance like `obj::method`), a new instance is created each time to hold the captured object reference.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers test whether you can correctly identify the four types of method references and explain the subtle difference between bound and unbound instance references. A strong answer demonstrates knowing that `String::length` maps to `(String s) -> s.length()` (the first argument becomes the receiver). Bonus points for explaining when lambdas are more readable than method references.
 
 ## ⚡ Follow-up Questions
+
 1. Can you use method references with overloaded methods? How does the compiler resolve ambiguity?
 2. What's the difference between `this::method` and `ClassName::method`?
 3. How does `String[]::new` work as an array constructor reference?
 
 ## 📚 Related Topics
+
 - [Lambda Expressions](./q01-lambda-expressions.md)
 - [Functional Interfaces](./q03-functional-interfaces-detail.md)
 - [Stream API Operations](./q04-stream-api-operations.md)

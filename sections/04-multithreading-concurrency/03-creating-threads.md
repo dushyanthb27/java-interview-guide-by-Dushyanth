@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What are the different ways to create and run threads in Java? Which approach is preferred and why?
 
 ---

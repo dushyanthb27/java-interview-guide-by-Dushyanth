@@ -1,6 +1,7 @@
 # Q14: Records in Java 16+ - Advanced Usage
 
 ## 📋 Question
+
 Explain advanced usage of records in Java 16+, including compact constructors, custom methods, and integration with pattern matching.
 
 ## Difficulty: 🟠 Intermediate
@@ -110,14 +111,17 @@ static void printShape(Shape shape) {
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you understand records beyond the basics - compact constructors, custom methods, and pattern matching integration. Strong candidates can explain when to use records vs traditional classes and understand the immutability guarantees.
 
 ## ⚡ Follow-up Questions
+
 1. Can records have additional instance fields beyond the components?
 2. How do compact constructors differ from canonical constructors?
 3. When would you choose a record over a traditional class?
 
 ## 📚 Related Topics
+
 - [Records in Java 14+](../01-java-fundamentals/14-records-java14.md)
 - [Sealed Classes](../01-java-fundamentals/15-sealed-classes-java15.md)
 - [Pattern Matching](./15-pattern-matching.md)

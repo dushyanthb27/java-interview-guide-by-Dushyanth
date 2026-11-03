@@ -1,6 +1,7 @@
 # Q11: CompletableFuture Advanced Patterns
 
 ## 📋 Question
+
 Explain advanced CompletableFuture composition patterns. Cover thenApply vs thenCompose, combining futures, exception handling, timeouts, and real-world async pipeline design.
 
 ## Difficulty: 🟠 Senior
@@ -309,25 +310,31 @@ public class CustomExecutorDemo {
 | `anyOf` | `CF<?>...` | — | Returns first | `CF<Object>` |
 
 ### ⚠️ Common Mistake
+
 **Using `thenApply` when you need `thenCompose`**: If your transformation function returns a `CompletableFuture`, using `thenApply` gives you `CompletableFuture<CompletableFuture<T>>` — a nested future. Use `thenCompose` to flatten it, just like `flatMap` for streams. Also, **beware of `get()` without timeout** — it blocks indefinitely if the future never completes. Always use `get(timeout, unit)` or `join()` (which throws unchecked exceptions).
 
 ### ⚡ Performance Tip
+
 The default executor for `supplyAsync` and `*Async` variants is `ForkJoinPool.commonPool()`, which is shared across the entire JVM. For I/O-bound operations (HTTP calls, database queries), use a **dedicated thread pool** to avoid starving CPU-bound tasks. Also note: `thenApply` (non-async) runs on the completing thread, which might be the caller's thread if the future is already completed — this can cause unexpected blocking. Use `thenApplyAsync` if the transformation is non-trivial.
 
 ### 🔧 JVM Internals
+
 Internally, `CompletableFuture` maintains a **Treiber stack** (lock-free concurrent stack) of dependent actions. When a future completes, it pops and executes all registered actions. The `*Async` variants submit actions to an executor rather than running them inline. `join()` vs `get()`: both block, but `join()` wraps exceptions in `CompletionException` (unchecked), while `get()` wraps in `ExecutionException` (checked). For parallel streams and `CompletableFuture`, the `ForkJoinPool.commonPool()` parallelism defaults to `Runtime.getRuntime().availableProcessors() - 1`.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers expect you to distinguish `thenApply` vs `thenCompose` (the most common question) and explain the analogy to `map` vs `flatMap`. A strong answer demonstrates real-world usage patterns: fan-out/fan-in with `allOf`, timeout handling, and proper exception recovery. Knowing the difference between `handle`, `exceptionally`, and `whenComplete` shows mastery of the error-handling model.
 
 ## ⚡ Follow-up Questions
+
 1. What thread does `thenApply` (non-async) execute on?
 2. How do you implement retry logic with CompletableFuture?
 3. How does CompletableFuture compare to reactive streams (Project Reactor)?
 
 ## 📚 Related Topics
+
 - [Lambda Expressions](./q01-lambda-expressions.md)
 - [Stream API Operations](./q04-stream-api-operations.md)
 - [Virtual Threads](./q18-virtual-threads-detail.md)

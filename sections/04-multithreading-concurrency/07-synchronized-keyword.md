@@ -5,6 +5,7 @@
 ---
 
 ## 📋 Question
+
 How does the `synchronized` keyword work in Java? What are monitor locks, intrinsic locks, and the happens-before guarantee?
 
 ## Difficulty: 🟡 Intermediate
@@ -318,9 +319,11 @@ public class ThreadSafeCounter {
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to understand your grasp of synchronization fundamentals: monitor locks, reentrancy, and the happens-before guarantee. Strong candidates explain the difference between synchronized methods and blocks, discuss common pitfalls (like non-final lock objects), and can describe when to use `ReentrantLock` instead of `synchronized`.
 
 ## ⚡ Follow-up Questions
+
 1. When would you choose `ReentrantLock` over `synchronized`, and what are the trade-offs?
 2. How does biased locking work, and when does it revert to normal locking?
 3. Explain lock coarsening, lock elision, and escape analysis optimizations performed by the JIT.
@@ -330,6 +333,7 @@ Interviewers want to understand your grasp of synchronization fundamentals: moni
 7. How does the wait/notify mechanism work with synchronized blocks, and what are the alternatives?
 
 ## 📚 Related Topics
+
 - [Volatile Keyword](./08-volatile-keyword.md)
 - [Reentrant Lock](./10-reentrant-lock.md)
 - [Atomic Classes](./09-atomic-classes.md)

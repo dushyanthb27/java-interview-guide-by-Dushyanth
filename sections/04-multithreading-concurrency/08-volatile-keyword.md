@@ -5,6 +5,7 @@
 ---
 
 ## Question
+
 What does the `volatile` keyword do in Java? How does it differ from `synchronized`? When is it sufficient?
 
 ---
@@ -316,6 +317,7 @@ public void process() {
 ---
 
 ## ⚡ Follow-up Questions
+
 1. What is the difference between visibility and atomicity, and why doesn't volatile provide atomicity?
 2. How does volatile's memory barrier differ from synchronized's locking mechanism?
 3. What is the "safe publication" pattern, and when is volatile insufficient for it?
@@ -325,6 +327,7 @@ public void process() {
 7. What is the difference between `volatile` and `AtomicReference` for publishing immutable objects?
 
 ## 📚 Related Topics
+
 - [Synchronized Keyword](./07-synchronized-keyword.md)
 - [Atomic Classes](./09-atomic-classes.md)
 - [Java Memory Model](../07-jvm-internals/04-java-memory-model.md)

@@ -1,6 +1,7 @@
 # Q13: Local Variable Type Inference (var)
 
 ## 📋 Question
+
 What is the `var` keyword in Java? Explain LVTI rules, where `var` can and cannot be used, interactions with the diamond operator and lambdas, and best practices for readability.
 
 ## Difficulty: 🟡 Medium
@@ -247,25 +248,31 @@ public class VarBestPracticesDemo {
 | Fields, parameters, returns | ❌ N/A | Not allowed |
 
 ### ⚠️ Common Mistake
+
 **Using `var` with the diamond operator on constructors**: `var list = new ArrayList<>()` infers `ArrayList<Object>` — the generic type information is lost because neither side specifies it. Always provide the type parameter when using `var` with constructors: `var list = new ArrayList<String>()`. Similarly, avoid `var` when the right-hand side is a method call whose return type isn't immediately obvious — it forces readers to look up the method signature.
 
 ### ⚡ Performance Tip
+
 `var` has **zero runtime impact** — it's purely a compile-time feature. The compiler resolves the type and emits the same bytecode as if you'd written the type explicitly. The compiled class file contains the full type information. There's no boxing, no reflection, no dynamic dispatch — `var` is syntactic sugar that disappears at compilation. Use it freely without performance concerns.
 
 ### 🔧 JVM Internals
+
 `var` is not a keyword — it's a **reserved type name**. This means you can still have variables named `var` (legacy code compatibility), but you cannot create a class, interface, or enum named `var`. The compiler performs **flow-sensitive type inference** using the initializer expression. The inferred type is the **most specific concrete type** — `var x = new ArrayList<String>()` infers `ArrayList<String>`, not `List<String>`. This is a subtle but important difference from explicit typing, where you'd typically program to the interface.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you understand `var` is **compile-time syntactic sugar**, not a dynamic type. Key points to mention: the restrictions (can't use for fields, parameters, null, lambdas without target type), the diamond operator gotcha, and the readability trade-off. A strong answer discusses **when NOT to use var** — code readability should never be sacrificed for brevity. Mentioning that `var` infers the concrete type (not the interface) shows deep understanding.
 
 ## ⚡ Follow-up Questions
+
 1. What type does `var list = new ArrayList<>()` infer?
 2. Why can't `var` be used for method return types?
 3. Is `var` a keyword or a reserved type name? What's the difference?
 
 ## 📚 Related Topics
+
 - [Lambda Expressions](./q01-lambda-expressions.md)
 - [Records](./q14-records-detail.md)
 - [Text Blocks](./q17-text-blocks.md)

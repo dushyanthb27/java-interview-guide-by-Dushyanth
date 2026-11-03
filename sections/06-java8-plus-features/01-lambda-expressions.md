@@ -1,6 +1,7 @@
 # Q1: How Do Lambda Expressions Work?
 
 ## 📋 Question
+
 How do lambda expressions work in Java? Explain the syntax, target typing, variable capture rules, and how they differ from anonymous classes.
 
 ## Difficulty: 🟡 Medium
@@ -214,25 +215,31 @@ public class SerializableLambdaDemo {
 ```
 
 ### ⚠️ Common Mistake
+
 **Modifying captured variables via mutable wrappers**: While using `int[]` or `AtomicInteger` as a workaround for effectively-final constraints is technically valid, it defeats the purpose of the restriction. The effectively-final rule exists to prevent concurrency bugs — if you're mutating shared state inside a lambda (especially in parallel streams), you've introduced a race condition. Prefer `reduce()`, `collect()`, or `AtomicInteger` for thread-safe accumulation.
 
 ### ⚡ Performance Tip
+
 Non-capturing lambdas (those that don't reference any variables from the enclosing scope) are **cached as singletons** by the JVM. A lambda like `s -> s.length()` used in a loop creates **zero garbage** — the same instance is reused on every iteration. Capturing lambdas allocate a new object each time to hold the captured values, which adds GC pressure in hot loops.
 
 ### 🔧 JVM Internals
+
 The `invokedynamic` approach was chosen over anonymous inner classes for three key reasons: (1) **deferred class generation** — the lambda implementation class is created at runtime, not compile time, enabling future JVM optimizations without recompilation; (2) **no extra .class files** — a project with 1,000 lambdas doesn't produce 1,000 additional class files; (3) **optimization potential** — the JVM can inline lambda bodies directly into call sites, eliminating virtual dispatch overhead entirely.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers want to see that you understand lambdas beyond basic syntax. Key differentiators: explaining `this` semantics vs anonymous classes, knowing the effectively-final rule and **why** it exists (thread safety), and understanding that lambdas use `invokedynamic` rather than generating inner classes. Mentioning the singleton caching of non-capturing lambdas demonstrates deep JVM awareness.
 
 ## ⚡ Follow-up Questions
+
 1. Why does Java require captured variables to be effectively final?
 2. Can a lambda throw checked exceptions? How do you handle that?
 3. How does `invokedynamic` differ from `invokevirtual` for lambda dispatch?
 
 ## 📚 Related Topics
+
 - [Method References](./q02-method-references.md)
 - [Functional Interfaces](./q03-functional-interfaces-detail.md)
 - [Stream API Operations](./q04-stream-api-operations.md)

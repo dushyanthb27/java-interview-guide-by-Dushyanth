@@ -1,6 +1,7 @@
 # Q23: What Are Virtual Threads (Project Loom)?
 
 ## 📋 Question
+
 What are virtual threads in Java 21? How do they differ from platform threads? When should you use them?
 
 ## Difficulty: 🟠 Intermediate
@@ -297,14 +298,17 @@ public class VirtualThreadAntiPatterns {
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers ask about virtual threads to assess your knowledge of modern Java. They want you to understand the key difference: virtual threads are **cheap to create** and **don't waste OS threads** when blocking. Strong candidates can explain mounting/unmounting, pinning issues, and when to use virtual threads vs platform threads.
 
 ## ⚡ Follow-up Questions
+
 1. What is the difference between virtual threads and platform threads?
 2. When should you use virtual threads vs traditional thread pools?
 3. What causes pinning in virtual threads and how do you avoid it?
 
 ## 📚 Related Topics
+
 - [Thread Pools](./05-thread-pools.md)
 - [Executor Framework](./06-executor-framework.md)
 - [CompletableFuture](./15-completable-future.md)

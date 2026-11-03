@@ -1,6 +1,7 @@
 # Q3: Deep Dive into Functional Interfaces
 
 ## 📋 Question
+
 What are functional interfaces in Java? Explain the built-in functional interfaces, their primitive specializations, composition methods, and how to create custom functional interfaces.
 
 ## Difficulty: 🟡 Medium
@@ -268,25 +269,31 @@ interface ThrowingFunction<T, R> {
 ```
 
 ### ⚠️ Common Mistake
+
 **Creating custom functional interfaces when a built-in one exists**: Java provides 43 built-in functional interfaces in `java.util.function`. Before creating `interface StringProcessor { String process(String s); }`, check if `UnaryOperator<String>` already fits. Custom interfaces are only warranted when you need a descriptive name for domain clarity, checked exception support, or more than two parameters.
 
 ### ⚡ Performance Tip
+
 Always prefer **primitive specializations** (`IntPredicate`, `LongFunction`, `ToDoubleFunction`) over their generic counterparts when working with primitives. Using `Predicate<Integer>` instead of `IntPredicate` in a tight loop forces autoboxing/unboxing on every call — this can cause 3-5x slower performance and heavy garbage collection pressure due to the constant creation of `Integer` wrapper objects.
 
 ### 🔧 JVM Internals
+
 The `@FunctionalInterface` annotation is purely a **compile-time check** — it has no effect on runtime behavior. Any interface with a single abstract method can be used as a lambda target, with or without the annotation. However, the annotation prevents accidental addition of a second abstract method and serves as documentation. Note that methods from `Object` (`toString`, `equals`, `hashCode`) don't count as abstract methods in functional interfaces because every class already inherits their implementation from `Object`.
 
 ---
 
 ## 🎯 Interviewer Insight
+
 Interviewers expect you to name the core functional interfaces (`Function`, `Predicate`, `Consumer`, `Supplier`) and their method signatures from memory. A strong answer demonstrates knowledge of primitive specializations and their performance benefits, plus the ability to compose predicates and functions using `andThen`/`compose`/`and`/`or`. Mentioning the `ThrowingFunction` pattern for checked exceptions shows real-world experience.
 
 ## ⚡ Follow-up Questions
+
 1. Why does `Function` have both `andThen` and `compose`? What's the execution order difference?
 2. How many built-in functional interfaces does Java provide?
 3. Can a functional interface extend another interface?
 
 ## 📚 Related Topics
+
 - [Lambda Expressions](./q01-lambda-expressions.md)
 - [Method References](./q02-method-references.md)
 - [Stream API Operations](./q04-stream-api-operations.md)
