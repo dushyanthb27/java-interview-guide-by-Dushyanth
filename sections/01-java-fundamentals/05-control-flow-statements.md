@@ -202,6 +202,11 @@ public class ExhaustiveSwitchDemo {
 
 > **📚 Related:** [Operators and Expressions](./04-operators-and-expressions.md), [Enums in Java](./12-enums-in-java.md), [Sealed Classes](./15-sealed-classes-java15.md)
 
+### ⚠️ Gotchas
+- **Switch Fall-Through Bugs**: Forgetting `break` statements in traditional `switch` blocks causes unintended execution flow into subsequent cases.
+- **Concurrent Modification During Iteration**: Modifying a collection inside a standard `for-each` loop throws a `ConcurrentModificationException`.
+- **Dangling Else Confusion**: Omitting braces in nested `if-else` blocks associates the `else` with the wrong `if` statement, altering logic flow.
+
 ---
 
 [← Previous: Operators and Expressions](./04-operators-and-expressions.md) · [Next: Arrays in Java →](./06-arrays-in-java.md)

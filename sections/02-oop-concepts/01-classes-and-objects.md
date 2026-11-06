@@ -174,3 +174,9 @@ var employees = new ArrayList<Employee>(); // Type is inferred
 ---
 
 [← Back to Section Index](./README.md) · [Next: Constructors →](./02-constructors.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

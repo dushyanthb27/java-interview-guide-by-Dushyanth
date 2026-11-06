@@ -153,6 +153,11 @@ for (long i = 0; i < 10_000_000; i++) {
 
 > **📚 Related:** [Operators and Expressions](./04-operators-and-expressions.md), [Strings and String Pool](./07-strings-and-string-pool.md), [Generics & Type System](../09-generics-type-system/README.md)
 
+### ⚠️ Gotchas
+- **Comparing Wrapper Objects with `==`**: Using `==` on wrapper types checks reference identity rather than value equality, leading to subtle bugs for values outside the `-128` to `127` Integer cache range.
+- **Null Unboxing Crash**: Unboxing a `null` wrapper reference (e.g., in arithmetic or assignment to a primitive) throws a runtime `NullPointerException`.
+- **Autoboxing in Loops**: Unchecked autoboxing inside high-frequency loops creates millions of short-lived objects on the heap, triggering severe GC pauses.
+
 ---
 
 [← Previous: JVM, JRE, and JDK](./02-jvm-jre-jdk.md) · [Next: Operators and Expressions →](./04-operators-and-expressions.md)

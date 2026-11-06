@@ -143,6 +143,11 @@ Loader: Bootstrap (null — implemented in native code)
 
 > **📚 Related:** [Java vs Other Languages](./01-java-vs-other-languages.md), [Static vs Instance](./10-static-vs-instance.md), [Object-Oriented Programming](../02-oop-concepts/README.md)
 
+### ⚠️ Gotchas
+- **Deploying JDK in Production Containers**: Bundling the full JDK inside container images unnecessarily expands the attack surface and image size; deploy only the JRE or a custom runtime built via `jlink`.
+- **Assuming Immediate JIT Optimization**: Java applications experience a warm-up phase where startup performance is slower while the JIT compiler profiles execution and compiles hot spots.
+- **Class Loader Hierarchy Violations**: Attempting to load classes across custom class loaders without understanding parent delegation can cause `LinkageError` or `ClassNotFoundException`.
+
 ---
 
 [← Previous: Java vs Other Languages](./01-java-vs-other-languages.md) · [Next: Data Types and Primitives →](./03-data-types-primitives.md)

@@ -334,3 +334,9 @@ public Optional<String> findEmail(long userId) { ... }
 ---
 
 [Prev: Q15 - Streams API](./q15-streams-api-collections.md) | [Next: Q17 - Immutable Collections](./q17-immutable-collections.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

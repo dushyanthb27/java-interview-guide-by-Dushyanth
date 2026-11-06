@@ -203,6 +203,11 @@ objects[0] = 42;              // ❌ ArrayStoreException at runtime!
 
 > **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Strings and String Pool](./07-strings-and-string-pool.md), [Generics & Type System](../09-generics-type-system/README.md)
 
+### ⚠️ Gotchas
+- **Array Covariance Runtime Failures**: Assigning a subtype array to a supertype array (e.g., `String[]` to `Object[]`) compiles successfully but throws `ArrayStoreException` on invalid element assignments at runtime.
+- **Off-by-One Index Errors**: Accessing arrays past `arr.length - 1` throws `ArrayIndexOutOfBoundsException`.
+- **Shallow Copy Misconceptions**: Using `Arrays.copyOf()` or assignment copies references rather than deep objects, leaving mutable elements shared between arrays.
+
 ---
 
 [← Previous: Control Flow Statements](./05-control-flow-statements.md) · [Next: Strings and String Pool →](./07-strings-and-string-pool.md)

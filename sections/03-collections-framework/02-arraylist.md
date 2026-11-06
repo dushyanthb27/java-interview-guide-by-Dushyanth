@@ -339,3 +339,9 @@ String[] array = list.toArray(new String[0]);
 ---
 
 [← Previous: Collection Hierarchy](./01-collection-hierarchy.md) · [Next: LinkedList →](./03-linkedlist.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

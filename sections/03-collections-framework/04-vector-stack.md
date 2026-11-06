@@ -339,3 +339,9 @@ Deque<String> concurrentStack = new ConcurrentLinkedDeque<>();
 ---
 
 [← Previous: LinkedList Internals](./03-linkedlist.md) · [Next: HashSet Internals →](./05-hashset.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

@@ -378,3 +378,9 @@ Map<String, Object> cache = new ConcurrentHashMap<>();
 ---
 
 [Prev: Q11 - Iterator vs ListIterator](./q11-iterator-listiterator.md) | [Next: Q13 - Comparable vs Comparator](./q13-comparable-comparator.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

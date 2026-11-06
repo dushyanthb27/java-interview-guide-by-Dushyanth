@@ -342,3 +342,9 @@ public List<String> getItems() {
 ---
 
 [Prev: Q16 - Optional Handling](./q16-optional-handling.md) | [Next: Q18 - Collection Performance](./q18-collection-performance.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

@@ -354,3 +354,9 @@ Map<String, Integer> constants = Map.of("A", 1, "B", 2, "C", 3);
 ---
 
 [← Previous: HashMap Internals](./07-hashmap-internals.md) · [Next: ConcurrentHashMap →](./09-concurrenthashmap.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

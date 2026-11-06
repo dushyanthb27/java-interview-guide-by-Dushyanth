@@ -362,3 +362,9 @@ list.stream().filter(s -> s.length() > 3).forEach(System.out::println);
 ---
 
 [Prev: Q10 - Queue and Deque](./q10-queue-deque.md) | [Next: Q12 - Fail-Fast vs Fail-Safe](./q12-fail-fast-fail-safe.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

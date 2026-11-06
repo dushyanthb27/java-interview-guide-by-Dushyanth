@@ -118,6 +118,11 @@ int main() {
 
 > **📚 Related:** [JVM, JRE, and JDK](./02-jvm-jre-jdk.md), [Data Types and Primitives](./03-data-types-primitives.md), [Java 8+ Features](../06-java8-plus-features/README.md)
 
+### ⚠️ Gotchas
+- **Assuming GC Prevents All Memory Leaks**: Garbage collection only reclaims unreachable objects. Objects that remain reachable via static references, thread locals, or open connections accumulate and cause `OutOfMemoryError`.
+- **Confusing Bytecode Interpretation with Pure Interpretation**: Java bytecode is compiled to native machine code at runtime by the JIT compiler, making peak performance competitive with statically compiled languages.
+- **Ignoring Ecosystem and Tooling Trade-offs**: Comparing languages purely on syntax ignores the maturity of profiling, monitoring, refactoring tools, and library ecosystems that dictate enterprise productivity.
+
 ---
 
 [← Back to Section Index](./README.md) · [Next: JVM, JRE, and JDK →](./02-jvm-jre-jdk.md)

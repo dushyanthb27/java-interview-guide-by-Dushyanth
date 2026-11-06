@@ -252,6 +252,11 @@ record SafeTeam(String name, List<String> members) {
 
 > **📚 Related:** [Sealed Classes](./15-sealed-classes-java15.md), [Final Keyword](./11-final-keyword.md), [Enums in Java](./12-enums-in-java.md)
 
+### ⚠️ Gotchas
+- **Using Records as JPA Entities**: Attempting to use records as JPA/Hibernate entities fails because records lack no-arg constructors and mutable fields required by ORM frameworks.
+- **Shallow Immutability Traps**: Including mutable collections as record components allows external code to mutate internal state unless defensive copies (`List.copyOf()`) are performed in compact constructors.
+- **Incorrect Canonical Constructor Overrides**: Bypassing field initialization or failing to assign parameters in compact constructors leads to uninitialized state.
+
 ---
 
 [← Previous: Annotations](./13-annotations.md) · [Next: Sealed Classes →](./15-sealed-classes-java15.md)

@@ -209,6 +209,11 @@ public class StaticImportDemo {
 
 > **📚 Related:** [Static vs Instance](./10-static-vs-instance.md), [Final Keyword](./11-final-keyword.md), [Object-Oriented Programming](../02-oop-concepts/README.md)
 
+### ⚠️ Gotchas
+- **Misunderstanding `protected` Scope**: Assuming `protected` means "subclass only" when it also grants access to all classes within the same package.
+- **Overusing `public` Visibility**: Making classes and members `public` by default violates encapsulation and creates tight coupling, turning internal refactorings into breaking API changes.
+- **Wildcard Import Name Collisions**: Using wildcard imports (`import java.util.*`) can introduce compilation ambiguity errors when multiple imported packages contain classes with identical names.
+
 ---
 
 [← Previous: Methods and Parameter Passing](./08-methods-and-parameter-passing.md) · [Next: Static vs Instance →](./10-static-vs-instance.md)

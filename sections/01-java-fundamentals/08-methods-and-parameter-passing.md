@@ -212,6 +212,11 @@ static int sum(int... numbers) { /* fallback for 4+ args */ }
 
 > **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Static vs Instance](./10-static-vs-instance.md), [Object-Oriented Programming](../02-oop-concepts/README.md)
 
+### ⚠️ Gotchas
+- **Pass-by-Reference Misconception**: Believing objects are passed by reference rather than pass-by-value of reference copies, leading to failed attempts to reassign caller variables inside methods.
+- **Varargs Heap Allocation Overhead**: Invoking methods with varargs parameters implicitly allocates a new array on every call, impacting performance in hot loops.
+- **Ambiguous Overload Resolution**: Creating overlapping overloads with primitive widening, boxing, and varargs can trigger ambiguous method call compilation errors.
+
 ---
 
 [← Previous: Strings and String Pool](./07-strings-and-string-pool.md) · [Next: Packages and Access Modifiers →](./09-packages-and-access-modifiers.md)

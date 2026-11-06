@@ -243,6 +243,11 @@ private static final MyService INSTANCE = new MyService();
 
 > **📚 Related:** [Final Keyword](./11-final-keyword.md), [Packages and Access Modifiers](./09-packages-and-access-modifiers.md), [Object-Oriented Programming](../02-oop-concepts/README.md)
 
+### ⚠️ Gotchas
+- **Accessing Static Members via Instances**: Accessing static fields or methods through object references (`obj.staticMethod()`) misleads readers into expecting polymorphic behavior where none exists.
+- **Inner Class Memory Leaks**: Non-static inner classes hold an implicit reference to their outer class instance, preventing garbage collection and causing memory leaks when retained in long-lived contexts.
+- **Static Mutable State Concurrency Bugs**: Sharing mutable static state across threads without proper synchronization introduces race conditions and intermittent data corruption.
+
 ---
 
 [← Previous: Packages and Access Modifiers](./09-packages-and-access-modifiers.md) · [Next: Final Keyword →](./11-final-keyword.md)

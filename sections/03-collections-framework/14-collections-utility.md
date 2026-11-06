@@ -348,3 +348,9 @@ Map<String, Integer> safe = new ConcurrentHashMap<>();
 ---
 
 [Prev: Q13 - Comparable vs Comparator](./q13-comparable-comparator.md) | [Next: Q15 - Streams API with Collections](./q15-streams-api-collections.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

@@ -211,6 +211,11 @@ if ("admin".equals(userInput)) {
 
 > **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Final Keyword](./11-final-keyword.md), [Java 8+ Features](../06-java8-plus-features/README.md)
 
+### ⚠️ Gotchas
+- **Comparing Strings with `==`**: Using `==` on strings checks reference identity instead of content equality, causing intermittent bugs when comparing dynamically created strings versus literals.
+- **String Immutability Performance Traps**: Using the `+` operator inside loops creates excessive temporary `StringBuilder` and `String` objects, causing severe garbage collection pressure.
+- **Excessive `intern()` Usage**: Calling `String.intern()` on dynamically generated or unbounded input strings can exhaust the native String Table memory and trigger performance degradation.
+
 ---
 
 [← Previous: Arrays in Java](./06-arrays-in-java.md) · [Next: Methods and Parameter Passing →](./08-methods-and-parameter-passing.md)

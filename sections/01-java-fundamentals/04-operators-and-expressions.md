@@ -174,6 +174,11 @@ public class CompoundAssignmentCast {
 
 > **📚 Related:** [Data Types and Primitives](./03-data-types-primitives.md), [Control Flow Statements](./05-control-flow-statements.md), [Strings and String Pool](./07-strings-and-string-pool.md)
 
+### ⚠️ Gotchas
+- **Silent Integer Overflow**: Arithmetic operations exceeding `Integer.MAX_VALUE` wrap around silently to negative numbers rather than throwing an exception unless checked methods are used.
+- **Non-Short-Circuit Operator Mix-up**: Using `&` or `|` instead of `&&` or `||` evaluates both operands, resulting in unexpected `NullPointerException` when checking null safety.
+- **Operator Precedence Surprises**: Chaining comparison or ternary expressions without parentheses leads to unexpected evaluation orders and incorrect boolean logic.
+
 ---
 
 [← Previous: Data Types and Primitives](./03-data-types-primitives.md) · [Next: Control Flow Statements →](./05-control-flow-statements.md)

@@ -416,3 +416,9 @@ Set<String> concurrentSet = ConcurrentHashMap.newKeySet();
 ---
 
 [Prev: Q8 - LinkedHashMap and TreeMap](./08-linkedhashmap-treemap.md) | [Next: Q10 - Queue and Deque](./10-queue-deque.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

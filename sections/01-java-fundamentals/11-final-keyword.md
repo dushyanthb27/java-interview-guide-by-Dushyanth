@@ -235,6 +235,11 @@ public class FinalBestPractices {
 
 > **📚 Related:** [Strings and String Pool](./07-strings-and-string-pool.md), [Records in Java 14+](./14-records-java14.md), [Sealed Classes](./15-sealed-classes-java15.md)
 
+### ⚠️ Gotchas
+- **Confusing Reference Immutability with Object Immutability**: Assuming `final` makes an object immutable when it only freezes the reference variable, allowing internal state modifications on mutable objects like collections.
+- **Constant Inlining Recompilation Pitfalls**: Modifying a `static final` primitive or String constant requires recompiling all consumer classes due to bytecode inlining, not just the declaring class.
+- **Mutable Static Constants**: Declaring `public static final List` with a mutable collection allows external code to modify shared state, violating safety guarantees.
+
 ---
 
 [← Previous: Static vs Instance](./10-static-vs-instance.md) · [Next: Enums in Java →](./12-enums-in-java.md)

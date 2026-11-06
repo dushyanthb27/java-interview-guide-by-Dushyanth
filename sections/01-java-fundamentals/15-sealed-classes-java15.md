@@ -286,6 +286,11 @@ record DigitalWallet(String provider, String email) implements PaymentMethod {
 
 > **📚 Related:** [Records in Java 14+](./14-records-java14.md), [Enums in Java](./12-enums-in-java.md), [Control Flow — Switch Expressions](./05-control-flow-statements.md)
 
+### ⚠️ Gotchas
+- **Accidental Reopening with `non-sealed`**: Marking a permitted subclass as `non-sealed` unintentionally removes restriction on its children, allowing arbitrary external extension.
+- **Package and Module Co-Location Violations**: Failing to place permitted subtypes in the same package or module as the sealed parent results in compilation errors.
+- **Incomplete Switch Exhaustiveness**: Adding new permitted subtypes to a sealed hierarchy without updating pattern matching switch expressions breaks compiler exhaustiveness checks.
+
 ---
 
 [← Previous: Records in Java 14+](./14-records-java14.md) · [Next: Java 8+ Features →](../06-java8-plus-features/README.md)

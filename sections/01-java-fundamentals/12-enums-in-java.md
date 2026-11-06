@@ -266,6 +266,11 @@ Season restored = Season.valueOf(saved2);
 
 > **📚 Related:** [Final Keyword](./11-final-keyword.md), [Sealed Classes](./15-sealed-classes-java15.md), [Records in Java 14+](./14-records-java14.md)
 
+### ⚠️ Gotchas
+- **Persisting Enum `ordinal()` Values**: Relying on `ordinal()` for database persistence or external APIs breaks data integrity whenever enum constants are reordered, inserted, or deleted.
+- **Enum Map Performance Misuse**: Using `HashMap<MyEnum, V>` instead of `EnumMap` sacrifices significant memory and CPU efficiency optimized specifically for enum keys.
+- **Mutable Enum Fields**: Adding mutable fields to enums violates their singleton-like immutability guarantees and risks concurrency race conditions across shared constants.
+
 ---
 
 [← Previous: Final Keyword](./11-final-keyword.md) · [Next: Annotations →](./13-annotations.md)

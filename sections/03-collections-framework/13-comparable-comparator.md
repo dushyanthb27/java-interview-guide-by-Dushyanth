@@ -351,3 +351,9 @@ Employee youngest = Collections.min(employees,
 ---
 
 [Prev: Q12 - Fail-Fast vs Fail-Safe](./q12-fail-fast-fail-safe.md) | [Next: Q14 - Collections Utility](./q14-collections-utility.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.

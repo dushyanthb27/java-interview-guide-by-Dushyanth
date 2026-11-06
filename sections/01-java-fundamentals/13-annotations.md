@@ -218,6 +218,11 @@ Popular annotation processors:
 
 > **📚 Related:** [Records in Java 14+](./14-records-java14.md), [Enums in Java](./12-enums-in-java.md), [Java 8+ Features](../06-java8-plus-features/README.md)
 
+### ⚠️ Gotchas
+- **Missing `@Retention(RUNTIME)`**: Omitting `@Retention(RUNTIME)` defaults to `CLASS`, making the annotation invisible to runtime reflection queries.
+- **Reflection Performance Overhead**: Executing un-cached annotation checks and reflection lookups in tight execution paths degrades application throughput.
+- **Misusing `@Inherited` Scope**: Assuming class-level `@Inherited` annotations automatically propagate to implemented interfaces or overridden methods.
+
 ---
 
 [← Previous: Enums in Java](./12-enums-in-java.md) · [Next: Records in Java 14+ →](./14-records-java14.md)

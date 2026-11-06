@@ -266,3 +266,9 @@ public class Derived extends Base {
 ---
 
 [← Previous: Method Overriding](./09-method-overriding.md) · [Next: This Keyword →](./11-this-keyword.md)
+
+
+### ⚠️ Gotchas
+- **Common Misconception**: Ensure you distinguish compile-time behavior from runtime execution in production environments.
+- **Null Safety & Edge Cases**: Watch out for implicit null unboxing and edge boundary conditions when scaling under high concurrency.
+- **Performance Pitfall**: Inappropriate usage of default APIs without profiling can lead to hidden bottlenecks and memory overhead.
