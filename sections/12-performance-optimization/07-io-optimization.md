@@ -71,6 +71,12 @@ try (BufferedOutputStream bos = new BufferedOutputStream(
 
 ---
 
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
+
 ## 2. NIO for Scalability
 
 ```java
@@ -136,6 +142,12 @@ public class NioServer {
 
 ---
 
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
+
 ## 3. Memory-Mapped Files
 
 ```java
@@ -192,6 +204,12 @@ public class MemoryMappedFileDemo {
 
 ---
 
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
+
 ## 4. Zero-Copy Transfers
 
 ```java
@@ -239,6 +257,12 @@ Sending 1 GB file over network:
 ```
 
 ---
+
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
 
 ## 5. Asynchronous I/O (AIO)
 
@@ -294,6 +318,12 @@ public class AsyncFileReader {
 
 ---
 
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
+
 ## 6. Compression
 
 ```java
@@ -342,6 +372,12 @@ public class CompressionOptimization {
 
 ---
 
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
+
 ## 7. Connection Pooling
 
 ```java
@@ -375,6 +411,12 @@ public String fetchGood(String url) throws Exception {
 
 ---
 
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.
+
 ## 8. I/O Optimization Summary
 
 | Technique              | When to Use                         | Speedup     |
@@ -405,3 +447,9 @@ public String fetchGood(String url) throws Exception {
 ---
 
 [<< Previous: String Optimization](./q06-string-optimization.md) | [Next: JDBC Optimization >>](./q08-jdbc-optimization.md)
+
+### Gotchas
+- **Unbuffered I/O Streams**: Reading or writing raw `FileInputStream` or `FileOutputStream` byte-by-byte triggers thousands of individual system calls, destroying I/O throughput.
+- **Resource Leak via Missing Close**: Failing to wrap I/O streams in try-with-resources blocks leads to file descriptor leaks, eventually hitting OS file handle limits (`ulimit`).
+- **Synchronous Blocking in Reactive Flows**: Mixing blocking JDBC or I/O calls inside non-blocking reactive pipelines (Reactor/WebFlux) blocks event-loop threads.
+- **Buffer Size Misalignment**: Allocating I/O buffers smaller than OS page sizes (4KB) reduces read/write efficiency.

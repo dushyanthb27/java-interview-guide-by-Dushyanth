@@ -60,6 +60,12 @@ String msg = new StringBuilder().append("Hello, ").append(name)
 
 ---
 
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
+
 ## 2. String.join() and StringJoiner
 
 ```java
@@ -83,6 +89,12 @@ String csv = words.stream()
 ```
 
 ---
+
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
 
 ## 3. Compact Strings (Java 9+)
 
@@ -115,6 +127,12 @@ For applications with millions of strings, savings are substantial.
 ```
 
 ---
+
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
 
 ## 4. String Deduplication
 
@@ -151,6 +169,12 @@ Internationalization strings     10-30% heap reduction
 ```
 
 ---
+
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
 
 ## 5. String.intern() Considerations
 
@@ -194,6 +218,12 @@ jcmd <pid> VM.stringtable
 
 ---
 
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
+
 ## 6. Text Blocks (Java 15+)
 
 ```java
@@ -226,6 +256,12 @@ String sql = """
 
 ---
 
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
+
 ## 7. StringBuffer vs StringBuilder
 
 ```java
@@ -249,6 +285,12 @@ StringBuilder builder = new StringBuilder();  // no synchronization overhead
 ```
 
 ---
+
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
 
 ## 8. Advanced String Optimization Patterns
 
@@ -300,6 +342,12 @@ sb.append(',');  // avoids String object overhead
 
 ---
 
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.
+
 ## 9. String Performance Quick Reference
 
 | Operation                | Fast                        | Slow                          |
@@ -328,3 +376,9 @@ sb.append(',');  // avoids String object overhead
 ---
 
 [<< Previous: Collection Performance](./q05-collection-performance.md) | [Next: I/O Optimization >>](./q07-io-optimization.md)
+
+### Gotchas
+- **String Interning Memory Leak**: Calling `String.intern()` on dynamic runtime values (like user inputs or IDs) pollutes the JVM String Table (Metaspace/PermGen), causing permanent memory bloat.
+- **Implicit StringBuilder Creation**: Using string concatenation (`+`) inside loops generates excessive temporary `StringBuilder` and `String` instances in older Java or unoptimized code.
+- **SubString Memory Retention**: Pre-Java 7/8 substring retaining backing character arrays caused large memory retention bugs (resolved in modern Java by copying or shared char arrays, but still relevant in legacy code).
+- **Charset Encoding Overhead**: Repeatedly performing string-to-byte conversions using default charsets instead of explicit UTF-8 `StandardCharsets` causes CPU overhead and platform-dependent bugs.

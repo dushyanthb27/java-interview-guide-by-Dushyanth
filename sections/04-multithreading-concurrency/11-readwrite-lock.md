@@ -4,41 +4,32 @@
 
 ---
 
-## Question
+## 📋 Question
 
-What is `ReadWriteLock`? How does `ReentrantReadWriteLock` work and when should you use it? What is `StampedLock`?
+What is `ReadWriteLock`? How does `ReentrantReadWriteLock` work, when should you use it, how do lock downgrading and reader/writer starvation policies operate, and what is `StampedLock`?
+
+## Difficulty: 🟡 Intermediate
 
 ---
 
-## Answer
+## 💡 Answer
 
-### The Problem: Readers vs Writers
+### The Readers-Writers Problem
+
+Standard mutual exclusion locks (`synchronized` or `ReentrantLock`) allow only one thread at a time into a critical section, even if the operation is purely read-only and thread-safe. When read operations vastly outnumber write operations, exclusive locking creates severe throughput bottlenecks.
+
+`ReadWriteLock` decouples read access from write access:
+- **Multiple readers** can hold the read lock concurrently.
+- **Writers** require exclusive access (no other readers or writers allowed).
 
 ```
-With synchronized (or ReentrantLock):
-  Reader A ──LOCK──read──UNLOCK──
-  Reader B ──────────────────────LOCK──read──UNLOCK──
-  Reader C ─────────────────────────────────────────LOCK──read──UNLOCK──
-  ❌ Readers block each other even though reads are safe in parallel!
-
-With ReadWriteLock:
-  Reader A ──RLOCK──read──RUNLOCK──
-  Reader B ──RLOCK──read──RUNLOCK──   ← Concurrent! No blocking!
-  Reader C ──RLOCK──read──RUNLOCK──
-  Writer X ─────────────────────────WLOCK──write──WUNLOCK──
-  ✅ Multiple readers in parallel; writers get exclusive access
+Exclusive Lock (synchronized):      ReadWriteLock:
+  Reader A ──LOCK──read──UNLOCK──     Reader A ──RLOCK──read──RUNLOCK──
+  Reader B ──WAIT...──LOCK──        Reader B ──RLOCK──read──RUNLOCK── (Concurrent!)
+  Writer X ──WAIT...──LOCK──        Writer X ──WAIT...──WLOCK──write──
 ```
 
-### ReadWriteLock Interface
-
-```java
-public interface ReadWriteLock {
-    Lock readLock();   // Shared lock - multiple readers allowed
-    Lock writeLock();  // Exclusive lock - only one writer, no readers
-}
-```
-
-### ReentrantReadWriteLock
+### `ReentrantReadWriteLock` Architecture
 
 ```java
 public class ThreadSafeCache<K, V> {
@@ -47,9 +38,8 @@ public class ThreadSafeCache<K, V> {
     private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
 
-    // Multiple threads can read simultaneously
     public V get(K key) {
-        readLock.lock();
+        readLock.lock(); // Shared read lock
         try {
             return cache.get(key);
         } finally {
@@ -57,258 +47,101 @@ public class ThreadSafeCache<K, V> {
         }
     }
 
-    public boolean containsKey(K key) {
-        readLock.lock();
-        try {
-            return cache.containsKey(key);
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    // Only one thread can write; blocks all readers
     public V put(K key, V value) {
-        writeLock.lock();
+        writeLock.lock(); // Exclusive write lock
         try {
             return cache.put(key, value);
         } finally {
             writeLock.unlock();
         }
     }
-
-    public void clear() {
-        writeLock.lock();
-        try {
-            cache.clear();
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
-    public int size() {
-        readLock.lock();
-        try {
-            return cache.size();
-        } finally {
-            readLock.unlock();
-        }
-    }
 }
 ```
 
-### Lock Compatibility Matrix
+#### Lock Compatibility Matrix
 
-```
-┌─────────────────┬────────────┬─────────────┐
-│ Requesting \    │ Read Lock  │ Write Lock  │
-│ Holding         │ (shared)   │ (exclusive) │
-├─────────────────┼────────────┼─────────────┤
-│ Read Lock       │  ✅ Allow  │  ❌ Block   │
-│ Write Lock      │  ❌ Block  │  ❌ Block   │
-└─────────────────┴────────────┴─────────────┘
+| Current \ Requesting | Read Lock (Shared) | Write Lock (Exclusive) |
+|----------------------|--------------------|------------------------|
+| **Read Lock** | ✅ Allowed | ❌ Blocked |
+| **Write Lock** | ❌ Blocked | ❌ Blocked |
 
-- Multiple readers: ✅ Allowed (shared access)
-- Reader + Writer: ❌ Blocked (mutual exclusion)
-- Multiple writers: ❌ Blocked (exclusive access)
-```
+### Fairness Policies & Writer Starvation
+
+`ReentrantReadWriteLock` supports two fairness settings (`new ReentrantReadWriteLock(true)`):
+- **Unfair (Default):** Higher throughput. Readers can jump ahead of waiting writers if read locks are active, which can cause **writer starvation** if read requests arrive continuously.
+- **Fair:** Queued threads acquire locks in FIFO order. If a writer is waiting, subsequent incoming readers are queued behind it, preventing writer starvation at the expense of throughput.
 
 ### Lock Downgrading (Write → Read)
+
+`ReentrantReadWriteLock` supports **lock downgrading**: a thread holding the write lock can acquire the read lock, and then release the write lock, safely transitioning from exclusive writer to shared reader without losing data visibility.
 
 ```java
 public class LockDowngradeDemo {
     private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private volatile Object cachedData;
-    private volatile boolean cacheValid;
+    private final Lock readLock = rwLock.readLock();
+    private final Lock writeLock = rwLock.writeLock();
+    private Object data = "Initial";
+    private volatile boolean changed = false;
 
-    public Object processData() {
-        rwLock.readLock().lock();
+    public void updateAndRead() {
+        writeLock.lock(); // 1. Acquire write lock
         try {
-            if (!cacheValid) {
-                // Must release read lock before acquiring write lock
-                rwLock.readLock().unlock();
-                rwLock.writeLock().lock();
-                try {
-                    // Double-check after acquiring write lock
-                    if (!cacheValid) {
-                        cachedData = loadFromDatabase();
-                        cacheValid = true;
-                    }
-                    // ✅ Downgrade: acquire read lock while holding write lock
-                    rwLock.readLock().lock();
-                } finally {
-                    // Release write lock; still holding read lock
-                    rwLock.writeLock().unlock();
-                }
+            if (changed) {
+                data = "Updated Data";
+                changed = false;
             }
-            // Use data under read lock
-            return cachedData;
+            readLock.lock(); // 2. Downgrade by acquiring read lock while holding write lock
         } finally {
-            rwLock.readLock().unlock();
+            writeLock.unlock(); // 3. Release write lock; retain read lock
         }
-    }
 
-    // ❌ Lock UPGRADING (Read → Write) is NOT supported!
-    // This will DEADLOCK:
-    public void brokenUpgrade() {
-        rwLock.readLock().lock();
         try {
-            // rwLock.writeLock().lock(); // ❌ DEADLOCK! Cannot upgrade
+            System.out.println("Reading safely under shared read lock: " + data);
         } finally {
-            rwLock.readLock().unlock();
+            readLock.unlock(); // 4. Release read lock
         }
-    }
-
-    private Object loadFromDatabase() {
-        return "data from DB";
     }
 }
 ```
+*Note:* Lock upgrading (Read → Write) is **not** supported and will deadlock if attempted directly.
 
-### StampedLock (Java 8+)
+### Modern Alternative: `StampedLock` (Java 8+)
 
-`StampedLock` adds **optimistic reading** for even better performance:
+Introduced in Java 8, `StampedLock` controls read/write access with return **stamps**. Unlike `ReentrantReadWriteLock`, it introduces **Optimistic Locking**:
+- Reads do not acquire any lock or modify state; instead, they read data and validate whether a write occurred in the interim using a stamp validation check (`validate(stamp)`).
+- If validation fails, the reader falls back to acquiring a standard shared read lock.
 
 ```java
-public class StampedLockDemo {
-    private final StampedLock stampedLock = new StampedLock();
+public class Point {
     private double x, y;
+    private final StampedLock lock = new StampedLock();
 
-    // Write lock (exclusive)
-    public void move(double deltaX, double deltaY) {
-        long stamp = stampedLock.writeLock();
-        try {
-            x += deltaX;
-            y += deltaY;
-        } finally {
-            stampedLock.unlockWrite(stamp);
-        }
-    }
-
-    // ✅ Optimistic read (no locking!) - best case: zero overhead
-    public double distanceFromOrigin() {
-        long stamp = stampedLock.tryOptimisticRead(); // Non-blocking!
+    // Optimistic Read - extremely fast, lock-free
+    public double distanceToOrigin() {
+        long stamp = lock.tryOptimisticRead(); // Non-blocking stamp
         double currentX = x;
         double currentY = y;
 
-        // Validate: check if a write occurred during our read
-        if (!stampedLock.validate(stamp)) {
-            // A write happened! Fall back to pessimistic read lock
-            stamp = stampedLock.readLock();
+        // Check if any writer intervened during our read
+        if (!lock.validate(stamp)) {
+            stamp = lock.readLock(); // Fallback to traditional read lock
             try {
                 currentX = x;
                 currentY = y;
             } finally {
-                stampedLock.unlockRead(stamp);
+                lock.unlockRead(stamp);
             }
         }
-
-        return Math.sqrt(currentX * currentX + currentY * currentY);
+        return Math.hypot(currentX, currentY);
     }
 
-    // Pessimistic read lock (same as ReadWriteLock)
-    public double[] getPosition() {
-        long stamp = stampedLock.readLock();
+    public void move(double deltaX, double deltaY) {
+        long stamp = lock.writeLock(); // Exclusive write lock
         try {
-            return new double[]{x, y};
+            x += deltaX;
+            y += deltaY;
         } finally {
-            stampedLock.unlockRead(stamp);
-        }
-    }
-
-    // Lock conversion: read → write
-    public void moveIfAt(double expectedX, double expectedY, double newX, double newY) {
-        long stamp = stampedLock.readLock();
-        try {
-            while (x == expectedX && y == expectedY) {
-                // Try to upgrade to write lock
-                long writeStamp = stampedLock.tryConvertToWriteLock(stamp);
-                if (writeStamp != 0L) {
-                    stamp = writeStamp; // Upgrade successful!
-                    x = newX;
-                    y = newY;
-                    break;
-                } else {
-                    // Upgrade failed - release read, acquire write
-                    stampedLock.unlockRead(stamp);
-                    stamp = stampedLock.writeLock();
-                }
-            }
-        } finally {
-            stampedLock.unlock(stamp);
-        }
-    }
-}
-```
-
-### Comparison: ReadWriteLock vs StampedLock
-
-```
-┌──────────────────┬─────────────────────┬──────────────────────┐
-│ Feature          │ ReentrantRWLock      │ StampedLock          │
-├──────────────────┼─────────────────────┼──────────────────────┤
-│ Optimistic reads │ ❌                  │ ✅                   │
-│ Reentrant        │ ✅                  │ ❌                   │
-│ Conditions       │ ✅ (write lock)     │ ❌                   │
-│ Fair mode        │ ✅                  │ ❌                   │
-│ Lock upgrading   │ ❌                  │ ✅ tryConvertTo..()  │
-│ Performance      │ Good                │ Better (read-heavy)  │
-│ Complexity       │ Moderate            │ Higher               │
-│ Since            │ JDK 1.5             │ JDK 1.8              │
-└──────────────────┴─────────────────────┴──────────────────────┘
-```
-
-### When to Use What
-
-```java
-// Use synchronized: Simple, low-contention cases
-public synchronized void simpleUpdate() { /* ... */ }
-
-// Use ReentrantLock: Need tryLock, fairness, conditions
-private final ReentrantLock lock = new ReentrantLock(true);
-
-// Use ReentrantReadWriteLock: Read-heavy, write-rare workloads
-private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-
-// Use StampedLock: Maximum read performance, non-reentrant OK
-private final StampedLock stampedLock = new StampedLock();
-```
-
-### Practical Example: Configuration Store
-
-```java
-public class ConfigStore {
-    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-    private final Map<String, String> config = new HashMap<>();
-    private volatile long lastModified;
-
-    // Frequent operation - multiple readers allowed
-    public String getProperty(String key) {
-        rwLock.readLock().lock();
-        try {
-            return config.get(key);
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-
-    public Map<String, String> getAllProperties() {
-        rwLock.readLock().lock();
-        try {
-            return new HashMap<>(config); // Defensive copy
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-
-    // Rare operation - exclusive access
-    public void reloadConfig(Map<String, String> newConfig) {
-        rwLock.writeLock().lock();
-        try {
-            config.clear();
-            config.putAll(newConfig);
-            lastModified = System.currentTimeMillis();
-        } finally {
-            rwLock.writeLock().unlock();
+            lock.unlockWrite(stamp);
         }
     }
 }
@@ -316,33 +149,41 @@ public class ConfigStore {
 
 ---
 
-## Anti-Patterns
+## ⚠️ Gotchas & Pitfalls
 
-❌ **Attempting to upgrade read lock to write lock (ReentrantReadWriteLock):**
-```java
-readLock.lock();
-writeLock.lock(); // ❌ DEADLOCK!
-```
-
-❌ **Using ReadWriteLock when writes are frequent:**
-```java
-// If write ratio > 20%, ReadWriteLock overhead may not be worth it
-```
-
-❌ **Using StampedLock reentrantly:**
-```java
-long stamp = stampedLock.writeLock();
-long stamp2 = stampedLock.writeLock(); // ❌ DEADLOCK! Not reentrant
-```
-
-## Best Practices
-
-✅ Use `ReadWriteLock` when reads significantly outnumber writes  
-✅ Use `StampedLock` with optimistic reads for maximum read throughput  
-✅ Remember: lock downgrading (write→read) is allowed; upgrading (read→write) is not  
-✅ Always unlock in finally blocks  
-✅ Consider `ConcurrentHashMap` before implementing your own read-write cache
+1. **Writer Starvation in Unfair Mode:** Under heavy read concurrency, an unfair `ReentrantReadWriteLock` can starve waiting writers indefinitely.
+2. **Attempting Lock Upgrading:** Trying to acquire a write lock while holding a read lock will block forever (deadlock). You must fully release the read lock before acquiring a write lock.
+3. **`StampedLock` Reentrancy Limitation:** `StampedLock` **is not reentrant**. If a thread holding a write lock attempts to acquire another write lock, it will deadlock.
+4. **Incorrect Optimistic Read Fallback:** Forgetting to check `lock.validate(stamp)` or omitting the fallback read lock results in reading inconsistent, half-mutated multi-variable states.
 
 ---
 
-[← ReentrantLock](./q10-reentrant-lock.md) | [Next: Condition Variables →](./q12-condition-variables.md)
+## ✅ Best Practices
+
+- Use `ReentrantReadWriteLock` when read operations dominate write operations (e.g., 90%+ reads) and critical sections are long or complex.
+- Prefer `StampedLock` for read-heavy coordinate or numerical state objects where optimistic reads eliminate lock acquisition overhead entirely.
+- Remember that `StampedLock` does not support reentrancy or conditions—use `ReentrantReadWriteLock` if those features are required.
+
+---
+
+## 🎯 Interviewer Insight
+
+Interviewers use `ReadWriteLock` and `StampedLock` to test your ability to scale high-concurrency read scenarios. Strong candidates contrast shared vs. exclusive lock matrices, explain writer starvation risks, demonstrate lock downgrading, and explain how `StampedLock` optimistic reads bypass locking overhead through stamp validation.
+
+## ⚡ Follow-up Questions
+
+1. What is the difference between reader and writer starvation in `ReentrantReadWriteLock`, and how does fair mode resolve it?
+2. Why does `ReentrantReadWriteLock` support lock downgrading but prohibit lock upgrading?
+3. How does `StampedLock` optimistic reading work, and when does it outperform standard read locks?
+4. Why is `StampedLock` not reentrant?
+5. What happens if a thread holding a `StampedLock` optimistic read is garbage collected or blocked?
+
+## 📚 Related Topics
+
+- [Reentrant Lock](./10-reentrant-lock.md)
+- [Synchronized Keyword](./07-synchronized-keyword.md)
+- [Concurrent Collections](./17-concurrent-collections.md)
+
+---
+
+[← Reentrant Lock](./10-reentrant-lock.md) | [Next: Condition Variables →](./12-condition-variables.md)

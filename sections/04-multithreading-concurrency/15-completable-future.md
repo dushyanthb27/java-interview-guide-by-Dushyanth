@@ -308,6 +308,15 @@ public class ServiceAggregator {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Common ForkJoinPool Starvation:** Using blocking operations inside `.supplyAsync()` or `.thenApplyAsync()` without a custom executor exhausts threads in `ForkJoinPool.commonPool()`, degrading performance across the entire JVM.
+2. **Checked Exception Wrapping:** `CompletableFuture` methods accept standard `Function` and `Consumer` functional interfaces, which do not throw checked exceptions; throwing checked exceptions inside lambdas requires manual wrapping into unchecked `CompletionException`.
+3. **CompletionException Unwrapping:** Calling `.get()` throws a checked `ExecutionException`, whereas calling `.join()` throws an unchecked `CompletionException`, which can surprise callers expecting standard checked exceptions.
+4. **Memory Leaks in Uncompleted Futures:** Holding references to incomplete `CompletableFuture` instances in long-lived callback chains or maps prevents garbage collection of intermediate stage objects.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Blocking with `get()` on the common ForkJoinPool:**
@@ -334,4 +343,4 @@ CompletableFuture.supplyAsync(() -> riskyOperation()); // ❌ Exception is silen
 
 ---
 
-[← Thread Communication](./q14-thread-communication.md) | [Next: Parallel Streams →](./q16-parallel-streams.md)
+[← Thread Communication](./14-thread-communication.md) | [Next: Parallel Streams →](./16-parallel-streams.md)

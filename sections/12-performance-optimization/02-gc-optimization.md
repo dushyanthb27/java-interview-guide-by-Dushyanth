@@ -40,6 +40,12 @@ java -XX:+UseZGC \
 
 ---
 
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
+
 ## 2. G1 GC Tuning
 
 ### Key G1 Parameters
@@ -90,6 +96,12 @@ public class G1HumongousDemo {
 ```
 
 ---
+
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
 
 ## 3. Young Generation Sizing
 
@@ -148,6 +160,12 @@ public class GCMonitor {
 
 ---
 
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
+
 ## 4. Humongous Object Management
 
 Objects larger than 50% of a G1 region are "humongous" and allocated directly in old generation.
@@ -184,6 +202,12 @@ java -XX:+G1EagerReclaimHumongousObjects -jar app.jar
 ```
 
 ---
+
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
 
 ## 5. GC Log Analysis
 
@@ -253,6 +277,12 @@ public class GCNotificationListener {
 
 ---
 
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
+
 ## 6. GC Optimization Checklist
 
 ### Step-by-Step Tuning Process
@@ -281,6 +311,12 @@ public class GCNotificationListener {
 | Metaspace full GC          | Metaspace OOM           | Set `MaxMetaspaceSize`, check leaks   |
 
 ---
+
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
 
 ## 7. GC Pause Time Optimization Patterns
 
@@ -329,6 +365,12 @@ public class ObjectPool<T> {
 
 ---
 
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.
+
 ## 8. ZGC and Shenandoah for Low Latency
 
 ```bash
@@ -369,3 +411,9 @@ java -XX:+UseShenandoahGC \
 ---
 
 [<< Previous: JVM Tuning](./q01-jvm-tuning.md) | [Next: Memory Management >>](./q03-memory-management-perf.md)
+
+### Gotchas
+- **Humongous Allocations in G1**: Objects larger than 50% of G1 region size bypass Eden and go straight to Old gen as humongous objects, triggering premature mixed GCs.
+- **Explicit `System.gc()` Calls**: Leaving explicit GC calls enabled in libraries or code can force Full GCs, freezing stop-the-world pauses. Use `-XX:+DisableExplicitGC`.
+- **Over-tuning Pause Targets**: Setting `-XX:MaxGCPauseMillis` unrealistically low (e.g., 5ms) forces G1 to shrink young gen excessively, severely degrading overall application throughput.
+- **ZGC Heap Sizing**: ZGC requires sufficient headroom; running ZGC with heap utilization constantly above 85-90% causes allocation stalls and thread parking.

@@ -71,6 +71,12 @@ public void bubbleSort(int[] arr) {
 
 ---
 
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
+
 ## 2. Space-Time Trade-Offs
 
 ```java
@@ -128,6 +134,12 @@ public boolean hasDuplicatesOptimal(int[] arr) {     // O(n) time, O(n) space
 
 ---
 
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
+
 ## 3. Algorithm Choice Impact
 
 ### Real-World Example: Finding Intersection of Two Lists
@@ -184,6 +196,12 @@ n = m = 100,000 elements:
 ```
 
 ---
+
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
 
 ## 4. Sorting Algorithm Selection
 
@@ -244,6 +262,12 @@ public List<Integer> topK(int[] arr, int k) {
 
 ---
 
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
+
 ## 5. Search Algorithm Optimization
 
 ```java
@@ -282,6 +306,12 @@ HashMap lookup:   ~3 ms        (O(1) per lookup)
 
 ---
 
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
+
 ## 6. Hash-Based vs Tree-Based Lookups
 
 ```java
@@ -310,6 +340,12 @@ Map.Entry<Integer, String> justAbove90 = scores.ceilingEntry(90); // 92=Bob
 ```
 
 ---
+
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
 
 ## 7. Algorithm Optimization Patterns
 
@@ -360,6 +396,12 @@ public boolean hasPairSum(int[] sorted, int target) { // O(n)
 
 ---
 
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.
+
 ## 8. Complexity Quick Reference
 
 | Operation                  | Naive        | Optimal       | Key Technique      |
@@ -389,3 +431,9 @@ public boolean hasPairSum(int[] sorted, int target) { // O(n)
 ---
 
 [<< Previous: Micro-Optimizations](./q12-micro-optimizations.md) | [Next: Data Structure Selection >>](./q14-data-structure-selection.md)
+
+### Gotchas
+- **Worst-Case Complexity Ignorance**: Choosing algorithms based on average-case performance ($O(N \log N)$) without accounting for worst-case quadratic degradation ($O(N^2)$ in Quicksort).
+- **Asymptotic vs Constant Factor**: Ignoring constant factors for small data sets where a simpler $O(N^2)$ algorithm outperforms a complex $O(N \log N)$ algorithm due to overhead.
+- **Boxing/Unboxing Overhead in Collections**: Using generic collections with boxed primitives (`List<Integer>`) instead of primitive arrays or primitive collections (`IntList`) adds massive memory and indirection overhead.
+- **Recursive Stack Overflow**: Implementing deep recursive algorithms without tail-call optimization or iterative conversion leads to `StackOverflowError`.

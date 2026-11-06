@@ -286,6 +286,15 @@ If ANY box is unchecked → ⚠️ Benchmark first or use sequential
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Global Common Pool Contamination:** Executing blocking I/O or long-running computations inside parallel streams ties up threads in `ForkJoinPool.commonPool()`, which impacts asynchronous frameworks across the entire JVM.
+2. **Splitting Overhead on LinkedList:** Calling `.parallelStream()` on collections with $O(N)$ random access (such as `LinkedList`) destroys performance because splitting requires linear traversal to find sublist midpoints.
+3. **Stateful Lambda Side Effects:** Modifying external collections or variables inside `.map()` or `.filter()` introduces race conditions and non-deterministic bugs due to concurrent execution across multiple threads.
+4. **Encounter Order Preservation Penalty:** Operations like `.findFirst()` or `.forEach()` force expensive synchronization and coordination across parallel stream partitions to maintain strict encounter order.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Using parallel streams for I/O operations**  
@@ -305,4 +314,4 @@ If ANY box is unchecked → ⚠️ Benchmark first or use sequential
 
 ---
 
-[← CompletableFuture](./q15-completable-future.md) | [Next: Concurrent Collections →](./q17-concurrent-collections.md)
+[← CompletableFuture](./15-completable-future.md) | [Next: Concurrent Collections →](./17-concurrent-collections.md)

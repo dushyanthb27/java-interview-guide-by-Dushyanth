@@ -69,6 +69,12 @@ public class HighThroughputCounter {
 
 ---
 
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
+
 ## 2. Lock-Free Algorithms
 
 ```java
@@ -142,6 +148,12 @@ LongAdder:             ~350 ms   (cell striping, minimal contention)
 
 ---
 
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
+
 ## 3. Thread Pool Sizing
 
 ### CPU-Bound Tasks
@@ -205,6 +217,12 @@ try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
 ---
 
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
+
 ## 4. False Sharing
 
 False sharing occurs when threads modify variables that reside on the same CPU cache line (typically 64 bytes), causing cache invalidation.
@@ -228,6 +246,12 @@ public class NoPaddingFalseSharing {
 ```
 
 ---
+
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
 
 ## 5. @Contended Annotation
 
@@ -273,6 +297,12 @@ Single-threaded baseline:           ~400 ms
 
 ---
 
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
+
 ## 6. Async Processing
 
 ```java
@@ -314,6 +344,12 @@ public class AsyncService {
 
 ---
 
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
+
 ## 7. Concurrent Data Structure Selection
 
 ```java
@@ -344,6 +380,12 @@ ConcurrentLinkedQueue<Event> events = new ConcurrentLinkedQueue<>();
 | `ConcurrentSkipListMap`   | Lock-free     | Sorted concurrent map           |
 
 ---
+
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.
 
 ## 8. Reducing Context Switch Overhead
 
@@ -396,3 +438,9 @@ public class BatchProcessor {
 ---
 
 [<< Previous: Memory Management](./q03-memory-management-perf.md) | [Next: Collection Performance >>](./q05-collection-performance.md)
+
+### Gotchas
+- **Virtual Thread Pinning**: Blocking synchronized blocks or native JNI calls inside virtual threads pins the underlying carrier thread, defeating the throughput benefits of Project Loom.
+- **ForkJoinPool Shared Pool Saturation**: Using `CompletableFuture.supplyAsync()` without a custom executor submits tasks to the common ForkJoinPool, starving parallel streams and async tasks.
+- **ThreadLocal Leaks in Application Servers**: Failing to remove `ThreadLocal` values in servlet filters or thread pools causes severe classloader and memory leaks across HTTP requests.
+- **False Sharing**: Modifying adjacent volatile fields accessed by different CPU cores causes cache line bouncing (MESI protocol overhead), destroying multi-core scalability.

@@ -6,13 +6,13 @@
 
 ## Question
 
-What are the different states in a thread's lifecycle? How do threads transition between states?
+What are the 6 states in a Java thread's lifecycle (`Thread.State`)? How do threads transition between them, and how do modern Java concurrency features and diagnostic tools interact with thread states?
 
 ---
 
 ## Answer
 
-### Thread States (java.lang.Thread.State)
+### Thread States (`java.lang.Thread.State`)
 
 Java defines **6 thread states** in the `Thread.State` enum:
 
@@ -34,8 +34,8 @@ Java defines **6 thread states** in the `Thread.State` enum:
         │ lock     │   │          │   │ parkNanos() │      │
         └────┬─────┘   └────┬─────┘   └──────┬──────┘      │
              │               │                │             │
-             │  lock acquired │  notify/      │  timeout/   │
-             │               │  unpark       │  notify     │
+             │  lock acquired│  notify/       │  timeout/   │
+             │               │  unpark        │  notify     │
              └───────────────┴────────────────┴─────────────┘
                               │
                               ▼
@@ -46,42 +46,39 @@ Java defines **6 thread states** in the `Thread.State` enum:
                        └──────────────┘
 ```
 
-### Each State Explained
+### Detailed Breakdown of Each State
 
 ```java
 public class ThreadStateDemo {
     private static final Object lock = new Object();
 
     public static void main(String[] args) throws InterruptedException {
-        // 1. NEW - Thread created but not yet started
+        // 1. NEW - Created via 'new Thread()', but start() not yet called
         Thread thread = new Thread(() -> {});
         System.out.println("After creation: " + thread.getState()); // NEW
 
-        // 2. RUNNABLE - Thread is executing or ready to execute
+        // 2. RUNNABLE - Executing on CPU or waiting in OS ready queue
         Thread runnableThread = new Thread(() -> {
-            // Running on CPU or in the OS ready queue
-            for (int i = 0; i < 1_000_000; i++) { /* busy work */ }
+            for (long i = 0; i < 1_000_000L; i++) { /* busy work */ }
         });
         runnableThread.start();
         System.out.println("After start: " + runnableThread.getState()); // RUNNABLE
 
-        // 3. BLOCKED - Waiting to acquire a monitor lock
+        // 3. BLOCKED - Awaiting entry to a synchronized monitor block/method
         demonstrateBlocked();
 
-        // 4. WAITING - Waiting indefinitely for another thread
+        // 4. WAITING - Indefinitely waiting via Object.wait(), Thread.join(), or LockSupport.park()
         demonstrateWaiting();
 
-        // 5. TIMED_WAITING - Waiting with a timeout
+        // 5. TIMED_WAITING - Waiting with a timeout (sleep, wait(ms), join(ms), parkNanos)
         demonstrateTimedWaiting();
 
-        // 6. TERMINATED - Thread has completed execution
+        // 6. TERMINATED - Execution completed normally or threw an uncaught exception
         runnableThread.join();
         System.out.println("After join: " + runnableThread.getState()); // TERMINATED
     }
 
     private static void demonstrateBlocked() throws InterruptedException {
-        Object lock = new Object();
-
         Thread holder = new Thread(() -> {
             synchronized (lock) {
                 try { Thread.sleep(2000); } catch (InterruptedException e) {}
@@ -89,29 +86,26 @@ public class ThreadStateDemo {
         }, "Lock-Holder");
 
         Thread waiter = new Thread(() -> {
-            synchronized (lock) { // Will be BLOCKED until holder releases
+            synchronized (lock) { // BLOCKED here until holder exits block
                 System.out.println("Acquired lock!");
             }
         }, "Lock-Waiter");
 
         holder.start();
-        Thread.sleep(100); // Let holder acquire lock
+        Thread.sleep(100);
         waiter.start();
-        Thread.sleep(100); // Let waiter attempt to acquire
+        Thread.sleep(100);
 
         System.out.println("Waiter state: " + waiter.getState()); // BLOCKED
-
         holder.join();
         waiter.join();
     }
 
     private static void demonstrateWaiting() throws InterruptedException {
-        Object monitor = new Object();
-
         Thread waitingThread = new Thread(() -> {
-            synchronized (monitor) {
+            synchronized (lock) {
                 try {
-                    monitor.wait(); // WAITING - no timeout
+                    lock.wait(); // Enters WAITING state indefinitely
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -120,11 +114,10 @@ public class ThreadStateDemo {
 
         waitingThread.start();
         Thread.sleep(100);
-
         System.out.println("Waiting state: " + waitingThread.getState()); // WAITING
 
-        synchronized (monitor) {
-            monitor.notify(); // Wake up the waiting thread
+        synchronized (lock) {
+            lock.notify();
         }
         waitingThread.join();
     }
@@ -140,187 +133,48 @@ public class ThreadStateDemo {
 
         sleepingThread.start();
         Thread.sleep(100);
-
         System.out.println("Sleeping state: " + sleepingThread.getState()); // TIMED_WAITING
         sleepingThread.join();
     }
 }
 ```
 
-### State Transition Table
+### State Transition Matrix
 
-| From State | To State | Trigger |
-|-----------|----------|---------|
-| NEW | RUNNABLE | `thread.start()` |
-| RUNNABLE | BLOCKED | Attempting to enter `synchronized` block held by another thread |
-| RUNNABLE | WAITING | `Object.wait()`, `Thread.join()`, `LockSupport.park()` |
-| RUNNABLE | TIMED_WAITING | `Thread.sleep(ms)`, `Object.wait(ms)`, `Thread.join(ms)`, `LockSupport.parkNanos()` |
-| RUNNABLE | TERMINATED | `run()` completes normally or throws uncaught exception |
-| BLOCKED | RUNNABLE | Monitor lock becomes available |
-| WAITING | RUNNABLE | `notify()`, `notifyAll()`, `LockSupport.unpark()`, or joined thread terminates |
-| TIMED_WAITING | RUNNABLE | Timeout expires, `notify()`, or joined thread terminates |
+| From State | To State | Trigger / Cause |
+|------------|----------|-----------------|
+| `NEW` | `RUNNABLE` | Calling `Thread.start()` |
+| `RUNNABLE` | `BLOCKED` | Attempting to enter `synchronized` block/method held by another thread |
+| `RUNNABLE` | `WAITING` | Calling `Object.wait()`, `Thread.join()`, or `LockSupport.park()` |
+| `RUNNABLE` | `TIMED_WAITING` | Calling `Thread.sleep()`, `Object.wait(ms)`, `Thread.join(ms)`, or `LockSupport.parkNanos()` |
+| `RUNNABLE` | `TERMINATED` | Normal return from `run()` or uncaught exception termination |
+| `BLOCKED` | `RUNNABLE` | Releasing the monitor lock to the waiting thread |
+| `WAITING` | `RUNNABLE` | `Object.notify()`, `notifyAll()`, `LockSupport.unpark()`, or joined thread termination |
+| `TIMED_WAITING` | `RUNNABLE` | Timeout expiration, notification, or joined thread termination |
 
-### Thread.getState() in Practice
+### Virtual Threads and Lifecycle Considerations
 
-```java
-public class ThreadStateMonitor {
-
-    public static void main(String[] args) throws InterruptedException {
-        Thread worker = new Thread(() -> {
-            try {
-                // Simulate work phases
-                Thread.sleep(500);          // TIMED_WAITING
-                synchronized (ThreadStateMonitor.class) {
-                    ThreadStateMonitor.class.wait(500); // TIMED_WAITING
-                }
-                for (int i = 0; i < 10_000_000; i++) {} // RUNNABLE
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }, "Worker");
-
-        // Monitor thread state changes
-        Thread monitor = new Thread(() -> {
-            Thread.State previousState = null;
-            while (worker.getState() != Thread.State.TERMINATED) {
-                Thread.State currentState = worker.getState();
-                if (currentState != previousState) {
-                    System.out.println("Worker state changed: " +
-                        previousState + " -> " + currentState);
-                    previousState = currentState;
-                }
-            }
-            System.out.println("Worker state changed: " +
-                previousState + " -> TERMINATED");
-        }, "Monitor");
-
-        System.out.println("Before start: " + worker.getState());
-        monitor.start();
-        worker.start();
-
-        worker.join();
-        monitor.join();
-    }
-}
-```
-
-### Thread Dump Analysis
-
-Thread dumps show the state of all threads - invaluable for debugging:
-
-```
-"main" #1 prio=5 os_prio=0 tid=0x00007f... nid=0x1 RUNNABLE
-   at com.example.App.processData(App.java:42)
-   at com.example.App.main(App.java:15)
-
-"Worker-1" #12 prio=5 os_prio=0 tid=0x00007f... nid=0xc BLOCKED
-   waiting for monitor entry [0x00007f...]
-   at com.example.SharedResource.update(SharedResource.java:28)
-   - waiting to lock <0x000000076...> (a java.lang.Object)
-   - locked by "Worker-2" #13
-
-"Worker-2" #13 prio=5 os_prio=0 tid=0x00007f... nid=0xd BLOCKED
-   waiting for monitor entry [0x00007f...]
-   at com.example.SharedResource.read(SharedResource.java:35)
-   - waiting to lock <0x000000076...> (a java.lang.Object)
-   - locked by "Worker-1" #12
-
-Found one Java-level deadlock:
-=============================
-"Worker-1": waiting to lock <0x000000076ab...>
-  which is held by "Worker-2"
-"Worker-2": waiting to lock <0x000000076cd...>
-  which is held by "Worker-1"
-```
-
-**How to capture a thread dump:**
-```bash
-# Method 1: jstack
-
-jstack <pid>
-
-# Method 2: kill signal (Linux/Mac)
-
-kill -3 <pid>
-
-# Method 3: jcmd
-
-jcmd <pid> Thread.print
-
-# Method 4: Programmatic
-
-ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
-```
-
-```java
-// Programmatic thread dump
-public class ThreadDumpUtil {
-    public static void printThreadDump() {
-        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
-        ThreadInfo[] infos = bean.dumpAllThreads(true, true);
-
-        for (ThreadInfo info : infos) {
-            System.out.println("Thread: " + info.getThreadName());
-            System.out.println("  State: " + info.getThreadState());
-            System.out.println("  Blocked count: " + info.getBlockedCount());
-            System.out.println("  Waited count: " + info.getWaitedCount());
-
-            if (info.getLockName() != null) {
-                System.out.println("  Waiting on: " + info.getLockName());
-            }
-
-            StackTraceElement[] stack = info.getStackTrace();
-            for (StackTraceElement element : stack) {
-                System.out.println("    at " + element);
-            }
-            System.out.println();
-        }
-
-        // Detect deadlocks
-        long[] deadlockedThreads = bean.findDeadlockedThreads();
-        if (deadlockedThreads != null) {
-            System.out.println("DEADLOCK DETECTED!");
-            ThreadInfo[] deadlockInfos = bean.getThreadInfo(deadlockedThreads);
-            for (ThreadInfo info : deadlockInfos) {
-                System.out.println("  Deadlocked thread: " + info.getThreadName());
-            }
-        }
-    }
-}
-```
-
-### Important Notes
-
-> **RUNNABLE does not mean "running":** A RUNNABLE thread can be either actively executing on a CPU core or sitting in the OS ready queue waiting for CPU time. Java does not distinguish between the two.
-
-> **BLOCKED only applies to `synchronized`:** If a thread waits for a `ReentrantLock`, it enters **WAITING** (via `LockSupport.park()`), NOT BLOCKED. Only intrinsic monitor locks cause the BLOCKED state.
+In Java 21+, virtual threads (`Thread.ofVirtual()`) decouple Java thread identity from OS threads:
+- Virtual threads also pass through `Thread.State` values, but blocking operations (like I/O or `LockSupport.park()`) unmount the virtual thread from its carrier platform thread, leaving the carrier free to run other virtual threads.
+- Thread dump tooling (`jcmd <pid> Thread.print`) in Java 21 formats virtual threads hierarchical to task structure or `StructuredTaskScope`.
 
 ---
 
-## Anti-Patterns
+## ⚠️ Gotchas & Common Pitfalls
 
-❌ **Polling thread state in a tight loop:**
-```java
-while (thread.getState() != Thread.State.TERMINATED) {
-    // Burns CPU! Use thread.join() instead
-}
-```
-
-❌ **Using Thread.stop() or Thread.suspend() (deprecated):**
-```java
-thread.stop();    // ❌ Unsafe - can leave objects in inconsistent state
-thread.suspend(); // ❌ Deadlock-prone
-```
-
-## Best Practices
-
-✅ Use `thread.join()` to wait for thread completion  
-✅ Use `Thread.getState()` for monitoring/debugging only, not for control flow  
-✅ Use thread dumps (`jstack`, `jcmd`) to diagnose production issues  
-✅ Use cooperative interruption (`thread.interrupt()`) to stop threads  
-✅ Understand that BLOCKED is for monitors, WAITING is for explicit waits
+1. **Busy-Wait Polling**: Polling `thread.getState()` in a tight loop to wait for completion burns 100% CPU. Always use `thread.join()` or concurrency coordination primitives.
+2. **BLOCKED vs WAITING Confusion**: A thread waiting on a `ReentrantLock` or `CountDownLatch` is in **`WAITING`** (via `LockSupport.park()`), **NOT** `BLOCKED`. `BLOCKED` is strictly reserved for intrinsic `synchronized` monitor entries.
+3. **RUNNABLE Does Not Mean Running**: A `RUNNABLE` thread may be executing instructions on a CPU core **or** sitting in the OS ready queue waiting for CPU scheduler slices.
+4. **Deprecated Unsafe Methods**: Using `Thread.stop()` or `Thread.suspend()` corrupts internal monitor states and leaves shared objects half-mutated.
+5. **Swallowing Thread Death**: Uncaught exceptions in custom threads terminate the thread silently unless an `UncaughtExceptionHandler` is registered.
 
 ---
 
-[← Thread Basics](./q01-thread-basics.md) | [Next: Creating Threads →](./q03-creating-threads.md)
+## Interviewer Expectations & Deep Mental Models
+
+- **Thread Dumps**: Demonstrate fluency in reading thread dumps (`jstack`, `jcmd Thread.print`, or `ThreadMXBean.dumpAllThreads()`) to spot deadlocks (`BLOCKED` waiting for monitor owned by another thread).
+- **Monitor Entry Queue**: Explain how the JVM's ObjectMonitor internal VM structure manages the EntryList (for `BLOCKED` threads) and WaitSet (for `WAITING` threads via `wait()`).
+
+---
+
+[← Thread Basics](./01-thread-basics.md) | [Next: Creating Threads →](./03-creating-threads.md)

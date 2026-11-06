@@ -57,6 +57,12 @@ Performance: 2-5x faster than Statement for repeated queries
 
 ---
 
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
+
 ## 2. Batch Operations
 
 ```java
@@ -114,6 +120,12 @@ Inserting 100,000 rows:
 ```
 
 ---
+
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
 
 ## 3. Connection Pooling (HikariCP)
 
@@ -177,6 +189,12 @@ Common mistake: Too many connections!
 
 ---
 
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
+
 ## 4. Fetch Size Tuning
 
 ```java
@@ -226,6 +244,12 @@ Reading 100,000 rows:
 
 ---
 
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
+
 ## 5. Lazy Loading
 
 ```java
@@ -260,6 +284,12 @@ public class LazyUser {
 ```
 
 ---
+
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
 
 ## 6. N+1 Query Problem
 
@@ -316,6 +346,12 @@ public List<UserWithOrders> loadWithBatchIn(List<Long> userIds) throws SQLExcept
 
 ---
 
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
+
 ## 7. Index Optimization
 
 ```sql
@@ -348,6 +384,12 @@ CREATE INDEX idx_users_email ON users(email);
 ```
 
 ---
+
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
 
 ## 8. Read Replicas
 
@@ -389,6 +431,12 @@ public class UserService {
 
 ---
 
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.
+
 ## 9. JDBC Optimization Checklist
 
 | Optimization             | Impact  | Effort | Priority |
@@ -417,3 +465,9 @@ public class UserService {
 ---
 
 [<< Previous: I/O Optimization](./q07-io-optimization.md) | [Next: Caching Strategies >>](./q09-caching-strategies.md)
+
+### Gotchas
+- **N+1 Query Problem**: Fetching a parent entity and lazily iterating over child collections without `JOIN FETCH` or `@EntityGraph` triggers N+1 individual database round-trips.
+- **Unbounded Result Sets**: Executing queries without pagination or `setFetchSize()` loads millions of rows into heap memory, causing `OutOfMemoryError`.
+- **Connection Pool Exhaustion**: Setting max pool size too high overwhelms the database server; setting it too low causes thread blocking and request timeouts.
+- **Missing Database Indexes**: Performing frequent queries or sorting on unindexed foreign keys causes full table scans and high database CPU usage.

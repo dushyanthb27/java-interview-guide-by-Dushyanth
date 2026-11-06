@@ -6,7 +6,7 @@
 
 ## 📋 Question
 
-How does the `synchronized` keyword work in Java? What are monitor locks, intrinsic locks, and the happens-before guarantee?
+How does the `synchronized` keyword work in Java? What are monitor locks, intrinsic locks, object header mark words, JVM lightweight/heavyweight locking mechanisms, and the happens-before guarantee?
 
 ## Difficulty: 🟡 Intermediate
 
@@ -16,7 +16,7 @@ How does the `synchronized` keyword work in Java? What are monitor locks, intrin
 
 ### What is Synchronization?
 
-Synchronization ensures that only **one thread at a time** can execute a critical section of code, providing both **mutual exclusion** and **memory visibility**.
+Synchronization ensures that only **one thread at a time** can execute a critical section of code, providing both **mutual exclusion** (preventing race conditions) and **memory visibility** (ensuring modifications made by one thread are visible to subsequent threads).
 
 ```
 Without synchronization:           With synchronization:
@@ -27,9 +27,9 @@ Thread B: write(count=6)
 Result: 6 (WRONG! lost update)    Result: 7 (CORRECT!)
 ```
 
-### Monitor Lock / Intrinsic Lock
+### Monitor Lock / Intrinsic Lock & JVM Locking Internals
 
-Every Java object has an associated **monitor** (intrinsic lock):
+Every Java object header contains a **Mark Word** that stores synchronization state, hash codes, and GC metadata. The `synchronized` keyword relies on **intrinsic locks** (or **monitor locks**):
 
 ```java
 public class MonitorLockDemo {
@@ -40,21 +40,27 @@ public class MonitorLockDemo {
         count++; // Only one thread at a time per instance
     }
 
-    // 2. Synchronized static method — locks on Class object
+    // 2. Synchronized static method — locks on Class object (MonitorLockDemo.class)
     public static synchronized void staticMethod() {
-        // Locks on MonitorLockDemo.class
+        // Protected by the Class object's monitor
     }
 
-    // 3. Synchronized block — locks on specified object
+    // 3. Synchronized block — locks on a specified monitor object
     private final Object lock = new Object();
 
     public void blockSync() {
         synchronized (lock) {
-            count++; // More granular control
+            count++; // Granular locking
         }
     }
 }
 ```
+
+#### JVM Optimization Phases (HotSpot JVM)
+Hotspot escalates locking overhead dynamically depending on contention:
+1. **Biased Locking (Deprecated/Disabled in modern Java 17/21 due to Project Loom and complex revocation overhead):** Originally optimized for single-threaded repeated lock acquisition by recording the thread ID directly in the object header mark word.
+2. **Lightweight Locking:** Uses Compare-And-Swap (CAS) operations on the thread's stack (via a Lock Record) to acquire the lock without OS kernel intervention when contention is minimal (spinning / short critical sections).
+3. **Heavyweight Locking (ObjectMonitor):** When contention is high (multiple threads spinning fail), the JVM inflates the lock into an OS-level mutex (`ObjectMonitor`), putting contending threads to sleep via OS parking (`park()` / `unpark()`), which incurs context-switch overhead.
 
 ### Synchronized Method vs Block
 
@@ -65,20 +71,17 @@ public class SyncComparison {
 
     // ❌ Synchronized method - locks entire method on 'this'
     public synchronized void addAndCount(String item) {
-        // Pre-processing (doesn't need synchronization)
-        String processed = item.trim().toLowerCase();
-
-        // Both operations share the same lock, even if they're independent
+        String processed = item.trim().toLowerCase(); // Doesn't need synchronization
         list.add(processed);
         count++;
     }
 
-    // ✅ Synchronized block - only lock what needs protection
+    // ✅ Synchronized block - fine-grained locking
     private final Object listLock = new Object();
     private final Object countLock = new Object();
 
     public void addAndCountBetter(String item) {
-        String processed = item.trim().toLowerCase(); // No lock needed
+        String processed = item.trim().toLowerCase(); // CPU work outside lock
 
         synchronized (listLock) {
             list.add(processed);
@@ -92,42 +95,43 @@ public class SyncComparison {
 
 ### Reentrant Synchronization
 
-Java's intrinsic locks are **reentrant** - the same thread can acquire the lock it already holds:
+Java intrinsic locks are **reentrant**—a thread can acquire a lock it already holds without deadlocking itself:
 
 ```java
 public class ReentrantDemo {
     public synchronized void outer() {
         System.out.println("In outer");
-        inner(); // ✅ Same thread can re-enter
+        inner(); // ✅ Same thread re-enters successfully
     }
 
     public synchronized void inner() {
         System.out.println("In inner");
     }
 
-    // Without reentrancy, calling outer() would DEADLOCK
-    // because inner() tries to acquire the lock already held
-
-    // Reentrancy works with inheritance too
+    // Reentrancy also applies across inheritance hierarchies
     static class Parent {
         public synchronized void doWork() {
-            System.out.println("Parent.doWork()");
+            System.out.println("Parent work");
         }
     }
 
     static class Child extends Parent {
         @Override
         public synchronized void doWork() {
-            System.out.println("Child.doWork()");
-            super.doWork(); // ✅ Reentrant - same lock (this)
+            System.out.println("Child work");
+            super.doWork(); // ✅ Same monitor ('this') is re-entered
         }
     }
 }
 ```
 
-### Happens-Before Guarantee
+### Happens-Before Guarantee & Memory Barriers
 
-The `synchronized` keyword establishes a **happens-before** relationship:
+The Java Memory Model (JMM) defines a **happens-before** relationship for synchronization:
+- **Unlock happens-before every subsequent lock** on the same monitor.
+- This enforces **acquire-release semantics**: 
+  - Exiting a synchronized block flushes all CPU cache writes to main memory (StoreStore / StoreLoad memory barriers).
+  - Entering a synchronized block invalidates local CPU caches, forcing a reload from main memory.
 
 ```java
 public class HappensBeforeDemo {
@@ -135,202 +139,54 @@ public class HappensBeforeDemo {
     private int y = 0;
     private final Object lock = new Object();
 
-    // Thread A:
     public void writer() {
         synchronized (lock) {
-            x = 1;   // Write to x
-            y = 2;   // Write to y
-        }
-        // All writes inside synchronized are visible to the
-        // next thread that enters the same synchronized block
+            x = 1;
+            y = 2;
+        } // Exit releases lock -> flushes writes to main memory
     }
 
-    // Thread B (executes after Thread A releases lock):
     public void reader() {
         synchronized (lock) {
-            // Guaranteed to see x=1, y=2 (not stale values)
+            // Entry acquires lock -> invalidates cache, guarantees x=1, y=2 are visible
             System.out.println("x=" + x + ", y=" + y);
         }
     }
 }
 ```
 
-### Double-Checked Locking Pattern
+---
 
-```java
-public class Singleton {
-    // ❌ Broken double-checked locking (without volatile)
-    // private static Singleton instance;
+## ⚠️ Gotchas & Pitfalls
 
-    // ✅ Correct double-checked locking
-    private static volatile Singleton instance;
-
-    private Singleton() {}
-
-    public static Singleton getInstance() {
-        if (instance == null) {                // First check (no lock)
-            synchronized (Singleton.class) {
-                if (instance == null) {        // Second check (with lock)
-                    instance = new Singleton();
-                    // Without volatile, another thread might see
-                    // a partially constructed object!
-                }
-            }
-        }
-        return instance;
-    }
-
-    // ✅ Better alternative: Initialization-on-Demand Holder
-    // (see q20-thread-safety-patterns.md)
-}
-```
-
-> ⚠️ **Why volatile is required:** Without `volatile`, the JVM may reorder the constructor and field assignment. Thread B could see a non-null `instance` that is not fully constructed.
-
-### Common Synchronization Mistakes
-
-```java
-public class SyncMistakes {
-
-    // ❌ Mistake 1: Synchronizing on a non-final object
-    private Object lock = new Object();
-    public void wrongLock() {
-        synchronized (lock) {
-            // If someone does: lock = new Object(); → no protection!
-        }
-    }
-    // ✅ Fix: make lock final
-    private final Object safeLock = new Object();
-
-    // ❌ Mistake 2: Synchronizing on boxed types or String literals
-    private final Integer badLock = 42;
-    public void wrongLock2() {
-        synchronized (badLock) { // Integers are cached! Multiple classes may share!
-        }
-    }
-
-    // ❌ Mistake 3: Synchronizing on 'this' in a library class
-    public synchronized void publicMethod() {
-        // External code can also synchronize on this object!
-        // someObj.synchronized { ... } → potential deadlock
-    }
-    // ✅ Fix: use a private lock object
-    private final Object privateLock = new Object();
-    public void betterMethod() {
-        synchronized (privateLock) { /* safe */ }
-    }
-
-    // ❌ Mistake 4: Inconsistent locking
-    private int count = 0;
-    public synchronized void increment() { count++; }
-    public int getCount() { return count; } // ❌ Not synchronized! Stale reads possible.
-    // ✅ Fix: synchronize both read and write
-    public synchronized int getCountSafe() { return count; }
-}
-```
-
-### Performance Impact
-
-```java
-public class SyncPerformance {
-
-    // ❌ Over-synchronized: locks the entire method
-    public synchronized List<String> processAll(List<String> items) {
-        List<String> results = new ArrayList<>();
-        for (String item : items) {
-            results.add(expensiveTransform(item)); // Holds lock during CPU work
-        }
-        return results;
-    }
-
-    // ✅ Minimize synchronized scope
-    private final List<String> sharedResults = new ArrayList<>();
-
-    public void processBetter(List<String> items) {
-        // Do expensive work OUTSIDE the lock
-        List<String> localResults = new ArrayList<>();
-        for (String item : items) {
-            localResults.add(expensiveTransform(item));
-        }
-
-        // Only lock for the shared mutation
-        synchronized (sharedResults) {
-            sharedResults.addAll(localResults);
-        }
-    }
-
-    private String expensiveTransform(String item) {
-        // CPU-intensive work
-        return item.toUpperCase();
-    }
-}
-```
-
-### Thread-Safe Counter Example
-
-```java
-public class ThreadSafeCounter {
-    private int count = 0;
-
-    public synchronized void increment() { count++; }
-    public synchronized void decrement() { count--; }
-    public synchronized int getCount() { return count; }
-
-    public static void main(String[] args) throws InterruptedException {
-        ThreadSafeCounter counter = new ThreadSafeCounter();
-
-        // Launch 100 threads, each incrementing 1000 times
-        Thread[] threads = new Thread[100];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(() -> {
-                for (int j = 0; j < 1000; j++) {
-                    counter.increment();
-                }
-            });
-            threads[i].start();
-        }
-
-        for (Thread t : threads) { t.join(); }
-
-        System.out.println("Final count: " + counter.getCount()); // Always 100000
-    }
-}
-```
+1. **Lock Object Mutability:** Synchronizing on a non-final reference (`private Object lock = new Object();` where `lock` is reassigned later) completely breaks mutual exclusion because different threads lock on entirely different monitor instances.
+2. **Synchronizing on Shared Constants, String Literals, or Boxed Primitives:** Using `synchronized(Integer.valueOf(42))` or `synchronized("myLock")` causes unintended global synchronization because String literals and Integer cache values (-128 to 127) are shared across the entire JVM classloader.
+3. **Synchronizing on `this` in Public Classes:** If your class is non-final or public, external callers can synchronize on your instance (`synchronized(myObj) { ... }`), leading to unexpected deadlocks or denial of service if external code holds your object's monitor indefinitely.
+4. **Holding Locks During I/O or External Calls:** Executing blocking network calls, database queries, or calling unknown foreign methods inside a `synchronized` block starves all other threads waiting for the lock and can cascade into thread pool exhaustion.
+5. **Inconsistent Locking Policies:** Protecting shared mutable state with a synchronized block in setters while leaving getters un-synchronized (or vice versa) permits stale reads and data corruption.
 
 ---
 
-## ⚠️ Common Mistakes
-
-❌ **Synchronizing on a non-final reference** - lock object can change
-❌ **Synchronizing on String literals or boxed primitives** - shared across JVM
-❌ **Over-synchronization** - holding locks during I/O or CPU-intensive work
-❌ **Inconsistent locking** - some access paths skip synchronization
-❌ **Nested synchronized blocks** - risk of deadlock
-
 ## ✅ Best Practices
 
-✅ Use `private final Object lock` for lock objects
-✅ Keep synchronized blocks as short as possible
-✅ Synchronize all access paths to shared mutable state
-✅ Prefer `java.util.concurrent` utilities over raw synchronization
-✅ Document the locking policy (which lock protects which state)
-✅ Consider `ReentrantLock` for advanced features (tryLock, fairness)
+- Always declare lock objects as `private final Object lock = new Object();`.
+- Keep critical sections as short and lightweight as possible; perform heavy computation or I/O outside the synchronized block.
+- Document the locking policy clearly (e.g., annotate fields with `// Guarded by this lock`).
+- Prefer `java.util.concurrent.locks` (`ReentrantLock`) or atomic variables (`java.util.concurrent.atomic`) when advanced features like `tryLock`, timed waits, or non-blocking CAS are required.
 
 ---
 
 ## 🎯 Interviewer Insight
 
-Interviewers want to understand your grasp of synchronization fundamentals: monitor locks, reentrancy, and the happens-before guarantee. Strong candidates explain the difference between synchronized methods and blocks, discuss common pitfalls (like non-final lock objects), and can describe when to use `ReentrantLock` instead of `synchronized`.
+Strong candidates articulate more than just syntax: they explain monitor acquisition via object header mark words, the cost of JVM lock inflation (from lightweight CAS locks to heavyweight OS mutexes), and acquire-release memory barriers establishing happens-before consistency. Be ready to contrast `synchronized` with explicit `ReentrantLock` semantics.
 
 ## ⚡ Follow-up Questions
 
-1. When would you choose `ReentrantLock` over `synchronized`, and what are the trade-offs?
-2. How does biased locking work, and when does it revert to normal locking?
-3. Explain lock coarsening, lock elision, and escape analysis optimizations performed by the JIT.
-4. What is the difference between fair and unfair locking, and how does it impact performance?
-5. How do you implement a try-lock pattern with timeout using `ReentrantLock`?
-6. What is the difference between intrinsic lock reentrancy and ReentrantLock reentrancy?
-7. How does the wait/notify mechanism work with synchronized blocks, and what are the alternatives?
+1. How does the JVM perform lock inflation from biased locking (historical) to lightweight and heavyweight locking?
+2. What are the memory barrier instructions generated by the CPU during monitor enter and exit?
+3. Why does synchronizing on String literals cause severe concurrency bottlenecks?
+4. How does `synchronized` interact with modern Project Loom virtual threads (pinning)?
+5. Can a thread holding a monitor lock experience spurious wakeups during `wait()`?
 
 ## 📚 Related Topics
 

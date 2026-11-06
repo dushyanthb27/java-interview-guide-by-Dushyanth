@@ -279,6 +279,15 @@ public class VirtualThreadAntiPatterns {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Carrier Thread Pinning via `synchronized`:** Executing blocking operations or I/O inside `synchronized` blocks or native methods pins the virtual thread to its underlying OS carrier thread, preventing unmounting and defeating concurrency gains.
+2. **Virtual Thread Pooling Anti-Pattern:** Wrapping virtual threads in fixed-size thread pools (`Executors.newFixedThreadPool()`) defeats their lightweight design; virtual threads are designed to be created per task without pooling.
+3. **ThreadLocal Memory Bloat:** Allocating heavy `ThreadLocal` variables across millions of concurrent virtual threads causes massive, hidden heap memory consumption.
+4. **CPU-Bound Performance Regression:** Using virtual threads for heavy CPU-bound computation adds unnecessary scheduling and context-switching overhead without improving throughput compared to platform threads scaled to CPU cores.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Pooling virtual threads** - defeats the purpose  

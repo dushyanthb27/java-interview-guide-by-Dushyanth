@@ -349,3 +349,10 @@ spring.jpa.properties.hibernate.cache.region.factory_class=org.hibernate.cache.j
 ---
 
 [← Previous: Q2 - Dependency Injection](./q02-dependency-injection.md) | [Next: Q4 - JUnit Testing →](./q04-junit-testing.md)
+
+## Gotchas
+### Gotchas
+- **Misconfiguration Risk**: Setting defaults without production load testing can lead to catastrophic memory exhaustion or latency spikes under peak load.
+- **Version Compatibility**: Ensure flags and APIs match your exact runtime (Java 17 vs 21 LTS or framework minor releases).
+- **Benchmarking Pitfalls**: Micro-benchmarking without proper warmup and JIT stabilization (using JMH) yields misleading performance numbers.
+- **Debugging Complexity**: Advanced optimizations (like GraalVM native reflection config or custom GC flags) obscure stack traces and complicate diagnostic telemetry.

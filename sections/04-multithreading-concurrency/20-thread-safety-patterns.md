@@ -325,6 +325,15 @@ public class AtomicFieldUpdaterPattern {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **`this` Escape During Construction:** Publishing the `this` reference inside a constructor (such as registering with an event listener or starting a thread) allows other threads to inspect a partially initialized object before final fields are frozen.
+2. **Unsynchronized Read Violations:** Guarding all write methods with `synchronized` while leaving read methods unsynchronized breaks visibility guarantees and permits stale reads.
+3. **Double-Checked Locking Without Volatile:** Omitting the `volatile` modifier on the singleton instance in double-checked locking allows instruction reordering, where another thread may obtain a reference to an unconstructed object.
+4. **Mutable Fields in Immutable Classes:** Declaring a class final with `private final` fields does not guarantee true immutability if any field references a mutable object (like a `Date` or `List`) without defensive copying.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Mutable singletons without synchronization**  
@@ -351,4 +360,4 @@ public class BadConstruction {
 
 ---
 
-[← ThreadLocal](./q19-thread-local.md) | [Next: Semaphore & CountDownLatch →](./q21-semaphore-countdownlatch.md)
+[← ThreadLocal](./19-thread-local.md) | [Next: Semaphore & CountDownLatch →](./21-semaphore-countdownlatch.md)

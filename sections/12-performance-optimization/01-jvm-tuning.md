@@ -51,6 +51,12 @@ public class HeapInfo {
 
 ---
 
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
+
 ## 2. Garbage Collector Selection
 
 ```bash
@@ -81,6 +87,12 @@ java -XX:+UseShenandoahGC -jar app.jar
 | Shenandoah    | < 10 ms   | High       | 4-64 GB    | Latency-sensitive      |
 
 ---
+
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
 
 ## 3. JIT Compiler Tuning
 
@@ -130,6 +142,12 @@ public class HotMethod {
 
 ---
 
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
+
 ## 4. Thread Stack Size
 
 ```bash
@@ -152,6 +170,12 @@ Memory per thread = stack size (default ~1 MB)
 ```
 
 ---
+
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
 
 ## 5. Metaspace Configuration
 
@@ -186,6 +210,12 @@ public class MetaspaceMonitor {
 
 ---
 
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
+
 ## 6. Container-Aware Settings (Docker/Kubernetes)
 
 ```bash
@@ -219,6 +249,12 @@ ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
 
 ---
 
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
+
 ## 7. JVM Ergonomics
 
 The JVM automatically selects defaults based on the environment:
@@ -239,6 +275,12 @@ java -XX:+PrintCommandLineFlags -version
 | OS            | Thread stack size, large pages support      |
 
 ---
+
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
 
 ## 8. Common Tuning Scenarios
 
@@ -271,6 +313,12 @@ java -XX:MaxRAMPercentage=75.0 \
 ```
 
 ---
+
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.
 
 ## 9. JVM Flags Cheat Sheet
 
@@ -306,3 +354,9 @@ java -XX:MaxRAMPercentage=75.0 \
 ---
 
 [Next: GC Optimization >>](./q02-gc-optimization.md)
+
+### Gotchas
+- **`-Xms` vs `-Xmx` Mismatch**: Leaving `-Xms` smaller than `-Xmx` causes costly heap resizing pauses during traffic spikes. Always set them equal in production.
+- **Container Memory Limits**: Failing to configure `-XX:MaxRAMPercentage` in Docker/Kubernetes causes the JVM to consume host memory, leading to OOMKilled by cgroups.
+- **Code Cache Exhaustion**: Heavy use of reflection, dynamic proxies, or large codebases can exhaust the default JIT Code Cache (`-XX:ReservedCodeCacheSize`), causing JIT to stop compiling hot methods.
+- **Thread Stack Overflow vs Memory**: Setting `-Xss` too large reduces maximum concurrent threads; setting it too small causes `StackOverflowError` on deep recursive calls or complex frameworks.

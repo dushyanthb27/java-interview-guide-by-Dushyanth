@@ -40,6 +40,12 @@ Hot path examples:
 
 ---
 
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
+
 ## 2. JIT Optimizations That Make Manual Optimization Unnecessary
 
 The JIT compiler already performs these optimizations. Doing them manually is wasteful.
@@ -84,6 +90,12 @@ int dist = p.x + p.y;  // JIT may eliminate Point allocation
 
 ---
 
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
+
 ## 3. Loop Optimization
 
 ```java
@@ -123,6 +135,12 @@ for (int row = 0; row < 1000; row++) {
 
 ---
 
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
+
 ## 4. Branch Prediction
 
 ```java
@@ -159,6 +177,12 @@ for (int i = 0; i < data.length; i++) {
 ```
 
 ---
+
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
 
 ## 5. Locality of Reference
 
@@ -219,6 +243,12 @@ class ParticleSystem {
 
 ---
 
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
+
 ## 6. CPU Cache Effects
 
 ```java
@@ -250,6 +280,12 @@ for (int j = 0; j < 4096; j++)
 ```
 
 ---
+
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
 
 ## 7. Worthwhile Micro-Optimizations
 
@@ -304,6 +340,12 @@ public final class FastMath {
 
 ---
 
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
+
 ## 8. Optimizations That DON'T Help
 
 ```java
@@ -335,6 +377,12 @@ i = i + 1;
 
 ---
 
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.
+
 ## 9. Micro-Optimization Decision Matrix
 
 | Optimization                     | Worth It?       | When?                        |
@@ -365,3 +413,9 @@ i = i + 1;
 ---
 
 [<< Previous: Benchmarking with JMH](./q11-benchmarking-jmh.md) | [Next: Algorithm Selection >>](./q13-algorithm-selection.md)
+
+### Gotchas
+- **Premature Optimization**: Spending days optimizing micro-operations while architectural bottlenecks (database queries, network calls) remain unaddressed.
+- **JVM Inlining Limits**: Writing excessively large methods to avoid method call overhead prevents JIT from inlining them (default inline method size limit is 35 bytes).
+- **Readability vs Performance**: Obscuring clean, maintainable code with unreadable bit-twiddling hacks that modern JIT compilers already optimize automatically.
+- **Volatile/Synchronized Misuse**: Adding unnecessary volatile qualifiers or synchronization in micro-loops can disable CPU cache coherence optimizations.

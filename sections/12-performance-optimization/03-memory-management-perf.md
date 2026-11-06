@@ -61,6 +61,12 @@ java -XX:StartFlightRecording=filename=alloc.jfr,settings=profile \
 
 ---
 
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
+
 ## 2. TLAB (Thread-Local Allocation Buffer)
 
 Each thread gets a private allocation buffer in Eden space, eliminating synchronization for object allocation.
@@ -105,6 +111,12 @@ public void inefficientAllocation() {
 
 ---
 
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
+
 ## 3. Escape Analysis
 
 The JIT compiler analyzes whether an object "escapes" the method/thread that created it. Non-escaping objects can be optimized.
@@ -139,6 +151,12 @@ java -XX:-DoEscapeAnalysis -jar app.jar    # disable for testing
 ```
 
 ---
+
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
 
 ## 4. Scalar Replacement
 
@@ -208,6 +226,12 @@ java -XX:+PrintEscapeAnalysis \
 
 ---
 
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
+
 ## 5. Object Reuse vs Creation
 
 ### When to Reuse Objects
@@ -265,6 +289,12 @@ public record Point(int x, int y) {} // value-like, short-lived
 
 ---
 
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
+
 ## 6. Off-Heap Memory
 
 ```java
@@ -319,6 +349,12 @@ jcmd <pid> VM.native_memory summary
 
 ---
 
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
+
 ## 7. Value Types (Project Valhalla Preview)
 
 ```java
@@ -355,6 +391,12 @@ public class FlattenedPoints {
 ```
 
 ---
+
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.
 
 ## 8. Memory-Efficient Patterns
 
@@ -421,3 +463,9 @@ public class ExpensiveResource {
 ---
 
 [<< Previous: GC Optimization](./q02-gc-optimization.md) | [Next: Concurrency Optimization >>](./q04-concurrency-optimization.md)
+
+### Gotchas
+- **Escape Analysis Failure**: Returning escaped object references or allocating objects inside synchronized blocks prevents JIT scalar replacement and escape analysis.
+- **Direct ByteBuffer Leaks**: Off-heap memory allocated via `ByteBuffer.allocateDirect()` is not reclaimed by young GC; failing to explicitly release or track cleaner finalization leads to native OOM.
+- **TLAB Contention**: Extreme multi-threaded allocation rates can occasionally stress TLAB refills, though rare unless allocation bottlenecks are pathological.
+- **Reference Queue Leak**: Neglecting to poll `ReferenceQueue` for `WeakReference` or `SoftReference` causes reference objects to accumulate indefinitely.

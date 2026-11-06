@@ -65,6 +65,12 @@ java -jar target/benchmarks.jar
 
 ---
 
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
+
 ## 2. Core Annotations
 
 ### @Benchmark
@@ -192,6 +198,12 @@ public class CollectionSizeBenchmark {
 
 ---
 
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
+
 ## 3. Benchmark Modes
 
 ```java
@@ -244,6 +256,12 @@ public class BenchmarkModes {
 
 ---
 
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
+
 ## 4. Warmup Configuration
 
 ```java
@@ -265,6 +283,12 @@ public class BenchmarkModes {
 ```
 
 ---
+
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
 
 ## 5. Blackhole Consumption
 
@@ -318,6 +342,12 @@ public class BlackholeBenchmark {
 ```
 
 ---
+
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
 
 ## 6. Common Pitfalls
 
@@ -398,6 +428,12 @@ public int fixedLoop(LoopState state) {
 
 ---
 
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
+
 ## 7. Complete Benchmark Example
 
 ```java
@@ -464,6 +500,12 @@ SortingBenchmark.parallelSort 100000  avgt   20  856789.0 ± 12345  ns/op
 
 ---
 
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
+
 ## 8. Running Benchmarks
 
 ```bash
@@ -497,6 +539,12 @@ java -jar target/benchmarks.jar -prof stack
 
 ---
 
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.
+
 ## 9. JMH Best Practices
 
 | Practice                           | Why                                         |
@@ -525,3 +573,9 @@ java -jar target/benchmarks.jar -prof stack
 ---
 
 [<< Previous: Profiling Tools](./q10-profiling-tools.md) | [Next: Micro-Optimizations >>](./q12-micro-optimizations.md)
+
+### Gotchas
+- **JIT Dead Code Elimination**: If a benchmark method computes a result but does not return it or pass it to `Blackhole`, JIT optimizes the entire computation away, yielding 0ns benchmarks.
+- **Constant Folding**: Benchmarking operations on static final constants allows JIT to precompute values at compile time, measuring constant lookup instead of logic.
+- **Inadequate Warmup Iterations**: Failing to configure sufficient JMH warmup iterations measures uncompiled interpreted code rather than steady-state JIT native code.
+- **Fork Isolation Failure**: Running benchmarks in a single JVM fork risks state pollution across benchmark methods.

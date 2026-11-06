@@ -268,6 +268,15 @@ public class ModernAlternatives {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Lost Wakeups:** If `notify()` is called before the waiting thread enters `wait()`, the notification is permanently lost, leaving the thread blocked indefinitely.
+2. **InterruptedException Swallowing:** Catching `InterruptedException` and failing to restore the interrupt flag (`Thread.currentThread().interrupt()`) breaks task cancellation propagation.
+3. **Notify vs NotifyAll Starvation:** Using `notify()` instead of `notifyAll()` when multiple threads wait for different conditions can wake the wrong thread, causing it to re-check the condition and go back to sleep while valid threads remain stuck.
+4. **Monitor Ownership Requirement:** Calling `wait()`, `notify()`, or `notifyAll()` on an object without holding its monitor lock throws an unchecked `IllegalMonitorStateException` at runtime.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Using `if` instead of `while` with `wait()`:**
@@ -294,8 +303,8 @@ while (!ready) { Thread.sleep(100); } // ❌ Busy-waiting, use wait/notify
 ✅ Prefer `notifyAll()` over `notify()` unless you're certain only one waiter exists  
 ✅ Use `BlockingQueue` for producer-consumer patterns  
 ✅ Use `Condition` variables for multiple wait conditions  
-✅ Prefer higher-level concurrency utilities (java.util.concurrent)
+✅ Prefer higher-level concurrency utilities (`java.util.concurrent`)
 
 ---
 
-[← Deadlock](./q13-deadlock.md) | [Next: CompletableFuture →](./q15-completable-future.md)
+[← Deadlock](./13-deadlock.md) | [Next: CompletableFuture →](./15-completable-future.md)

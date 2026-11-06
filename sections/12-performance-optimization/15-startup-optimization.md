@@ -67,6 +67,12 @@ CDS benefits:
 
 ---
 
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
+
 ## 2. Ahead-of-Time Compilation (GraalVM Native Image)
 
 GraalVM native image compiles Java bytecode to a native executable at build time, eliminating JVM startup overhead entirely.
@@ -131,6 +137,12 @@ mvn -Pnative spring-boot:build-image
 | Reflection support  | Full             | Requires config   | JVM wins         |
 
 ---
+
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
 
 ## 3. Lazy Initialization
 
@@ -202,6 +214,12 @@ LazyValue<DatabaseConnection> dbConn =
 
 ---
 
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
+
 ## 4. Module System Benefits (JPMS)
 
 ```java
@@ -248,6 +266,12 @@ Benefits:
 
 ---
 
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
+
 ## 5. Startup Time Profiling
 
 ```bash
@@ -293,6 +317,12 @@ public class Application {
 ```
 
 ---
+
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
 
 ## 6. Spring Boot Startup Optimization
 
@@ -366,6 +396,12 @@ public class ProductionOnlyConfig {
 
 ---
 
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
+
 ## 7. GraalVM Native Images Deep Dive
 
 ```java
@@ -423,6 +459,12 @@ ENTRYPOINT ["/app"]
 
 ---
 
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.
+
 ## 8. Startup Optimization Summary
 
 | Technique                  | Startup Improvement | Trade-off                      |
@@ -466,3 +508,9 @@ Is sub-second startup required?
 ---
 
 [<< Previous: Data Structure Selection](./q14-data-structure-selection.md)
+
+### Gotchas
+- **CDS Archive Staleness**: Using outdated Class Data Sharing (CDS) archives after updating application dependencies or bytecode causes JVM startup failure or fallback.
+- **GraalVM Reflection Configuration**: Failing to register dynamic class loading, reflection, or proxies in GraalVM native-image config files leads to runtime `ClassNotFoundException`.
+- **Eager Initialization Bottlenecks**: Initializing heavy resources, database connections, or caches during application startup prolongs container boot and health-check readiness.
+- **Framework Component Scanning Overhead**: Scanning entire classpaths for annotations in large enterprise apps slows down startup; use explicit component indexing.

@@ -115,6 +115,12 @@ public class JfrProgrammatic {
 
 ---
 
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
+
 ## 2. async-profiler
 
 Open-source low-overhead profiler. Uses OS-level mechanisms (perf_events on Linux, DTrace on macOS).
@@ -158,6 +164,12 @@ java -agentpath:/path/to/libasyncProfiler.so=start,event=cpu,file=profile.jfr \
 
 ---
 
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
+
 ## 3. VisualVM
 
 ```bash
@@ -189,6 +201,12 @@ jvisualvm
 
 ---
 
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
+
 ## 4. JDK Mission Control (JMC)
 
 ```bash
@@ -218,6 +236,12 @@ JMC automatically detects:
 ```
 
 ---
+
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
 
 ## 5. CPU Profiling
 
@@ -262,6 +286,12 @@ public class CpuProfileAnalyzer {
 
 ---
 
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
+
 ## 6. Memory Profiling
 
 ```bash
@@ -297,6 +327,12 @@ jcmd <pid> JFR.start name=alloc settings=profile
 ```
 
 ---
+
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
 
 ## 7. Lock Contention Profiling
 
@@ -353,6 +389,12 @@ public class ContentionMonitor {
 
 ---
 
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
+
 ## 8. Flame Graphs
 
 ```
@@ -380,6 +422,12 @@ jfr print --events jdk.ExecutionSample --stack-depth 64 recording.jfr \
 ```
 
 ---
+
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
 
 ## 9. Continuous Profiling in Production
 
@@ -415,6 +463,12 @@ jcmd <pid> JFR.dump name=continuous filename=incident.jfr
 
 ---
 
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.
+
 ## 10. Profiling Tool Selection Guide
 
 | Need                      | Tool                  | When to Use                |
@@ -443,3 +497,9 @@ jcmd <pid> JFR.dump name=continuous filename=incident.jfr
 ---
 
 [<< Previous: Caching Strategies](./q09-caching-strategies.md) | [Next: Benchmarking with JMH >>](./q11-benchmarking-jmh.md)
+
+### Gotchas
+- **Sampling Bias in Profilers**: Relying solely on safepoint-biased profilers can miss non-safepoint loops and native method overhead. Prefer async-profiler.
+- **Overhead in Production**: Running high-frequency method tracing in production introduces severe latency and distorts performance metrics.
+- **Misinterpreting GC Logs vs JFR**: Confusing wall-clock time with CPU time in profiling reports leads to optimizing idle I/O waiting rather than CPU bottlenecks.
+- **Heap Dump Security Risks**: Heap dumps contain plain-text passwords, tokens, and PII; storing them insecurely violates data privacy regulations.

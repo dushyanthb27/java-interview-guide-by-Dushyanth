@@ -83,7 +83,6 @@ public class DeadlockExample {
 
 ```bash
 # Get thread dump
-
 jstack <pid>
 
 # Output:
@@ -95,7 +94,6 @@ jstack <pid>
 # "Thread-2":
 #   waiting to lock monitor 0x00007f...  (object 0x000000076...)
 #   which is held by "Thread-1"
-
 ```
 
 #### Programmatic Detection
@@ -328,6 +326,15 @@ ReentrantLock fairLock = new ReentrantLock(true);
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Hidden Deadlocks via Callbacks:** Holding a lock while calling an untrusted callback method (listener, observer) allows external code to acquire another lock or call back into your code, silently creating circular wait chains.
+2. **Lock Ordering Pitfall with Hash Collisions:** When sorting locks by `System.identityHashCode()`, hash collisions can occur where two distinct objects share the same hash code, requiring a tie-breaker mechanism.
+3. **Partial Lock Cleanup Bugs:** Failing to release locks in a `finally` block when using `tryLock()` or manual lock acquisition leads to resource leaks and thread starvation.
+4. **Synchronized Monitor Deadlocks vs Lock API:** `ThreadMXBean.findDeadlockedThreads()` detects both `synchronized` monitor deadlocks and `java.util.concurrent` lock deadlocks, whereas `findMonitorDeadlockedThreads()` only detects `synchronized` monitors.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Acquiring multiple locks in inconsistent order across the codebase**  
@@ -346,4 +353,4 @@ ReentrantLock fairLock = new ReentrantLock(true);
 
 ---
 
-[← Condition Variables](./q12-condition-variables.md) | [Next: Thread Communication →](./q14-thread-communication.md)
+[← Condition Variables](./12-condition-variables.md) | [Next: Thread Communication →](./14-thread-communication.md)

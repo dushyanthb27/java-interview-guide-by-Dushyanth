@@ -6,7 +6,7 @@
 
 ## Question
 
-What are thread pools? What types are available and how do you configure them?
+What are thread pools and why are they necessary? Explain `ThreadPoolExecutor` architecture, parameters, queue types, rejection policies, work-stealing pools, and virtual thread executors (`Executors.newVirtualThreadPerTaskExecutor()`).
 
 ---
 
@@ -23,27 +23,28 @@ WITHOUT Thread Pool:                    WITH Thread Pool:
 │    ...   │──► new Thread()           │    ...   │──┤    │ (fixed  │
 │ Request N│──► new Thread()           │ Request N│──┘    │ threads)│
 └──────────┘                           └──────────┘       └─────────┘
-❌ Unbounded thread creation            ✅ Thread reuse
-❌ OutOfMemoryError risk                ✅ Controlled resources
-❌ High creation/destruction cost       ✅ Better performance
+❌ Unbounded thread creation            ✅ Thread reuse & resource control
+❌ OutOfMemoryError risk                ✅ Lower latency (no thread creation overhead)
+❌ High creation/destruction cost       ✅ Throttling under heavy load
 ```
 
-### ThreadPoolExecutor - The Core
+### `ThreadPoolExecutor` - The Core Engine
 
 ```java
 public ThreadPoolExecutor(
-    int corePoolSize,        // Minimum threads kept alive
-    int maximumPoolSize,     // Maximum threads in pool
-    long keepAliveTime,      // Idle time before non-core threads die
-    TimeUnit unit,           // Time unit for keepAliveTime
-    BlockingQueue<Runnable> workQueue,  // Queue for pending tasks
-    ThreadFactory threadFactory,        // How to create threads
-    RejectedExecutionHandler handler   // What to do when saturated
+    int corePoolSize,                 // Minimum threads kept alive in pool
+    int maximumPoolSize,              // Maximum threads allowed in pool
+    long keepAliveTime,               // Idle timeout for non-core (or all) threads
+    TimeUnit unit,                    // Time unit for keepAliveTime
+    BlockingQueue<Runnable> workQueue,// Queue holding pending tasks
+    ThreadFactory threadFactory,      // Factory for custom naming / daemon config
+    RejectedExecutionHandler handler  // Saturation policy when pool & queue are full
 )
 ```
 
+#### Task Submission Flow Algorithm
+
 ```
-Task Submission Flow:
                                  ┌───────────────────────┐
                                  │   Submit new task      │
                                  └───────────┬───────────┘
@@ -67,99 +68,55 @@ Task Submission Flow:
                                                   └──────────────┘
 ```
 
-### Types of Thread Pools
+### Standard Factory Methods & Built-in Pools
 
-#### 1. Fixed Thread Pool
+1. **Fixed Thread Pool**: `Executors.newFixedThreadPool(n)`
+   - `corePoolSize == maximumPoolSize == n`
+   - Queue: Unbounded `LinkedBlockingQueue`
+   - Best for: Predictable CPU-bound workloads.
 
-```java
-// Creates a pool with exactly N threads
-ExecutorService fixedPool = Executors.newFixedThreadPool(4);
-// Equivalent to:
-// new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>())
+2. **Cached Thread Pool**: `Executors.newCachedThreadPool()`
+   - `corePoolSize = 0`, `maximumPoolSize = Integer.MAX_VALUE`, `keepAliveTime = 60s`
+   - Queue: `SynchronousQueue` (zero-capacity handoff)
+   - ⚠️ **Danger**: Can spawn unlimited threads under bursty traffic, risking OOM.
 
-// Best for: CPU-bound tasks with predictable load
-int cores = Runtime.getRuntime().availableProcessors();
-ExecutorService cpuPool = Executors.newFixedThreadPool(cores);
-```
+3. **Single Thread Executor**: `Executors.newSingleThreadExecutor()`
+   - `corePoolSize == maximumPoolSize == 1`
+   - Best for: Enforcing strict sequential task ordering.
 
-#### 2. Cached Thread Pool
+4. **Work-Stealing Pool (Java 8+)**: `Executors.newWorkStealingPool()`
+   - Backed by `ForkJoinPool`, where each thread maintains its own deque and steals tasks from idle/overloaded queues.
 
-```java
-// Creates threads as needed, reuses idle threads
-ExecutorService cachedPool = Executors.newCachedThreadPool();
-// Equivalent to:
-// new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>())
+5. **Virtual Thread Per-Task Executor (Java 21+)**: `Executors.newVirtualThreadPerTaskExecutor()`
+   - Spawns a new virtual thread for every submitted task. No traditional pool sizing needed.
 
-// ⚠️ WARNING: Can create unlimited threads!
-// Best for: Many short-lived I/O tasks
-```
-
-#### 3. Single Thread Executor
+### Custom Production Configuration Pattern
 
 ```java
-// Guarantees sequential execution
-ExecutorService singlePool = Executors.newSingleThreadExecutor();
-// Equivalent to a FixedThreadPool of size 1
-
-// Best for: Sequential task ordering, event loops
-```
-
-#### 4. Scheduled Thread Pool
-
-```java
-ScheduledExecutorService scheduledPool = Executors.newScheduledThreadPool(2);
-
-// One-time delayed execution
-scheduledPool.schedule(() -> System.out.println("Delayed!"),
-    5, TimeUnit.SECONDS);
-
-// Fixed rate - starts every N units (overlap possible)
-scheduledPool.scheduleAtFixedRate(() -> System.out.println("Fixed rate"),
-    0, 1, TimeUnit.SECONDS);
-
-// Fixed delay - N units gap between end and next start
-scheduledPool.scheduleWithFixedDelay(() -> System.out.println("Fixed delay"),
-    0, 1, TimeUnit.SECONDS);
-```
-
-#### 5. Work-Stealing Pool (Java 8+)
-
-```java
-// Uses ForkJoinPool with parallelism = available processors
-ExecutorService stealingPool = Executors.newWorkStealingPool();
-ExecutorService stealingPool4 = Executors.newWorkStealingPool(4);
-
-// Best for: Tasks that spawn subtasks, recursive algorithms
-```
-
-### Custom ThreadPoolExecutor Configuration
-
-```java
-public class CustomThreadPool {
+public class ProductionThreadPool {
     public static ExecutorService createOptimalPool() {
-        int coreSize = Runtime.getRuntime().availableProcessors();
-        int maxSize = coreSize * 2;
+        int cores = Runtime.getRuntime().availableProcessors();
+        int coreSize = cores;
+        int maxSize = cores * 2;
         long keepAlive = 60L;
 
-        // Bounded queue prevents memory issues
+        // ✅ Always use a BOUNDED queue in production to prevent OOM
         BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(1000);
 
-        ThreadFactory factory = new ThreadFactory() {
-            private final AtomicInteger counter = new AtomicInteger(0);
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, "app-worker-" + counter.incrementAndGet());
-                t.setDaemon(false);
-                t.setUncaughtExceptionHandler((thread, ex) ->
-                    System.err.println(thread.getName() + " error: " + ex.getMessage()));
-                return t;
-            }
+        ThreadFactory factory = r -> {
+            Thread t = new Thread(r, "app-worker-" + Thread.currentThread().getId());
+            t.setDaemon(false);
+            t.setUncaughtExceptionHandler((thread, ex) ->
+                System.err.println("Thread " + thread.getName() + " threw: " + ex.getMessage()));
+            return t;
         };
 
-        // CallerRunsPolicy: submitting thread runs the task when pool is saturated
+        // CallerRunsPolicy: backpressure mechanism — submitting thread executes task if pool saturated
+        RejectedExecutionHandler rejectionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+
         return new ThreadPoolExecutor(
             coreSize, maxSize, keepAlive, TimeUnit.SECONDS,
-            queue, factory, new ThreadPoolExecutor.CallerRunsPolicy()
+            queue, factory, rejectionHandler
         );
     }
 }
@@ -167,152 +124,27 @@ public class CustomThreadPool {
 
 ### Rejection Policies
 
-```java
-// When pool is saturated (max threads reached AND queue is full):
-
-// 1. AbortPolicy (DEFAULT) - throws RejectedExecutionException
-new ThreadPoolExecutor.AbortPolicy();
-
-// 2. CallerRunsPolicy - submitting thread runs the task
-new ThreadPoolExecutor.CallerRunsPolicy();
-
-// 3. DiscardPolicy - silently drops the task
-new ThreadPoolExecutor.DiscardPolicy();
-
-// 4. DiscardOldestPolicy - drops oldest queued task, retries submit
-new ThreadPoolExecutor.DiscardOldestPolicy();
-
-// 5. Custom policy
-RejectedExecutionHandler customHandler = (runnable, executor) -> {
-    System.err.println("Task rejected! Queue size: " + executor.getQueue().size());
-    // Log, persist to database, or push to a backup queue
-};
-```
-
-### Monitoring a Thread Pool
-
-```java
-public class ThreadPoolMonitor {
-    public static void printStats(ThreadPoolExecutor pool) {
-        System.out.println("=== Thread Pool Stats ===");
-        System.out.println("Pool Size:        " + pool.getPoolSize());
-        System.out.println("Core Pool Size:   " + pool.getCorePoolSize());
-        System.out.println("Max Pool Size:    " + pool.getMaximumPoolSize());
-        System.out.println("Active Threads:   " + pool.getActiveCount());
-        System.out.println("Queued Tasks:     " + pool.getQueue().size());
-        System.out.println("Completed Tasks:  " + pool.getCompletedTaskCount());
-        System.out.println("Total Tasks:      " + pool.getTaskCount());
-        System.out.println("Is Shutdown:      " + pool.isShutdown());
-        System.out.println("Is Terminated:    " + pool.isTerminated());
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
-
-        for (int i = 0; i < 20; i++) {
-            pool.submit(() -> {
-                try { Thread.sleep(500); } catch (InterruptedException e) {}
-            });
-        }
-
-        // Monitor every second
-        ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor();
-        monitor.scheduleAtFixedRate(() -> printStats(pool), 0, 1, TimeUnit.SECONDS);
-
-        pool.shutdown();
-        pool.awaitTermination(10, TimeUnit.SECONDS);
-        monitor.shutdown();
-    }
-}
-```
-
-### Pool Sizing Guidelines
-
-```java
-public class PoolSizingGuide {
-
-    // CPU-bound tasks: threads ≈ number of cores
-    static int cpuBoundPoolSize() {
-        return Runtime.getRuntime().availableProcessors();
-    }
-
-    // I/O-bound tasks: threads = cores * (1 + waitTime/computeTime)
-    static int ioBoundPoolSize(double waitTime, double computeTime) {
-        int cores = Runtime.getRuntime().availableProcessors();
-        return (int) (cores * (1 + waitTime / computeTime));
-    }
-
-    // Example: DB calls with 200ms wait, 20ms compute
-    // Pool size = 8 * (1 + 200/20) = 8 * 11 = 88 threads
-}
-```
+1. **`AbortPolicy` (Default)**: Throws `RejectedExecutionException`.
+2. **`CallerRunsPolicy`**: Executes task in the caller's thread, providing natural rate-limiting backpressure.
+3. **`DiscardPolicy`**: Silently discards the rejected task.
+4. **`DiscardOldestPolicy`**: Drops the oldest unhandled task in the work queue and retries submission.
 
 ---
 
-## Anti-Patterns
+## ⚠️ Gotchas & Common Pitfalls
 
-❌ **Using `Executors.newCachedThreadPool()` for unbounded workloads:**
-```java
-// Can create thousands of threads and crash the JVM
-ExecutorService pool = Executors.newCachedThreadPool();
-for (int i = 0; i < 100_000; i++) {
-    pool.submit(() -> Thread.sleep(10000)); // ❌ OOM!
-}
-```
-
-❌ **Using unbounded `LinkedBlockingQueue` with limited threads:**
-```java
-// Queue grows without limit → memory exhaustion
-new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS,
-    new LinkedBlockingQueue<>()); // ❌ Unbounded queue
-```
-
-❌ **Not shutting down thread pools:**
-```java
-ExecutorService pool = Executors.newFixedThreadPool(4);
-pool.submit(task);
-// ❌ JVM won't exit - pool threads are still alive
-```
-
-## Best Practices
-
-✅ Use bounded queues with `ThreadPoolExecutor` for production code  
-✅ Always configure a rejection policy  
-✅ Use custom `ThreadFactory` for naming and daemon configuration  
-✅ Size pools based on workload type (CPU-bound vs I/O-bound)  
-✅ Monitor pool metrics in production  
-✅ Always call `shutdown()` in a finally block or shutdown hook
-
-```java
-// ✅ Proper shutdown pattern
-ExecutorService executor = Executors.newFixedThreadPool(4);
-try {
-    // submit tasks
-} finally {
-    executor.shutdown();
-    if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-        executor.shutdownNow();
-    }
-}
-```
+1. **Unbounded Queue Hazard**: Using `Executors.newFixedThreadPool(...)` uses `LinkedBlockingQueue` with capacity `Integer.MAX_VALUE`, allowing memory exhaustion if task generation exceeds consumption rate.
+2. **Cached Pool Explosion**: Using `Executors.newCachedThreadPool()` under high load spawns thousands of OS threads, causing native OOM crashes.
+3. **Deadlock via Task Dependencies**: If tasks submitted to a fixed thread pool wait on results of other tasks submitted to the **same** pool, the pool can deadlock if all threads are blocked waiting.
+4. **Forgetting Pool Shutdown**: Failing to call `shutdown()` or using try-with-resources (Java 19+) keeps non-daemon threads active, preventing application exit.
 
 ---
 
-## ⚡ Follow-up Questions
+## Interviewer Expectations & Deep Mental Models
 
-1. How does `ThreadPoolExecutor` decide when to create a new thread vs. enqueue a task, and what are the configuration thresholds?
-2. What happens if a task throws an unchecked exception — does the worker thread die or continue processing?
-3. How would you implement a scheduled thread pool (like `ScheduledExecutorService`) from scratch?
-4. What is the difference between `shutdown()` and `shutdownNow()`, and when should you use each?
-5. How do you size a thread pool for CPU-bound vs I/O-bound workloads, and what are the formulas?
-6. What is the purpose of a custom ThreadFactory, and what configuration options should it provide?
-7. How does the ForkJoinPool differ from a standard ThreadPoolExecutor in terms of work-stealing?
-
-## 📚 Related Topics
-
-- [Executor Framework](./06-executor-framework.md)
-- [Runnable vs Callable](./04-runnable-vs-callable.md)
-- [CompletableFuture](./15-completable-future.md)
+- **Queue Sizing & Backpressure**: Be ready to explain how queue capacity and rejection policies govern system stability under traffic spikes.
+- **CPU vs I/O Sizing**: Formula for I/O-bound pools: $\text{Threads} = \text{Cores} \times (1 + \frac{\text{Wait Time}}{\text{Compute Time}})$.
+- **Virtual Threads vs Thread Pools**: Explain that with Java 21 Virtual Threads, traditional pooling is discouraged for I/O workloads; instead, create a virtual thread per task (`Executors.newVirtualThreadPerTaskExecutor()`).
 
 ---
 

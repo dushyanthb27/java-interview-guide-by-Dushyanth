@@ -326,6 +326,15 @@ Phaser: "Flexible barrier with dynamic participants and phases"
 
 ---
 
+## ⚠️ Gotchas
+
+1. **BrokenBarrierException Cascades:** If a single thread times out or is interrupted while waiting at a `CyclicBarrier`, the barrier breaks, throwing `BrokenBarrierException` to all other waiting threads and requiring explicit manual resetting (`barrier.reset()`).
+2. **Forgotten Phaser Deregistration:** Failing to call `arriveAndDeregister()` when a party finishes its task keeps the party registered in the `Phaser`, causing subsequent phases to wait indefinitely for phantom participants.
+3. **Phase Skew in Dynamic Phasers:** In a `Phaser` with dynamic registration, registering new parties mid-phase without careful coordination can cause threads to operate on mismatched phase numbers.
+4. **Barrier Action Execution Thread:** The optional barrier action in `CyclicBarrier` is executed by the **last arriving thread**, meaning any blocking or heavy computation inside the barrier action delays the release of all waiting parties.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Using CyclicBarrier when CountDownLatch suffices (simpler is better)**  
@@ -344,4 +353,4 @@ Phaser: "Flexible barrier with dynamic participants and phases"
 
 ---
 
-[← Semaphore & CountDownLatch](./q21-semaphore-countdownlatch.md) | [Next: Virtual Threads →](./q23-virtual-threads.md)
+[← Semaphore & CountDownLatch](./21-semaphore-countdownlatch.md) | [Next: Virtual Threads →](./23-virtual-threads.md)

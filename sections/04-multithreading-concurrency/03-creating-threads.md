@@ -6,30 +6,30 @@
 
 ## Question
 
-What are the different ways to create and run threads in Java? Which approach is preferred and why?
+What are the different ways to create and run threads in Java, including modern Java 21+ Virtual Threads (`Thread.ofVirtual()`) and Structured Concurrency (`StructuredTaskScope`)? Which approach is preferred and why?
 
 ---
 
 ## Answer
 
-### Approach 1: Extending Thread Class
+### Approach 1: Extending `Thread` Class
 
 ```java
 public class MyThread extends Thread {
     @Override
     public void run() {
-        System.out.println("Running in: " + getName());
+        System.out.println("Running in platform thread: " + getName());
     }
 
     public static void main(String[] args) {
         MyThread thread = new MyThread();
-        thread.setName("Custom-Thread");
-        thread.start(); // Calls run() in a new thread
+        thread.setName("Custom-Platform-Thread");
+        thread.start(); // Spawns OS-backed platform thread
     }
 }
 ```
 
-### Approach 2: Implementing Runnable Interface
+### Approach 2: Implementing `Runnable` Interface
 
 ```java
 public class MyRunnable implements Runnable {
@@ -45,23 +45,22 @@ public class MyRunnable implements Runnable {
 }
 ```
 
-### Approach 3: Implementing Callable Interface
+### Approach 3: Implementing `Callable` Interface
 
 ```java
 public class MyCallable implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
-        System.out.println("Computing in: " + Thread.currentThread().getName());
-        Thread.sleep(1000);
+        System.out.println("Computing in executor pool: " + Thread.currentThread().getName());
+        Thread.sleep(500);
         return 42;
     }
 
     public static void main(String[] args) throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Integer> future = executor.submit(new MyCallable());
-
-        System.out.println("Result: " + future.get()); // Blocks until result is ready
-        executor.shutdown();
+        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+            Future<Integer> future = executor.submit(new MyCallable());
+            System.out.println("Result: " + future.get());
+        }
     }
 }
 ```
@@ -71,230 +70,96 @@ public class MyCallable implements Callable<Integer> {
 ```java
 public class LambdaThreads {
     public static void main(String[] args) {
-        // Lambda with Runnable
-        Thread thread1 = new Thread(() -> {
-            System.out.println("Lambda Runnable: " + Thread.currentThread().getName());
-        }, "Lambda-Thread");
-        thread1.start();
-
-        // Lambda with ExecutorService
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        // Runnable lambda
-        executor.execute(() -> System.out.println("Execute: " + Thread.currentThread().getName()));
-
-        // Callable lambda
-        Future<String> future = executor.submit(() -> {
-            return "Hello from " + Thread.currentThread().getName();
-        });
-
-        try {
-            System.out.println(future.get());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        executor.shutdown();
-    }
-}
-```
-
-### Approach 5: Using FutureTask
-
-```java
-public class FutureTaskDemo {
-    public static void main(String[] args) throws Exception {
-        FutureTask<String> futureTask = new FutureTask<>(() -> {
-            Thread.sleep(1000);
-            return "Task completed!";
-        });
-
-        // Can be used with a raw Thread
-        Thread thread = new Thread(futureTask, "FutureTask-Thread");
+        Thread thread = new Thread(() -> {
+            System.out.println("Lambda Runnable executing on: " + Thread.currentThread().getName());
+        }, "Lambda-Worker");
         thread.start();
-
-        // Or with an ExecutorService
-        // executor.execute(futureTask);
-
-        System.out.println("Doing other work...");
-        System.out.println("Result: " + futureTask.get()); // Blocks until done
     }
 }
 ```
 
-### Approach 6: CompletableFuture (Java 8+)
+### Approach 5: Modern Virtual Threads (Java 21+)
+
+Java 21 introduces **Virtual Threads** (`Thread.ofVirtual()`), which are lightweight threads managed by the JVM rather than the OS kernel. Millions can run concurrently.
 
 ```java
-public class CompletableFutureCreation {
-    public static void main(String[] args) {
-        // Runs asynchronously in ForkJoinPool.commonPool()
-        CompletableFuture<String> cf = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Running in: " + Thread.currentThread().getName());
-            return "Async result";
+public class VirtualThreadCreation {
+    public static void main(String[] args) throws InterruptedException {
+        // 1. Unstarted virtual thread builder
+        Thread vThread = Thread.ofVirtual().unstarted(() -> {
+            System.out.println("Running virtual thread: " + Thread.currentThread());
+        });
+        vThread.start();
+        vThread.join();
+
+        // 2. Direct start factory
+        Thread.ofVirtual().name("worker-vthread").start(() -> {
+            System.out.println("Quick virtual thread execution");
         });
 
-        // With custom executor
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-        CompletableFuture<String> cf2 = CompletableFuture.supplyAsync(() -> {
-            return "Custom executor result";
-        }, executor);
-
-        cf.thenAccept(result -> System.out.println("Got: " + result));
-
-        executor.shutdown();
+        // 3. Virtual thread per task ExecutorService (Java 21+)
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            executor.submit(() -> {
+                System.out.println("Submitted to virtual thread executor");
+            });
+        } // Auto-closes and awaits termination
     }
 }
 ```
 
-### Comparison Table
-
-```
-┌──────────────────┬─────────┬───────────┬───────────┬────────────────┐
-│ Feature          │ Thread  │ Runnable  │ Callable  │ CompleteFuture │
-├──────────────────┼─────────┼───────────┼───────────┼────────────────┤
-│ Return value     │  No     │  No       │  Yes      │  Yes           │
-│ Throw exception  │  No     │  No       │  Yes      │  Yes           │
-│ Extend other     │  No     │  Yes      │  Yes      │  Yes           │
-│  class           │         │           │           │                │
-│ Lambda support   │  No     │  Yes      │  Yes      │  Yes           │
-│ Chaining support │  No     │  No       │  No       │  Yes           │
-│ Since            │ JDK 1.0 │ JDK 1.0   │ JDK 1.5   │  JDK 1.8      │
-└──────────────────┴─────────┴───────────┴───────────┴────────────────┘
-```
-
-### Why Runnable is Preferred Over Thread
+### Approach 6: Structured Concurrency (`StructuredTaskScope` - Java 21+)
 
 ```java
-// ❌ Extending Thread - wastes the single inheritance slot
-public class TaskThread extends Thread {
-    // Cannot extend any other class!
-    @Override
-    public void run() { /* task logic */ }
-}
+public class StructuredConcurrencyDemo {
+    record UserProfile(String name) {}
+    record OrderHistory(List<String> orders) {}
+    public record UserDashboard(UserProfile profile, OrderHistory orders) {}
 
-// ✅ Implementing Runnable - flexible composition
-public class Task implements Runnable, Serializable { // Can implement multiple interfaces
-    @Override
-    public void run() { /* task logic */ }
-}
+    public UserDashboard fetchDashboard(long userId) throws Exception {
+        // StructuredTaskScope ensures subtasks complete within scope boundaries
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            Supplier<UserProfile> profileTask = scope.fork(() -> fetchProfile(userId));
+            Supplier<OrderHistory> ordersTask = scope.fork(() -> fetchOrders(userId));
 
-// ✅ Separation of concerns
-Runnable task = () -> System.out.println("Task logic");
+            scope.join();           // Join all subtasks
+            scope.throwIfFailed();  // Propagate exception if any subtask failed
 
-// Same task, different execution strategies:
-new Thread(task).start();                         // Raw thread
-executor.execute(task);                           // Thread pool
-scheduledExecutor.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS); // Scheduled
-```
-
-### Practical Example: All Approaches Combined
-
-```java
-public class ThreadCreationShowcase {
-    public static void main(String[] args) throws Exception {
-        System.out.println("Main thread: " + Thread.currentThread().getName());
-
-        // 1. Thread subclass
-        new Thread("Approach-1") {
-            @Override
-            public void run() {
-                System.out.println("[" + getName() + "] Thread subclass");
-            }
-        }.start();
-
-        // 2. Runnable
-        new Thread(() -> System.out.println("[Approach-2] Runnable lambda")).start();
-
-        // 3. Callable with ExecutorService
-        ExecutorService pool = Executors.newCachedThreadPool();
-        Future<Double> priceFuture = pool.submit(() -> {
-            Thread.sleep(500);
-            return 99.99;
-        });
-
-        // 4. CompletableFuture chain
-        CompletableFuture.supplyAsync(() -> "Hello", pool)
-            .thenApply(s -> s + " World")
-            .thenAccept(s -> System.out.println("[Approach-4] " + s));
-
-        // 5. Thread factory (custom naming & configuration)
-        ThreadFactory factory = r -> {
-            Thread t = new Thread(r);
-            t.setName("Custom-" + t.getId());
-            t.setDaemon(true);
-            t.setUncaughtExceptionHandler((thread, ex) ->
-                System.err.println(thread.getName() + " failed: " + ex.getMessage()));
-            return t;
-        };
-        factory.newThread(() -> System.out.println("[Approach-5] Custom factory")).start();
-
-        System.out.println("Price: " + priceFuture.get());
-        pool.shutdown();
+            return new UserDashboard(profileTask.get(), ordersTask.get());
+        }
     }
+
+    private UserProfile fetchProfile(long id) { return new UserProfile("Alice"); }
+    private OrderHistory fetchOrders(long id) { return new OrderHistory(List.of("ORD-1")); }
 }
 ```
 
-### Thread Factory Pattern
+### Comparison Matrix
 
-```java
-public class NamedThreadFactory implements ThreadFactory {
-    private final AtomicInteger counter = new AtomicInteger(0);
-    private final String prefix;
-    private final boolean daemon;
-
-    public NamedThreadFactory(String prefix, boolean daemon) {
-        this.prefix = prefix;
-        this.daemon = daemon;
-    }
-
-    @Override
-    public Thread newThread(Runnable r) {
-        Thread thread = new Thread(r, prefix + "-" + counter.incrementAndGet());
-        thread.setDaemon(daemon);
-        thread.setUncaughtExceptionHandler((t, e) -> {
-            System.err.println("Thread " + t.getName() + " failed with: " + e.getMessage());
-        });
-        return thread;
-    }
-}
-
-// Usage
-ExecutorService executor = Executors.newFixedThreadPool(4,
-    new NamedThreadFactory("worker", false));
-```
+| Approach | Thread Type | Return Value | Checked Exceptions | Best Use Case |
+|----------|-------------|--------------|-------------------|---------------|
+| Extending `Thread` | Platform | `void` | No | ❌ Anti-pattern (wastes single inheritance slot) |
+| Implementing `Runnable` | Platform | `void` | No | Legacy task definition |
+| Implementing `Callable` | Platform / Pool | Generic `V` | Yes (`throws Exception`) | Tasks requiring result & checked exceptions |
+| Virtual Threads (`Thread.ofVirtual`) | Virtual | `void` / via Future | Optional | High-throughput I/O bound servers |
+| `StructuredTaskScope` | Virtual tasks | Aggregated | Yes | Concurrent hierarchical task trees |
 
 ---
 
-## Anti-Patterns
+## ⚠️ Gotchas & Common Pitfalls
 
-❌ **Calling `run()` instead of `start()`:**
-```java
-Thread thread = new Thread(() -> System.out.println("Task"));
-thread.run();   // ❌ Runs in the CURRENT thread, no new thread is created!
-thread.start(); // ✅ Starts a new thread
-```
-
-❌ **Calling `start()` twice:**
-```java
-thread.start();
-thread.start(); // ❌ Throws IllegalThreadStateException!
-```
-
-❌ **Creating threads manually in a loop:**
-```java
-for (Request req : requests) {
-    new Thread(() -> process(req)).start(); // ❌ Unbounded thread creation
-}
-```
-
-## Best Practices
-
-✅ Prefer `Runnable` / `Callable` over extending `Thread`  
-✅ Use `ExecutorService` for thread management  
-✅ Use `CompletableFuture` for async operations with chaining  
-✅ Use `ThreadFactory` for consistent thread configuration  
-✅ Always name your threads for debugging
+1. **Calling `run()` Instead of `start()`**: Executing `thread.run()` runs the task synchronously on the current thread, creating **no new thread** whatsoever.
+2. **Starting a Thread Twice**: Invoking `thread.start()` a second time throws `IllegalThreadStateException`.
+3. **Pinning Virtual Threads**: Executing synchronized blocks, native methods, or foreign function calls inside virtual threads can "pin" the virtual thread to its carrier OS thread, blocking carrier scaling. (Use `ReentrantLock` instead of `synchronized` in high-throughput virtual thread code).
+4. **Unbounded Platform Thread Creation**: Spawning raw platform threads (`new Thread(...)`) without an executor pool risks `OutOfMemoryError` under high traffic.
+5. **Forgetting AutoCloseable Shutdown**: Failing to close `ExecutorService` or `StructuredTaskScope` leaves background non-daemon threads active or causes resource leaks.
 
 ---
 
-[← Thread Lifecycle](./q02-thread-lifecycle.md) | [Next: Runnable vs Callable →](./q04-runnable-vs-callable.md)
+## Interviewer Expectations & Deep Mental Models
+
+- **Why `Runnable` over `Thread`**: Emphasize composition over inheritance, separation of task definition from execution mechanics, and task reusability across thread pools and virtual executors.
+- **Virtual Thread Architecture**: Understand how the JVM schedules virtual threads onto a pool of carrier platform threads (default pool size = number of available processors) using work-stealing `ForkJoinPool`.
+
+---
+
+[← Thread Lifecycle](./02-thread-lifecycle.md) | [Next: Runnable vs Callable →](./04-runnable-vs-callable.md)

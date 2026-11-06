@@ -322,6 +322,15 @@ try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Thread Pool Memory Leaks:** In application servers (like Tomcat), threads are reused from pools; failing to call `ThreadLocal.remove()` in a `finally` block leaves stale data attached to the thread, causing severe memory leaks and classloader retention.
+2. **WeakReference Key Confusion:** While `ThreadLocalMap` uses weak references for `ThreadLocal` keys (allowing keys to be garbage-collected when unreferenced), values remain strongly referenced, leading to "stale entries" where values linger until the thread terminates or map re-hashing occurs.
+3. **InheritableThreadLocal Pool Incompatibility:** `InheritableThreadLocal` copies values from parent to child thread upon thread creation; in thread pools where threads are pre-created and reused, child tasks inherit stale values from the thread's initial creator rather than the submitting thread.
+4. **Virtual Thread Memory Explosion:** Creating millions of virtual threads while populating `ThreadLocal` variables per thread causes massive heap consumption because each virtual thread allocates its own `ThreadLocalMap`.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Not calling `remove()` in thread pool environments:**
@@ -350,4 +359,4 @@ threadLocal.set(value);
 
 ---
 
-[← Fork/Join Framework](./q18-fork-join-framework.md) | [Next: Thread Safety Patterns →](./q20-thread-safety-patterns.md)
+[← Fork/Join Framework](./18-fork-join-framework.md) | [Next: Thread Safety Patterns →](./20-thread-safety-patterns.md)

@@ -47,6 +47,12 @@ Pre-sizing to 16384 eliminates all intermediate resizes.
 
 ---
 
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
+
 ## 2. Right Collection for the Job
 
 ### HashMap vs TreeMap vs LinkedHashMap
@@ -79,6 +85,12 @@ Map<String, Integer> accessOrder = new LinkedHashMap<>(16, 0.75f, true);
 | Memory/entry   | ~48 bytes | ~56 bytes   | ~64 bytes     |
 
 ---
+
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
 
 ## 3. ArrayList vs LinkedList
 
@@ -129,6 +141,12 @@ LinkedList: ~48 bytes per element (Node object: prev + next + item + header)
 
 ---
 
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
+
 ## 4. EnumSet and EnumMap for Enum Keys
 
 ```java
@@ -171,6 +189,12 @@ Memory:
 ```
 
 ---
+
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
 
 ## 5. Primitive Collections
 
@@ -227,6 +251,12 @@ boolean contains = ids.contains(12345L); // no Long boxing
 
 ---
 
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
+
 ## 6. Collection Selection Decision Guide
 
 ```
@@ -253,6 +283,12 @@ Need key-value lookup?
 ```
 
 ---
+
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
 
 ## 7. Iteration Performance
 
@@ -290,6 +326,12 @@ for (String key : map.keySet()) {
 ```
 
 ---
+
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.
 
 ## 8. Common Collection Anti-Patterns
 
@@ -336,3 +378,9 @@ list.stream().filter(x -> x > 0).collect(Collectors.toList());
 ---
 
 [<< Previous: Concurrency Optimization](./q04-concurrency-optimization.md) | [Next: String Optimization >>](./q06-string-optimization.md)
+
+### Gotchas
+- **HashMap Rehashing Storms**: Instantiating collections without initial capacity (`new HashMap<>()`) causes cascading array resizing and rehashing under high load.
+- **Mutable Keys in Maps**: Using mutable objects as keys in `HashMap` or `TreeMap` invalidates bucket hash positions, making entries permanently unretrievable.
+- **ArrayList Random Insertion/Deletion**: Inserting or deleting elements at the head or middle of an `ArrayList` causes $O(N)$ array copying overhead.
+- **`Collectors.groupingBy()` Memory Overhead**: Grouping large streams into maps without downstream reducing collectors can trigger memory pressure and garbage collection spikes.

@@ -284,6 +284,15 @@ public class WeakConsistencyDemo {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Non-Atomic Multi-Method Sequences:** While individual methods on `ConcurrentHashMap` (like `put` or `get`) are atomic, compound operations across multiple calls (such as `if (map.containsKey(k)) map.put(k, v)`) are vulnerable to race conditions unless atomic methods like `putIfAbsent` or `compute` are used.
+2. **CopyOnWriteArrayList Write Overhead:** Every mutation (`add`, `set`, `remove`) on `CopyOnWriteArrayList` allocates and copies the entire underlying array, causing $O(N)$ latency spikes under frequent writes.
+3. **Unbounded Queue Memory Hazards:** Using `LinkedBlockingQueue` without an explicit capacity bound creates an unbounded queue that can exhaust JVM heap memory if producers outpace consumers.
+4. **Weakly Consistent Iterator Staleness:** Iterators on `ConcurrentHashMap` do not throw `ConcurrentModificationException`, but they may or may not reflect concurrent updates made during iteration, leading to subtle state discrepancies.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Using `Collections.synchronizedMap()` when `ConcurrentHashMap` fits:**
@@ -312,4 +321,4 @@ map.putIfAbsent("key", value); // ✅ Atomic
 
 ---
 
-[← Parallel Streams](./q16-parallel-streams.md) | [Next: Fork/Join Framework →](./q18-fork-join-framework.md)
+[← Parallel Streams](./16-parallel-streams.md) | [Next: Fork/Join Framework →](./18-fork-join-framework.md)

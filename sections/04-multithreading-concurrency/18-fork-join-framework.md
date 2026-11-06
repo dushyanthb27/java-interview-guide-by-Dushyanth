@@ -296,6 +296,15 @@ invokeAll(task1, task2, task3); // Framework optimizes execution
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Blocking Operations in Fork/Join Workers:** Executing synchronous I/O or database calls inside `RecursiveTask` or `RecursiveAction` blocks worker threads, degrading the work-stealing pool's efficiency and potentially stalling asynchronous tasks across the JVM.
+2. **Subtask Forking Waste:** Forking both left and right subtasks (`left.fork(); right.fork();`) abandons the current thread's ability to execute work directly, creating unnecessary scheduling overhead.
+3. **Improper Granularity Thresholds:** Setting the split threshold too low results in massive task creation overhead that dwarfs actual computation, while setting it too high leaves CPU cores underutilized.
+4. **Common Pool Starvation:** Submitting long-running or blocking tasks directly to `ForkJoinPool.commonPool()` interferes with parallel streams and asynchronous completions sharing the same JVM-wide pool.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Forking both subtasks (wasting current thread):**
@@ -331,4 +340,4 @@ left.fork();
 
 ---
 
-[← Concurrent Collections](./q17-concurrent-collections.md) | [Next: ThreadLocal →](./q19-thread-local.md)
+[← Concurrent Collections](./17-concurrent-collections.md) | [Next: ThreadLocal →](./19-thread-local.md)

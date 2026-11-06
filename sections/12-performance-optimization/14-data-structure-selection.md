@@ -49,6 +49,12 @@ What is the primary operation?
 
 ---
 
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
+
 ## 2. Performance Characteristics Table
 
 ### List Implementations
@@ -106,6 +112,12 @@ _* grows dynamically_
 
 ---
 
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
+
 ## 3. Memory Overhead Comparison
 
 ```java
@@ -160,6 +172,12 @@ public class MemoryMeasurement {
 
 ---
 
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
+
 ## 4. Concurrent vs Non-Concurrent
 
 ```java
@@ -198,6 +216,12 @@ BlockingQueue<String> bQueue = new LinkedBlockingQueue<>(1000);
 
 ---
 
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
+
 ## 5. Specialized Collections
 
 ```java
@@ -233,6 +257,12 @@ Map<Object, String> identityMap = new IdentityHashMap<>();
 ```
 
 ---
+
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
 
 ## 6. Array-Based vs Pointer-Based
 
@@ -271,6 +301,12 @@ Random access 100K times:
 
 ---
 
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
+
 ## 7. Common Anti-Patterns
 
 ```java
@@ -299,6 +335,12 @@ int max = Collections.max(list);   // O(n) - scan once
 ```
 
 ---
+
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).
 
 ## 8. Data Structure Selection Quick Reference
 
@@ -334,3 +376,9 @@ int max = Collections.max(list);   // O(n) - scan once
 ---
 
 [<< Previous: Algorithm Selection](./q13-algorithm-selection.md) | [Next: Startup Optimization >>](./q15-startup-optimization.md)
+
+### Gotchas
+- **LinkedList Misuse**: Using `LinkedList` instead of `ArrayList` for general-purpose lists due to a misconception about insertion speed, ignoring pointer overhead and cache locality failure.
+- **ConcurrentHashMap Null Ban**: Assuming `ConcurrentHashMap` behaves like `HashMap` regarding `null` keys or values (it throws `NullPointerException` for both).
+- **EnumMap / EnumSet Neglect**: Using generic `HashMap` or `HashSet` for enum keys instead of highly optimized `EnumMap` and `EnumSet` (backed by bit vectors).
+- **PriorityQueue Thread Safety**: Assuming `PriorityQueue` is thread-safe (it is not; use `PriorityBlockingQueue` for concurrent access).

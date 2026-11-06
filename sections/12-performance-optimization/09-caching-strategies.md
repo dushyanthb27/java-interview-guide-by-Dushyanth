@@ -75,6 +75,12 @@ public class CaffeineExample {
 
 ---
 
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
+
 ## 2. Guava Cache
 
 ```java
@@ -115,6 +121,12 @@ public class GuavaCacheExample {
 | Active development | Yes              | Maintenance    |
 
 ---
+
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
 
 ## 3. Distributed Caching (Redis)
 
@@ -172,6 +184,12 @@ public class UserService {
 ```
 
 ---
+
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
 
 ## 4. Cache Patterns
 
@@ -272,6 +290,12 @@ public class WriteBehindService {
 
 ---
 
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
+
 ## 5. Eviction Policies
 
 ### TTL (Time-To-Live), LRU, LFU
@@ -310,6 +334,12 @@ Cache<String, byte[]> weightCache = Caffeine.newBuilder()
 | FIFO     | First in, first out              | Simple, predictable               |
 
 ---
+
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
 
 ## 6. Cache Stampede Prevention
 
@@ -353,6 +383,12 @@ public Data getWithJitter(String key) {
 ```
 
 ---
+
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
 
 ## 7. Multi-Level Caching
 
@@ -407,6 +443,12 @@ L4 (External API):           ~100-500 ms (cross-network)
 ```
 
 ---
+
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.
 
 ## 8. Spring Boot Caching Integration
 
@@ -467,3 +509,9 @@ public class ProductService {
 ---
 
 [<< Previous: JDBC Optimization](./q08-jdbc-optimization.md) | [Next: Profiling Tools >>](./q10-profiling-tools.md)
+
+### Gotchas
+- **Cache Stampede (Dogpile Effect)**: When a popular cache entry expires concurrently, thousands of threads hit the database simultaneously. Use request coalescing or mutex locks.
+- **Unbounded Cache Growth**: Caching data in-memory without maximum size limits or eviction policies (`MaximumSize`, `expireAfterWrite`) guarantees eventual `OutOfMemoryError`.
+- **Stale Data Invalidation**: Failing to implement proper cache invalidation on write/update operations leads to dirty reads and inconsistent application state.
+- **Serialization Overhead**: Storing complex object graphs in distributed caches (Redis) without efficient serialization (e.g., Protobuf, Kryo) adds heavy CPU and network overhead.

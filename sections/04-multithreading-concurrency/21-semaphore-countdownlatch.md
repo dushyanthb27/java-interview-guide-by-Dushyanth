@@ -314,6 +314,15 @@ public class CoordinatedStart {
 
 ---
 
+## ⚠️ Gotchas
+
+1. **Permit Leakage:** Failing to wrap `semaphore.release()` in a `finally` block when an exception occurs inside the critical section permanently leaks permits, eventually starving waiting threads.
+2. **Semaphore Non-Reentrancy:** Unlike `ReentrantLock`, `Semaphore` is not reentrant; if the same thread calls `acquire()` twice without releasing, it will self-deadlock even with a `Semaphore(1)`.
+3. **CountDownLatch Non-Reusability:** A `CountDownLatch` cannot be reset once its count reaches zero; attempting to reuse it requires creating a new instance or switching to `CyclicBarrier` / `Phaser`.
+4. **Incorrect Initial Count:** Initializing `CountDownLatch` with a count mismatch relative to the actual number of worker threads causes `await()` to block indefinitely or unblock prematurely.
+
+---
+
 ## Anti-Patterns
 
 ❌ **Not releasing semaphore in finally block:**
@@ -343,4 +352,4 @@ latch.await(); // Returns immediately
 
 ---
 
-[← Thread Safety Patterns](./q20-thread-safety-patterns.md) | [Next: CyclicBarrier & Phaser →](./q22-cyclic-barrier-phaser.md)
+[← Thread Safety Patterns](./20-thread-safety-patterns.md) | [Next: CyclicBarrier & Phaser →](./22-cyclic-barrier-phaser.md)
