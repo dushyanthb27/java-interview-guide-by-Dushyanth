@@ -371,6 +371,13 @@ public class ModernHttpClientSSL {
 | **Self-signed certs** | Add to custom truststore; don't disable validation |
 | **HttpClient** | Java 11+ supports SSLContext natively with HTTP/2 |
 
+## ⚠️ Gotchas
+
+- **Trust-All TrustManagers**: Implementing a custom `X509TrustManager` with empty `checkServerTrusted` methods completely disables SSL/TLS certificate validation, leaving the application vulnerable to Man-in-the-Middle (MITM) attacks.
+- **Hostname Verification Bypass**: Establishing an HTTPS connection without configuring hostname verification (`HttpsURLConnection.getDefaultHostnameVerifier()`) allows a valid cert for `evil.com` to impersonate `api.example.com`.
+- **Default TrustStore Corruption**: Modifying the global JVM truststore (`lib/security/cacerts`) affects all applications running on that JVM instance and risks being overwritten during Java updates.
+- **Cipher Suite Mismatch**: Hardcoding obsolete or overly restrictive cipher suites causes handshake failures when communicating with modern cloud services or clients using TLS 1.3.
+
 ---
 
 [<< Previous: Q6 - SecureRandom](./q06-secure-random.md) | [Next: Q8 - Preventing Injection >>](./q08-preventing-injection.md)

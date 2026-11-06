@@ -385,6 +385,16 @@ Should I pool this object?
 
 ---
 
+## ⚠️ Gotchas
+
+- **Stale State Leak**: Forgetting to thoroughly reset mutable fields when returning an object to a pool leads to data corruption and security vulnerabilities where sensitive user data bleeds into subsequent requests.
+- **Micro-optimization Trap**: Pooling lightweight heap objects (like DTOs, `Point`, or `StringBuilder`) almost always reduces performance compared to letting the modern generational GC allocate and collect short-lived objects in Eden space.
+- **Deadlock and Starvation**: Unbounded wait times or incorrect max pool sizing can cause thread starvation and deadlocks when high concurrency exhausts available pooled resources.
+- **Reference Leak via Pooled Instances**: If a pooled object retains a reference to a large request-scoped object or database result set, that reference is held across reuse cycles, causing a massive memory leak.
+- **Thread-Safety Violations**: Sharing a mutable pooled object across multiple threads without proper synchronization or thread-affinity guarantees leads to race conditions and unpredictable state mutations.
+
+---
+
 ## Interview Tips
 
 - Modern JVMs allocate objects in ~10ns and collect short-lived objects in minor GC — pooling lightweight objects is counterproductive

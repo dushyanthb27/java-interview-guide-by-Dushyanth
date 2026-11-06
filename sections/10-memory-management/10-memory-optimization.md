@@ -391,6 +391,16 @@ public enum Status {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Object Header Overhead Underestimation**: Developers often calculate object memory based solely on field sizes, ignoring the mandatory 12-16 byte object header and 8-byte alignment padding, which makes small wrapper objects disproportionately expensive.
+- **`HashMap` Entry Node Bloat**: Each entry in a `HashMap` allocates a `Node` object (~32 bytes) plus key and value objects, meaning maps with millions of entries consume vastly more heap than a parallel primitive array structure.
+- **Direct ByteBuffer Memory Leaks**: Allocating off-heap memory with `ByteBuffer.allocateDirect()` bypasses the heap GC, but failing to release native memory or depending solely on finalization can cause native `OutOfMemoryError`.
+- **Premature Optimization Complications**: Introducing primitive collections (like fastutil or Eclipse Collections) or flyweight patterns prematurely adds unnecessary code complexity and maintenance overhead without measurable performance gains.
+- **Compressed OOPs Threshold (`-XX:+UseCompressedOops`)**: Heaps larger than 32GB disable compressed object pointers (OOPs), expanding 4-byte references to 8-byte pointers and causing a sudden, massive jump in memory consumption across the entire heap.
+
+---
+
 ## Interview Tips
 
 - Every Java object has a 12-16 byte header — storing an `int` in an `Integer` costs 24 bytes vs 4 bytes

@@ -361,6 +361,16 @@ map.get(new ImmutableKey(1));   // Returns "value" — always consistent
 
 ---
 
+## ⚠️ Gotchas
+
+- **ThreadLocal Retention in Application Servers**: Thread pools reuse worker threads indefinitely. If a `ThreadLocal` value is set during request processing and `remove()` is not called in a `finally` block, that value (and its entire object graph) remains strongly reachable for the lifetime of the thread.
+- **Anonymous Inner Class Outer Reference**: Non-static inner classes and lambda expressions capturing outer state implicitly hold a strong reference to the outer enclosing class instance, silently preventing garbage collection of heavyweight service or controller objects.
+- **Mutable Map Keys**: Mutating fields of an object used as a key in a `HashMap` or `HashSet` alters its `hashCode()`, stranding the entry in the wrong bucket and rendering it permanently unretrievable and unremovable (a silent memory leak).
+- **Class Loader Leaks in Hot-Deploy**: Caching loaded `Class<?>` references or keeping static references from dynamic class loaders prevents the entire `ClassLoader` and all its loaded classes from being unloaded, common in plugin architectures and app servers.
+- **Unbounded Static Caches**: Accumulating data in static collections (`List`, `Map`) without eviction policies, TTLs, or size bounds will inevitably exhaust heap memory in long-running services.
+
+---
+
 ## Interview Tips
 
 - Memory leaks in Java are not "forgotten `free()` calls" — they are **unintended strong references**

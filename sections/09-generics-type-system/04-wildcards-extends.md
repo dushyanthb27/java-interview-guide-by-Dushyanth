@@ -238,6 +238,13 @@ List rawList = new ArrayList();     // ❌ Loses ALL type safety
 List<?> wildcard = new ArrayList<>();  // ✅ Type-safe, read-only
 ```
 
+## Gotchas
+
+- **Write Prohibition**: You cannot add any non-null elements to a `List<? extends T>` because the compiler cannot guarantee the exact runtime subtype (e.g., adding an `Integer` to what might actually be a `List<Double>`).
+- **The Null Exception**: `null` is the sole exception to the write ban on upper-bounded wildcards, as `null` is assignable to any reference type.
+- **Read-Only Limitation**: While you can safely read elements as the upper bound `T`, you lose precise subtype identity upon retrieval unless explicit casting or capture is used.
+- **Wildcard Capture Triggers**: Passing wildcard collections into generic methods can cause compilation errors due to failure of wildcard capture, often requiring helper methods to capture the unknown type variable.
+
 ## Best Practices
 
 ```java

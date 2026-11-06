@@ -405,6 +405,13 @@ throw new LoginException("Authentication failed");  // Don't reveal which part f
 | **vs Spring Security** | JAAS is JVM-level; Spring Security is application-level with web support |
 | **Best for** | Desktop apps, CLI tools, custom protocols; use Spring Security for web |
 
+## ⚠️ Gotchas
+
+- **Two-Phase Commit Confusion**: Developers often perform state mutations (like adding Principals) inside `login()` instead of `commit()`, leading to broken authentication workflows when modules abort or fail.
+- **Credential Leaks in Memory**: Passwords and keys stored in `Subject` private credentials remain in memory until garbage-collected unless explicitly cleared and zeroed out.
+- **Requisite vs Required Flags**: A `requisite` module failure aborts the entire login chain immediately without executing subsequent modules, whereas `required` continues execution before failing the login.
+- **Thread Context Isolation**: `Subject.doAs()` associates the Subject with the current `AccessControlContext`, but modern reactive and asynchronous pipelines easily drop or ignore this context.
+
 ---
 
 [<< Previous: Q3 - Code Signing](./q03-code-signing.md) | [Next: Q5 - Cryptography Basics >>](./q05-cryptography-basics.md)

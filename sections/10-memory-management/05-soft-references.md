@@ -163,6 +163,16 @@ if (c == null) {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Unpredictable Eviction Timing**: Soft references are cleared under memory pressure based on JVM heuristics and `SoftRefLRUPolicyMSPerMB`. Relying on them for deterministic caching or critical application state will lead to intermittent bugs.
+- **Garbage Collector Overhead**: Modern high-throughput garbage collectors (like ZGC or Shenandoah) may struggle or behave unpredictably with large numbers of soft references due to traversal overhead during reference processing phases.
+- **Small Object Overhead**: Wrapping small, inexpensive objects in `SoftReference` wrappers wastes more memory on reference wrapper objects than is saved by caching.
+- **All-Or-Nothing OOM Prevention**: The JVM guarantees clearing all soft references before throwing `OutOfMemoryError`, but this bulk clearance can cause sudden performance drops as cached data is evicted simultaneously across threads.
+- **Lack of Size Bounds**: Raw soft reference maps do not enforce maximum capacity limits, potentially consuming excessive memory before GC pressure triggers eviction.
+
+---
+
 ## Interview Tips
 
 - Soft references are the JVM's way of saying "keep this if you can, discard if you must"

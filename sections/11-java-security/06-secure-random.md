@@ -318,6 +318,13 @@ securerandom.source=file:/dev/urandom
 | **Seeding** | Auto-seeded by default; never use fixed seeds in production |
 | **Performance** | Reuse instances; use ThreadLocal for high-throughput |
 
+## ⚠️ Gotchas
+
+- **Blocking on `getInstanceStrong()`**: In headless Linux containers or virtual machines with low entropy, `SecureRandom.getInstanceStrong()` can block indefinitely waiting for entropy events.
+- **Explicit Seeding Pitfall**: Passing a fixed byte array seed (e.g., `new SecureRandom(new byte[]{1, 2, 3})`) overwrites the CSPRNG internal seed with predictable values, ruining security.
+- **`java.util.Random` in Security Contexts**: Using `java.util.Random` for session tokens, password reset tokens, or cryptographic nonces allows attackers to predict future values after observing a few outputs.
+- **Headless Container Entropy Starvation**: Docker containers running minimal Linux distros often deplete `/dev/random` and `/dev/urandom` entropy pools, causing severe latency or blocking during secure random generation.
+
 ---
 
 [<< Previous: Q5 - Cryptography Basics](./q05-cryptography-basics.md) | [Next: Q7 - SSL/TLS >>](./q07-ssl-tls.md)

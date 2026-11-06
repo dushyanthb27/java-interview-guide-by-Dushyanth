@@ -312,6 +312,13 @@ public class KeyStoreOperations {
 | **Certificate chain** | Root CA > Intermediate CA > Code Signing Cert |
 | **Best practice** | RSA 4096-bit, SHA-256+, CA-issued certs, always timestamp |
 
+## ⚠️ Gotchas
+
+- **Certificate Expiration Failures**: Without a Timestamping Authority (TSA), signed JARs instantly become untrusted the moment the signing certificate expires, even if the code was deployed years prior.
+- **JKS vs PKCS12 Default Mismatch**: Older JDKs defaulted to proprietary JKS format, whereas Java 9+ defaults to open PKCS12. Mixing keystore types during programmatic loading causes `UnrecoverableKeyException` or `IOException`.
+- **Manifest Tampering**: Modifying any file inside a signed JAR without re-signing invalidates the entire `META-INF` cryptographic signature block.
+- **Weak Digest Algorithms**: Older signing tools defaulted to SHA-1 or MD5 digests, which are cryptographically broken and rejected by modern JVM runtimes.
+
 ---
 
 [<< Previous: Q2 - Permissions & Policies](./q02-permissions-policies.md) | [Next: Q4 - JAAS >>](./q04-jaas.md)

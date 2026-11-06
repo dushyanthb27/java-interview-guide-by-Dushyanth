@@ -275,7 +275,6 @@ public static <T extends Integer> void process(T value) { }
 // ❌ Missing recursive bound causes type-safety gap
 public static <T extends Comparable> T max(T a, T b) {  // Raw Comparable
     return a.compareTo(b) >= 0 ? a : b;  // Unchecked — can compare anything
-}
 
 // ❌ Forgetting that erasure replaces T with the first bound
 public class Thing<T extends Serializable & Comparable<T>> {
@@ -283,6 +282,13 @@ public class Thing<T extends Serializable & Comparable<T>> {
     // Put the most-used type first if possible
 }
 ```
+
+## Gotchas
+
+- **Multiple Bound Ordering Rules**: In multiple bounds (`<T extends Class & Interface1 & Interface2>`), the single class bound must always be specified first, followed by any interface bounds; specifying an interface first or multiple classes causes a compilation error.
+- **First Bound Erasure Replacement**: Type erasure replaces bounded parameters with their *first* bound (e.g., `Serializable` in `T extends Serializable & Comparable<T>`), which dictates the bytecode return type and requires careful ordering for performance.
+- **Recursive Bound Casting**: Implementing recursive type bounds (`B extends Builder<B>`) often requires unchecked casts (`return (B) this;`) in fluent builder self-methods, requiring careful internal type safety.
+- **Final Class Bounds**: Bounding a type parameter with a `final` class (e.g., `<T extends String>`) renders generics pointless since only that exact class can ever satisfy the bound.
 
 ## Best Practices
 

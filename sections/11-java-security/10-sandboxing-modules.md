@@ -328,6 +328,13 @@ Step 5: Test and remove SecurityManager references
 | **ServiceLoader** | Safe extensibility pattern for module-based plugin systems |
 | **Migration** | Replace SM with modules + containers + app-level authorization |
 
+## ⚠️ Gotchas
+
+- **Reflection Bypass via `--add-opens`**: JVM flags like `--add-opens` or `--add-exports` can bypass module encapsulation at startup, which developers frequently misuse to silence framework access errors instead of fixing module descriptors.
+- **Split Package Errors**: Two different modules cannot contain classes in the same package name; the JVM detects split packages at startup and terminates with a `LayerInstantiationException`.
+- **Open Module Over-Privileging**: Declaring an entire module as `open module` opens every package to deep reflection by any other module, negating strong encapsulation benefits.
+- **Automatic Modules Fragility**: Unnamed classpath JARs become automatic modules in the module graph, inheriting readability to all other modules and unstable auto-generated module names based on file names.
+
 ---
 
 [<< Previous: Q9 - Secure Coding Practices](./q09-secure-coding-practices.md) | [Back to Section Index](./README.md)

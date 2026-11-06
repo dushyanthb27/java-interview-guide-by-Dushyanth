@@ -378,6 +378,13 @@ public class InputValidation {
 | **Command injection** | Use `ProcessBuilder` with arg arrays; prefer Java APIs |
 | **Defense in depth** | Layer input validation + parameterization + output encoding |
 
+## ⚠️ Gotchas
+
+- **Dynamic SQL Column Names**: `PreparedStatement` cannot parameterize table names or column names (`ORDER BY ?` fails). Developers often fall back to string concatenation, opening up SQL injection vulnerabilities unless whitelisted explicitly.
+- **Path Traversal via Null Bytes**: Attackers can inject null bytes (`%00`) in older file paths to truncate string validation checks in Java applications before reaching underlying file system APIs.
+- **XXE in TransformerFactory and XPath**: Disabling DTDs in `DocumentBuilderFactory` is not enough; `TransformerFactory`, `SchemaFactory`, and `XPath` parsers also require explicit security feature configuration.
+- **Shell Interpretation in ProcessBuilder**: Passing a single combined command string to `ProcessBuilder` (e.g., `new ProcessBuilder("sh", "-c", userCommand)")` re-enables shell interpretation and command injection vulnerabilities.
+
 ---
 
 [<< Previous: Q7 - SSL/TLS](./q07-ssl-tls.md) | [Next: Q9 - Secure Coding Practices >>](./q09-secure-coding-practices.md)

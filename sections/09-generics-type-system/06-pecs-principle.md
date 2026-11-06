@@ -286,6 +286,13 @@ public static double sum(List<? super Number> numbers) {
 public List<? extends Number> getValues() { ... }
 ```
 
+## Gotchas
+
+- **Return Type Anti-Pattern**: Applying wildcards (`? extends` or `? super`) to return types forces callers to deal with restricted types, breaking fluent method chaining and collection usability.
+- **Dual-Role Parameters**: Parameters that are both read from and written to within the same method cannot use wildcards and must use invariant exact type parameters (`T`).
+- **Comparator and Consumer Contravariance**: Forgetting that functions, consumers, and comparators consume items requires `? super T` rather than `? extends T`, which is a common interview trap.
+- **Collection Perspective Mismatch**: Misapplying PECS from the method caller's perspective instead of the underlying collection's operations leads to frustrating compiler errors.
+
 ## Best Practices
 
 ```java

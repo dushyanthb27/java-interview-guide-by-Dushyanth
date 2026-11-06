@@ -8,13 +8,13 @@
 
 ## Question
 
-> What is the diamond operator (`<>`) in Java? How has it evolved across Java versions?
+> What is the diamond operator (`<>`) in Java? How does it differ from raw types, and how has its support evolved for anonymous inner classes and local variables?
 
 ---
 
 ## Quick Answer
 
-The **diamond operator** (`<>`) was introduced in Java 7 to eliminate redundant type arguments on the right-hand side of generic declarations. Instead of repeating `new HashMap<String, List<Integer>>()`, you write `new HashMap<>()` — the compiler infers the type arguments from the left-hand side. Java 9 extended diamond to work with **anonymous inner classes**.
+The **diamond operator** (`<>`) was introduced in Java 7 to eliminate redundant generic type specifications on constructor invocations. Instead of repeating `new HashMap<String, List<Integer>>()`, you write `new HashMap<>()` — the compiler infers the exact type arguments from the assignment target (left-hand side). Java 9 extended the diamond operator to work with **anonymous inner classes** (provided the inferred type is denotable). It is distinct from raw types because it fully preserves compile-time type safety.
 
 ---
 
@@ -27,58 +27,38 @@ The **diamond operator** (`<>`) was introduced in Java 7 to eliminate redundant 
 List<String> names = new ArrayList<String>();
 Map<String, List<Integer>> scores = new HashMap<String, List<Integer>>();
 Map<String, Map<Integer, List<Double>>> nested =
-    new HashMap<String, Map<Integer, List<Double>>>();  // Very verbose!
-
-// The right-hand side types are completely redundant
-// The compiler already knows the types from the left-hand side
+    new HashMap<String, Map<Integer, List<Double>>>();  // Highly verbose!
 ```
 
 ### Diamond Operator (Java 7+)
 
 ```java
-// Java 7+: Diamond operator infers from left-hand side
+// Java 7+: Diamond operator infers from left-hand side assignment context
 List<String> names = new ArrayList<>();            // ✅ Clean
 Map<String, List<Integer>> scores = new HashMap<>(); // ✅ Clean
 Map<String, Map<Integer, List<Double>>> nested =
-    new HashMap<>();                                 // ✅ Much better
-
-// Works with any generic class constructor
-Set<Integer> numbers = new HashSet<>();
-Queue<String> queue = new LinkedList<>();
-Pair<String, Integer> pair = new Pair<>("age", 30);
+    new HashMap<>();                                 // ✅ Deep nesting simplified
 ```
 
 ### Diamond vs Raw Type
 
 ```java
-// ⚠️ CRITICAL DISTINCTION: Diamond is NOT the same as raw type
+// ⚠️ CRITICAL DISTINCTION: Diamond is NOT a raw type
 
-// Diamond operator — type-safe, compiler infers generics
-List<String> safe = new ArrayList<>();    // ArrayList<String>
+// Diamond operator — fully type-safe, compiler infers generic arguments
+List<String> safe = new ArrayList<>();    // Instantiates ArrayList<String>
 
-// Raw type — NO type safety, generates warnings
-List<String> unsafe = new ArrayList();    // ArrayList (RAW) — warning!
+// Raw type — NO type safety, generates unchecked compiler warnings
+List<String> unsafe = new ArrayList();    // Instantiates raw ArrayList (erased to Object)
 
-// The difference at compile time:
-List<String> list1 = new ArrayList<>();   // Inferred as ArrayList<String>
+// Compile-time enforcement:
+List<String> list1 = new ArrayList<>();   
 list1.add("hello");   // ✅
 // list1.add(42);     // ❌ COMPILE ERROR — type-safe
 
-List<String> list2 = new ArrayList();     // Raw ArrayList — warning
+List<String> list2 = new ArrayList();     
 list2.add("hello");   // ✅
-// Compiler warning: unchecked call
-```
-
-### Diamond with Constructors That Take Arguments
-
-```java
-// Diamond works when constructor has arguments that help inference
-List<String> copy = new ArrayList<>(existingStringList);  // ✅
-Set<Integer> fromList = new HashSet<>(integerList);       // ✅
-
-// Constructor arguments don't change inference — LHS determines type
-Map<String, Integer> map = new HashMap<>(16, 0.75f);     // ✅
-// Type args inferred from LHS, constructor args are capacity/loadFactor
+list2.add((Object) 42); // ⚠️ Compiles with raw warning, corrupts type safety!
 ```
 
 ### Diamond with Anonymous Classes (Java 9+)
@@ -86,11 +66,9 @@ Map<String, Integer> map = new HashMap<>(16, 0.75f);     // ✅
 ```java
 // Java 7-8: Diamond NOT allowed with anonymous inner classes
 // ❌ COMPILE ERROR in Java 7/8
-// Comparator<String> comp = new Comparator<>() {
-//     public int compare(String a, String b) { return a.compareTo(b); }
-// };
+// Comparator<String> comp = new Comparator<>() { ... };
 
-// Java 9+: Diamond ALLOWED with anonymous inner classes ✅
+// Java 9+: Diamond ALLOWED with anonymous inner classes if denotable
 Comparator<String> comp = new Comparator<>() {
     @Override
     public int compare(String a, String b) {
@@ -98,18 +76,7 @@ Comparator<String> comp = new Comparator<>() {
     }
 };
 
-// More Java 9+ examples
-Iterator<Integer> counter = new Iterator<>() {
-    private int current = 0;
-
-    @Override
-    public boolean hasNext() { return current < 10; }
-
-    @Override
-    public Integer next() { return current++; }
-};
-
-// Abstract class with diamond
+// Abstract class handler with diamond
 abstract class Handler<T> {
     abstract void handle(T item);
 }
@@ -125,142 +92,78 @@ Handler<String> stringHandler = new Handler<>() {   // Java 9+
 ### When Diamond Inference Fails
 
 ```java
-// ❌ Diamond cannot infer when there's no target type context
-// var list = new ArrayList<>();  // Inferred as ArrayList<Object> — probably wrong
+// ❌ Diamond cannot infer when there is no assignment target type context
+// var list = new ArrayList<>();  // Inferred as ArrayList<Object> ⚠️
 
-// ❌ Diamond fails in complex generic method arguments (pre-Java 8)
-// processItems(new ArrayList<>());  // May fail in Java 7
-
-// ✅ Java 8+ improved target-type inference for method args
-void processItems(List<String> items) { }
-processItems(new ArrayList<>());  // ✅ Works in Java 8+
-
-// ❌ Cannot infer when method is overloaded
+// ❌ Cannot infer when method is overloaded and target type is ambiguous
 void handle(List<String> strings) { }
 void handle(List<Integer> integers) { }
-// handle(new ArrayList<>());  // ❌ Ambiguous — which overload?
+// handle(new ArrayList<>());  // ❌ Ambiguous overload compilation error
 
 // ✅ Fix: be explicit
-handle(new ArrayList<String>());  // ✅ Resolves ambiguity
+handle(new ArrayList<String>());  // ✅ Resolves overload ambiguity
 ```
 
-### Diamond with var (Java 10+)
+### Diamond with `var` (Java 10+)
 
 ```java
-// ⚠️ var + diamond = Object type (usually wrong)
-var list = new ArrayList<>();           // ArrayList<Object> — NOT useful
-var map = new HashMap<>();              // HashMap<Object, Object> — NOT useful
+// ⚠️ COMBINING TRAP: var + diamond = ArrayList<Object>
+var list = new ArrayList<>();           // ArrayList<Object> — type safety lost!
 
-// ✅ var without diamond — preserves specific type
-var list2 = new ArrayList<String>();    // ArrayList<String> ✅
-var map2 = new HashMap<String, Integer>(); // HashMap<String, Integer> ✅
-
-// ✅ Or skip var and use diamond with explicit LHS type
-List<String> list3 = new ArrayList<>(); // List<String> ✅
-
-// Rule of thumb:
-// - Use EITHER var OR diamond, not both
-// - var infers from RIGHT side, diamond infers from LEFT side
-// - Together, neither side has type info → defaults to Object
+// ✅ Correct usage: choose ONE inference direction
+var list2 = new ArrayList<String>();    // RHS inference (`var` from RHS) ✅
+List<String> list3 = new ArrayList<>(); // LHS inference (`<>` from LHS) ✅
 ```
 
-### Diamond in Generic Method Calls
+---
 
-```java
-// Diamond is for constructors only — not for method type arguments
+## Gotchas
 
-// ✅ Method type inference (no diamond needed)
-List<String> list = Collections.emptyList();    // T inferred as String
-
-// ✅ Explicit type witness for methods (not diamond)
-List<String> list2 = Collections.<String>emptyList();
-
-// Diamond in constructor within method call
-List<String> list3 = new ArrayList<>(List.of("a", "b"));  // ✅ Diamond on constructor
-```
-
-### Real-World Usage Patterns
-
-```java
-// ✅ Service layer — clean declarations
-Map<String, List<UserDTO>> usersByRole = new HashMap<>();
-Set<Permission> permissions = new TreeSet<>();
-Optional<User> user = Optional.empty();
-
-// ✅ Builder collections
-List<Predicate<String>> filters = new ArrayList<>();
-filters.add(s -> s.length() > 3);
-filters.add(s -> s.startsWith("A"));
-
-// ✅ Concurrent collections
-ConcurrentMap<String, AtomicInteger> counters = new ConcurrentHashMap<>();
-BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
-
-// ✅ Multi-level generics — diamond eliminates massive repetition
-Map<String, Map<Integer, List<Pair<String, Double>>>> complexData = new HashMap<>();
-// Without diamond: new HashMap<String, Map<Integer, List<Pair<String, Double>>>>()
-```
+- **Anonymous Class Non-Denotable Types**: Java 9 permits diamond with anonymous classes *only* when the inferred type is denotable. If the compiler infers an intersection type or non-denotable anonymous type for the constructor, compilation fails.
+- **Overload Ambiguity Trap**: Passing `new ArrayList<>()` directly into overloaded methods without casting or explicit type witnesses often results in ambiguous method resolution errors.
+- **Raw Type Fallback Silencing**: Mixing raw types and diamond operator declarations across legacy module boundaries can suppress compiler warnings while introducing runtime heap pollution.
+- **IDE Refactoring Pitfalls**: Automated refactoring tools converting explicit generic instantiations to diamond operators can occasionally break method type inference when target typing is subtle.
 
 ---
 
 ## Anti-Patterns
 
 ```java
-// ❌ Using raw type instead of diamond
-List<String> names = new ArrayList();     // Raw type — unchecked warning
+// ❌ Using raw types instead of diamond operator
+List<String> names = new ArrayList();     // Unchecked warning and raw type risk
 
-// ❌ Combining var and diamond
-var data = new HashMap<>();               // HashMap<Object, Object>
+// ❌ Combining var and diamond operator
+var data = new HashMap<>();               // HashMap<Object, Object> — silent type degradation
 
-// ❌ Specifying types on both sides (pre-Java 7 style)
-List<String> names = new ArrayList<String>();  // Redundant in Java 7+
-
-// ❌ Over-relying on diamond in ambiguous contexts
-// process(new ArrayList<>());  // May fail if overloaded
+// ❌ Redundant explicit type arguments on both sides (pre-Java 7 style)
+List<String> names = new ArrayList<String>();  // Unnecessary verbosity in Java 7+
 ```
 
 ## Best Practices
 
 ```java
-// ✅ Always use diamond operator for constructor calls
+// ✅ Always use diamond operator for standard constructor calls
 List<String> names = new ArrayList<>();
 Map<String, Integer> ages = new HashMap<>();
 
-// ✅ Be explicit when diamond cannot infer correctly
-var names = new ArrayList<String>();     // Explicit type arg with var
+// ✅ Be explicit when diamond inference lacks context
+var names = new ArrayList<String>();     // Explicit RHS with var
 
-// ✅ Use diamond with Java 9+ anonymous classes
+// ✅ Use diamond with Java 9+ anonymous classes for concise custom implementations
 Comparator<String> comp = new Comparator<>() {
     @Override
     public int compare(String a, String b) {
         return a.length() - b.length();
     }
 };
-
-// ✅ Prefer lambdas over anonymous classes when possible
-Comparator<String> comp2 = (a, b) -> a.length() - b.length();  // Even cleaner
-
-// ✅ Choose one: var for RHS inference OR diamond for LHS inference
-List<String> a = new ArrayList<>();      // Diamond from LHS ✅
-var b = new ArrayList<String>();         // var from RHS ✅
-// var c = new ArrayList<>();            // Neither side — bad ❌
 ```
-
----
 
 ## Interview Tips
 
-- Diamond (`<>`) infers type arguments from the **assignment target** (left-hand side)
-
-- Diamond is **not** a raw type — it preserves full type safety
-
-- Java 9 extended diamond to anonymous inner classes
-
-- `var` + `<>` together defaults to `Object` — avoid this combination
-
-- Diamond only applies to **constructors**, not method calls
-
-- For methods, Java uses **type inference** automatically (no special syntax needed)
+- Diamond (`<>`) infers type arguments from the **left-hand side** assignment context.
+- Diamond is **not** a raw type; it enforces full compile-time generic type checks.
+- Java 9 enabled diamond usage with anonymous inner classes (a frequent interview trivia point).
+- Combining `var` and `<>` defaults to `Object`, which is a common interview trap.
 
 ---
 

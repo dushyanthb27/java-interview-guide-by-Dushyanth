@@ -233,6 +233,16 @@ queue.remove(1000);  // Wait up to 1 second
 
 ---
 
+## ⚠️ Gotchas
+
+- **Forgetting to Poll the Queue**: Enqueued reference objects accumulate in the `ReferenceQueue` until polled. If you never poll or process the queue, references accumulate and cause a memory leak.
+- **Indefinite Blocking on `remove()`**: Calling `queue.remove()` without a timeout blocks the calling thread indefinitely until an object is collected, which may stall background worker loops if no GC occurs.
+- **Phantom Reference Misconception**: Expecting `PhantomReference.get()` to return the referent object is a common trap; it always returns `null` by design to prevent accidental object resurrection.
+- **Reference Subclassing Requirement**: To clean up a map when a weak key is collected, you must subclass `WeakReference` to store the key identifier, because the reference object itself is enqueued, not the key.
+- **GC Phase Timing**: The time between an object becoming unreachable and its reference appearing on the `ReferenceQueue` is non-deterministic and depends entirely on garbage collector scheduling and heap pressure.
+
+---
+
 ## Interview Tips
 
 - ReferenceQueue is the only way to know when a reference's referent has been collected

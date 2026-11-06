@@ -218,6 +218,13 @@ public class LegacyCompatibility {
 | **Alternatives** | JPMS modules, containers, OS sandboxing, explicit access control |
 | **Legacy code** | Guard SecurityManager calls with null checks; plan migration |
 
+## ⚠️ Gotchas
+
+- **Performance Hit of Stack Walking**: `checkPermission()` walks the entire call stack to inspect every `ProtectionDomain`, which introduced severe performance penalties in hot code paths.
+- **False Sense of Security**: Many developers believed setting a SecurityManager made legacy applications completely secure, while malicious code often bypassed checks via reflection or `AllPermission`.
+- **System.setSecurityManager(null)**: In Java 17+, trying to set or manipulate the SecurityManager throws unsupported operation warnings or exceptions when `-Djava.security.manager=disallow` is enforced.
+- **Thread Local and Context Loss**: Asynchronous and reactive frameworks (like Project Reactor or CompletableFuture) break the thread-stack assumption of `AccessController`, making security context propagation unreliable.
+
 ---
 
 [Next: Q2 - Permissions and Policies >>](./q02-permissions-policies.md)

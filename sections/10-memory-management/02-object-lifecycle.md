@@ -378,6 +378,16 @@ largeCache = null;   // Help GC in long-running methods
 
 ---
 
+## ⚠️ Gotchas
+
+- **Cleaner Action Strong Reference Trap**: The cleaning action passed to `Cleaner` must **never** hold a strong reference to the enclosing object being cleaned. Doing so creates an uncollectable cycle where the object remains strongly reachable via its own cleanup action.
+- **Deserialization & Reflection Constructor Bypass**: Using `clone()`, deserialization (`ObjectInputStream`), or `Unsafe.allocateInstance()` instantiates objects without executing constructors, potentially leaving final fields uninitialized or invariants violated.
+- **Finalizer Queue Backlog**: Overriding legacy `finalize()` stalls GC collection because finalizable objects require multiple GC cycles and run in a single background thread, easily causing `OutOfMemoryError` under heavy finalization load.
+- **Phantom Reference Misconception**: Unlike Weak and Soft references where `get()` returns the object until collected, `PhantomReference.get()` **always** returns `null`. It is solely designed to signal the `ReferenceQueue` when unreachability occurs.
+- **Nullifying References Manually**: Explicitly setting local references to `null` (`myVar = null`) is rarely necessary in modern JVMs unless the variable is in a long-lived scope (like a thread-local or static field) where stack frame popping doesn't apply.
+
+---
+
 ## Interview Tips
 
 - Know all four creation mechanisms and which ones skip the constructor

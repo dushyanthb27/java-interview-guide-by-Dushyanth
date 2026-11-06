@@ -246,6 +246,13 @@ List<Integer> b = new ArrayList<>();
 // void handle(List<Integer> i) { }  // Erasure collision
 ```
 
+## Gotchas
+
+- **Absence of Reification**: Type arguments are completely removed at compile time; `List<String>.class` and `List<Integer>.class` do not exist at runtime (both are `List.class`), making generic type instantiation and exact `instanceof` checks impossible.
+- **Erasure Collisions**: Overloading methods whose signatures differ only by generic type arguments (e.g., `print(List<String>)` and `print(List<Integer>)`) fails to compile because both erase to `print(List)`.
+- **Cast Insertion Overhead**: The compiler automatically inserts casts at call sites for generic return types, which introduces subtle performance overhead and potential `ClassCastException` if raw types corrupt boundaries.
+- **Reflection Type Erasure Limits**: While generic signatures are preserved in class metadata for fields and superclasses, local variable generic types are lost entirely, limiting runtime type inspection.
+
 ## Best Practices
 
 ```java

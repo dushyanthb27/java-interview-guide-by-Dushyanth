@@ -307,6 +307,16 @@ java -XX:StringTableSize=1000003 MyApp
 
 ---
 
+## ⚠️ Gotchas
+
+- **`String.intern()` Abuse**: Interning dynamic, unbounded strings (like UUIDs, timestamps, or user input) fills the internal string table hash map, causing severe CPU contention and a permanent memory leak.
+- **PermGen vs Main Heap Confusion**: Developers frequently retain the obsolete Java 6 belief that the String Pool lives in PermGen and causes `PermGen OOM`, whereas since Java 7 it lives in the main heap and can trigger standard heap OOM.
+- **String Table Size Bottleneck**: The string pool is backed by a fixed-size hash table (controlled by `-XX:StringTableSize`). Having millions of interned strings with a default table size leads to long hash chain collisions and CPU spikes.
+- **`==` Operator False Security**: Comparing strings with `==` may work for compile-time constants or interned strings, but fails unpredictably across dynamically generated strings or different class loaders.
+- **Deduplication vs Interning**: Confusing G1 String Deduplication (which shares internal `byte[]` arrays automatically without altering object identity) with `intern()` (which shares the entire `String` object and identity) leads to incorrect memory assumptions.
+
+---
+
 ## Interview Tips
 
 - String Pool moved from PermGen to the main heap in Java 7 — pooled strings can be GC'd

@@ -244,6 +244,13 @@ list.add(42);               // ✅ Integer extends Number
 list.add(3.14);             // ✅ Double extends Number
 ```
 
+## Gotchas
+
+- **Object Retrieval Limitation**: Reading from a `List<? super T>` always returns `Object` because the actual underlying collection could be `List<Object>`, forcing unsafe casts if specific types are expected.
+- **Write Type Restriction**: You can only add `T` and its *subtypes* to a `List<? super T>`, never its supertypes (e.g., you cannot add a `Number` to a `List<? super Integer>`).
+- **Comparable SuperTrap**: Forgetting to use `Comparable<? super T>` instead of `Comparable<T>` restricts sorting and collection algorithms from working with subclasses that inherit their comparison logic from parent classes.
+- **API Consumer Confusion**: Misusing `? super` on return types or producer methods forces callers into tedious casting and reduces overall API usability.
+
 ## Best Practices
 
 ```java

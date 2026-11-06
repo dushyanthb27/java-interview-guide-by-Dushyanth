@@ -270,6 +270,14 @@ public static <T> List<T> asList(T... elements) {
 }
 ```
 
+## Gotchas
+
+- **Instantiation Prohibition**: You cannot write `new T()` because `T` is erased to `Object` at runtime, meaning the JVM has no constructor reference or class allocation info without a `Class<T>` or `Supplier<T>` token.
+- **Primitive Incompatibility**: Type arguments cannot be primitive types (`int`, `double`), requiring boxing overhead via `Integer` and `Double` unless specialized primitive collections are used.
+- **Generic Array Creation Block**: Creating arrays like `new T[10]` or `new List<String>[10]` is illegal because array reification and covariance clash with generic erasure and invariance.
+- **Static Scope Isolation**: Type parameters belong strictly to generic instances; static fields and methods cannot reference class-level type parameters.
+- **Exception Catching Limits**: You cannot catch or throw generic exception parameters (`catch (T e)`) because exception handling requires reified runtime type checking by the JVM.
+
 ## Best Practices
 
 ```java

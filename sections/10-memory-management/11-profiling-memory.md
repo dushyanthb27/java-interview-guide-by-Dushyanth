@@ -480,6 +480,16 @@ public class MemoryAlertSystem {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Used vs Committed vs Max Confusion**: Monitoring tools show "Committed" memory (allocated from OS) rather than "Used" memory (live objects), leading engineers to falsely believe a service is out of memory when the JVM is simply retaining committed space for future allocations.
+- **Production Profiler Overhead**: Attaching heavy full-featured GUI profilers in production introduces massive CPU overhead and stop-the-world pauses, often crashing high-load services. Always prefer JFR (Java Flight Recorder) or async-profiler.
+- **`System.gc()` Misconception**: Calling `System.gc()` manually in application code or monitoring tools does not guarantee garbage collection; modern JVM collectors treat it merely as a suggestion and can ignore it entirely.
+- **Native Memory Blind Spots**: Standard heap monitors and profilers miss non-heap memory consumed by thread stacks, JNI code, metaspace, and direct buffers, requiring Native Memory Tracking (NMT) for complete visibility.
+- **JFR Recording File Size**: Running continuous JFR recordings without size or time bounds can fill up disk space rapidly in high-throughput production environments.
+
+---
+
 ## Interview Tips
 
 - **JFR** is the go-to for production profiling — <1% overhead, built into the JVM

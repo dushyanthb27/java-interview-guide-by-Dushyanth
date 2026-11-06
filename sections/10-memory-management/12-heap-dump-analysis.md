@@ -440,6 +440,16 @@ java -Xlog:gc*:file=gc.log:time \
 
 ---
 
+## ⚠️ Gotchas
+
+- **Shallow vs Retained Size Confusion**: Focusing on an object's small shallow size while ignoring its massive retained size leads investigators to overlook root causes where a tiny object dominates gigabytes of child objects.
+- **Production Server Dump Generation**: Generating a heap dump on a live production server via `jmap` or `jcmd` freezes the JVM process during the dump creation, potentially causing load balancers to timeout and drop active client requests.
+- **Failing to Exclude Weak References**: When tracing path to GC roots in analysis tools, failing to exclude weak, soft, and phantom references leads to false-positive retention paths through cache structures.
+- **Massive Dump Analysis Workstation Memory**: Opening multi-gigabyte heap dumps requires configuring analyzer tools (like Eclipse MAT) with sufficient JVM heap memory (`-Xmx8g`), otherwise the analyzer itself will run out of memory.
+- **Live-Only Object Filtering**: Taking a heap dump without filtering for live objects (`-XX:+HeapDumpOnOutOfMemoryError` dumps everything) includes dead uncollected garbage, requiring the analyzer to perform reachability calculations before identifying real suspects.
+
+---
+
 ## Interview Tips
 
 - A heap dump captures **all live objects** — it's the definitive tool for memory leak diagnosis

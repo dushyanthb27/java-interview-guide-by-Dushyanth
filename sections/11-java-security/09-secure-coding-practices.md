@@ -456,6 +456,13 @@ Dependencies:
 | **Secure defaults** | Auth on, TLS on, limits set - require explicit opt-out |
 | **Dependency scanning** | OWASP Dependency-Check catches known CVEs in libraries |
 
+## ⚠️ Gotchas
+
+- **String Immutability and Heap Dumps**: Passwords stored as `java.lang.String` cannot be cleared from memory and remain in the string pool or heap memory until garbage collected, making them vulnerable to heap dump analysis.
+- **Incomplete Defensive Copying**: Returning internal collections or mutable objects from getters (`getRoles()`) allows callers to mutate internal state directly, bypassing access control checks.
+- **Deserialization Gadget Chains**: Unfiltered Java object deserialization (`ObjectInputStream.readObject()`) allows Remote Code Execution (RCE) via known gadget chains in third-party libraries (e.g., Apache Commons Collections).
+- **Blacklist Validation Bypass**: Relying on blacklists to filter dangerous inputs or characters is easily circumvented by encoding variations, alternative syntax, or novel attack vectors; always use strict whitelisting.
+
 ---
 
 [<< Previous: Q8 - Preventing Injection](./q08-preventing-injection.md) | [Next: Q10 - Sandboxing & Modules >>](./q10-sandboxing-modules.md)

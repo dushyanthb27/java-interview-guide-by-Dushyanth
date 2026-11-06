@@ -254,6 +254,13 @@ public class Outer<T> {
 }
 ```
 
+## Gotchas
+
+- **Static Context Blindness**: Class-level type parameters (`T`) cannot be used in static fields, static methods, or static nested classes because static members belong to the class as a whole, not to individual parameterized instances.
+- **Raw Type Erasure Hazards**: Assigning a parameterized collection to a raw type variable bypasses compile-time checks and can cause heap pollution or `ClassCastException` downstream.
+- **Type Parameter Shadowing**: Declaring a method-level type parameter with the same name as a class-level type parameter (`<T> void method(T t)` inside `class MyClass<T>`) creates confusion and hides the class type parameter.
+- **Overload Erasure Collisions**: Overloading methods whose parameter types erase to the same raw types (e.g., `process(List<String>)` and `process(List<Integer>)`) fails to compile due to type erasure collisions.
+
 ## Best Practices
 
 ```java

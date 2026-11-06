@@ -262,6 +262,16 @@ public long factorial(int n) {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Primitive Field Storage**: Declaring a primitive variable inside a method puts it on the stack, but declaring that exact same primitive as an instance variable (`private int x;`) stores it on the **heap** inside the object instance.
+- **Escape Analysis Illusion**: Developers often assume objects created inside methods are always heap-allocated. However, JIT escape analysis can stack-allocate or scalar-replace non-escaping objects, making microbenchmarking without warm-up misleading.
+- **Thread Stack Sizing (`-Xss`) Pitfall**: Setting `-Xss` too high on systems with thousands of threads will quickly exhaust native memory and trigger an `OutOfMemoryError: unable to create native thread`, even if the heap has plenty of free space.
+- **Recursion vs Iteration**: Converting deep recursion to iteration is crucial for production stability, as catching `StackOverflowError` is unreliable and often corrupts JVM thread state.
+- **Reference Variable Confusion**: A local reference variable lives on the stack, but the object it points to lives on the heap. Passing a reference to a method copies the pointer value on the stack, not the underlying heap object.
+
+---
+
 ## Interview Tips
 
 - Stack memory is always faster because it's just pointer arithmetic (push/pop)

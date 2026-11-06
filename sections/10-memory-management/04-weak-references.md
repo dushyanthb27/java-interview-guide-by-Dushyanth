@@ -184,6 +184,16 @@ if (d != null) {
 
 ---
 
+## ⚠️ Gotchas
+
+- **TOCTOU Race Condition on `get()`**: Calling `ref.get()` multiple times in succession is unsafe because garbage collection can occur between calls, returning a valid object on the first check and `NullPointerException` on the second. Always assign `get()` to a local strong variable.
+- **String Literals as `WeakHashMap` Keys**: Interned string literals are permanently stored in the String Pool and never garbage collected under normal circumstances. Using them as keys in a `WeakHashMap` means entries are never evicted.
+- **Premature Collection**: Weakly reachable objects are collected at the very next GC cycle. Using `WeakReference` for caching data that is expensive to compute will lead to immediate cache misses on every minor GC.
+- **Strong Reference Contamination**: Wrapping an object in a `WeakReference` while holding a simultaneous strong reference variable to the same object defeats the weak reference entirely; it remains strongly reachable.
+- **`WeakHashMap` Value Leak**: While `WeakHashMap` automatically removes entries when keys are collected, if the *value* object holds a strong reference back to the key, neither the key nor the value will ever be collected.
+
+---
+
 ## Interview Tips
 
 - WeakReferences are collected eagerly — at the **next** GC cycle, not under memory pressure (that's SoftReference)

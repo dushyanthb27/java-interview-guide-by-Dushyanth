@@ -331,6 +331,13 @@ public class KeyStoreDemo {
 | **KeyStore** | PKCS12 format stores keys and certificates securely |
 | **IV/Nonce** | Never reuse IVs; generate with SecureRandom |
 
+## ⚠️ Gotchas
+
+- **IV Reuse in AES-GCM**: Reusing an Initialization Vector (IV) / nonce with the same AES key completely compromises confidentiality and allows attackers to recover plaintext messages.
+- **ECB Mode Vulnerability**: Using `AES/ECB/PKCS5Padding` leaks identical plaintext blocks as identical ciphertext blocks, exposing data patterns and structure.
+- **Hardcoded Cryptographic Keys**: Embedding secret keys directly in source code or properties files makes them trivially extractable via decompilation.
+- **Provider Ordering Side Effects**: Relying on default JCA provider ordering without explicitly requesting provider names can lead to unexpected algorithm implementations across different JVM vendors (e.g., OpenJDK vs Oracle JDK).
+
 ---
 
 [<< Previous: Q4 - JAAS](./q04-jaas.md) | [Next: Q6 - SecureRandom >>](./q06-secure-random.md)

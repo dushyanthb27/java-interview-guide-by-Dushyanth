@@ -296,6 +296,13 @@ public class ModernAuthorizationService {
 | **implies()** | Hierarchical check - broad permissions encompass narrow ones |
 | **Modern approach** | Use JPMS modules + app-level auth instead of JVM policies |
 
+## ⚠️ Gotchas
+
+- **Incorrect `implies()` Implementation**: When writing custom permissions, failing to correctly implement `implies()` can lead to privilege escalation or overly restrictive denial of legitimate operations.
+- **Wildcard Syntax Pitfalls**: In `FilePermission`, `/tmp/-` means recursive all files and subdirectories, whereas `/tmp/*` means only files directly inside `/tmp` (not subdirectories). Mixing these up causes unexpected permission denials.
+- **Policy File Parsing Errors**: Syntax errors in `.policy` files fail silently or throw cryptic exceptions at startup, making troubleshooting extremely difficult in production environments.
+- **CodeSource URL Matching**: CodeBase paths in policy files must match the exact URL protocol and format of loaded code jars, or permissions will not be granted.
+
 ---
 
 [<< Previous: Q1 - Security Manager](./q01-security-manager.md) | [Next: Q3 - Code Signing >>](./q03-code-signing.md)
