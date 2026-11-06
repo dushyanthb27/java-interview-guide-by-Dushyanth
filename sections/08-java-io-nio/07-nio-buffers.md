@@ -353,6 +353,16 @@ for (int i = 0; i < 1000; i++) {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Direct Buffer Memory Leaks (`OutOfMemoryError: Direct buffer memory`):** Direct buffers allocated via `ByteBuffer.allocateDirect()` sit in native off-heap memory. While the Java object is garbage-collected when unreachable, the underlying native memory is only reclaimed when the JVM's Garbage Collector runs its reference-processing phase (specifically cleaner tasks). Creating many direct buffers rapidly can exhaust native memory before the GC triggers, throwing `OutOfMemoryError`. Always pool or reuse direct buffers, or explicitly free them via modern APIs like Foreign Function & Memory API (Java 19+) `MemorySegment`.
+- **Forgetting Buffer Flip (`BufferUnderflowException` or Zero Data Read):** A newly allocated or written buffer has `position` at the end of the written data and `limit` at capacity. Failing to call `flip()` before reading from a buffer or writing it to a channel means reading from `position` onward (which contains uninitialized zero bytes) rather than from index 0 up to the written limit, leading to silent data corruption or `BufferUnderflowException`.
+- **Misunderstanding `clear()` vs `compact()` Data Preservation:** Calling `clear()` resets `position = 0` and `limit = capacity`, making the buffer ready for a full overwrite, but it **does not clear underlying bytes** (it's purely logical). If you have partially read a buffer and want to retain the remaining unread bytes for the next read cycle, calling `clear()` will discard them. You must use `compact()` to copy unread bytes to index 0 and position the pointer correctly.
+- **Slice and Duplicate State Interference:** Methods like `slice()`, `duplicate()`, and `asReadOnlyBuffer()` share the exact same underlying byte array or off-heap memory region. Modifying the content through one view immediately alters the data visible in all other views. However, their indices (`position`, `limit`, `mark`) are entirely independent, which can cause subtle synchronization bugs if multiple threads or components concurrently read/write via different views without external coordination.
+- **Endianness Mismatch (`ByteOrder`):** Network protocols and cross-platform file formats have strict endianness requirements (typically `BIG_ENDIAN`). ByteBuffer defaults to `BIG_ENDIAN`, but view buffers or typed operations on platform-native byte orders (`ByteOrder.nativeOrder()`) can introduce severe corruption when communicating between different hardware architectures (e.g., x86 Little-Endian vs ARM/Network Big-Endian). Always explicitly set `buffer.order(ByteOrder.BIG_ENDIAN)` for binary protocols.
+
+---
+
 ## Key Takeaways
 
 1. **flip()** before reading, **clear()**/**compact()** before writing — this is the fundamental buffer lifecycle

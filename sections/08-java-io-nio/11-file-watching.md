@@ -330,6 +330,16 @@ private boolean shouldProcess(Path file) {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Forgetting `key.reset()` (Silent Event Starvation):** After retrieving events from a `WatchKey`, you **must** invoke `key.reset()`. If `reset()` returns `false`, it means the key is no longer valid (directory was deleted or inaccessible). Omitting `reset()` silently stops the `WatchService` from delivering any further events for that key.
+- **Handling `StandardWatchEventKinds.OVERFLOW` Events:** When file system changes occur faster than the application consumes them (or if the OS kernel event buffer overflows), the watcher drops pending events and emits an `OVERFLOW` event. If your event loop does not explicitly check for and handle `OVERFLOW`, casting `event.context()` to `Path` will throw a `ClassCastException` because an overflow event's context is `null`.
+- **Incomplete File Writes during `ENTRY_CREATE` / `ENTRY_MODIFY`:** When a file is being saved or copied into a watched directory, the OS fires `ENTRY_CREATE` and `ENTRY_MODIFY` immediately as bytes start writing. If your application attempts to read the file instantly upon receiving the event, the file will be partially written or locked. Production watchers require a small debounce delay or file-lock check before processing.
+- **macOS Polling Latency and Resource Overhead:** On macOS, Java's `WatchService` falls back to a polling-based implementation (`PollingWatchService`) rather than native `kqueue`, because standard JDK NIO file watching on macOS polls directories at fixed intervals (often up to 10 seconds). This introduces high latency and CPU overhead compared to Linux (`inotify`) or Windows (`ReadDirectoryChangesW`).
+- **Missing Events on Subdirectories (Non-Recursive by Default):** Registering a directory with `WatchService` only monitors files directly inside that directory. It **does not** monitor subdirectories or newly created nested folders. Recursive watching requires walking the directory tree and explicitly registering every subdirectory, plus dynamically registering newly created subdirectories on `ENTRY_CREATE`.
+
+---
+
 ## Key Takeaways
 
 1. **`WatchService`** monitors directories for file create, modify, and delete events

@@ -32,7 +32,7 @@ Selector (NIO):
 │ Client 2 │──┼── Selector ── Single Thread
 │ Client 3 │──┘   (multiplexes all channels)
 │   ...     │
-└─────────┘        ← 10,000 clients = 1 thread (or a few)
+└─────────        ← 10,000 clients = 1 thread (or a few)
 ```
 
 ---
@@ -380,6 +380,16 @@ private void handleRead(SelectionKey key) {
 // ✅ Offload blocking work to a thread pool
 workerPool.submit(() -> database.query("SELECT ..."));
 ```
+
+---
+
+## ⚠️ Gotchas
+
+- **Epoll Spurious Wakeup Bug (100% CPU Utilization):** On Linux, Java NIO Selector implementation relies on `epoll`. Due to an inherent JVM bug (JDK-6403933 / EPollBug), a selector can occasionally wake up from `select()` with zero selected keys in an infinite tight loop, consuming 100% CPU. While modern Java versions attempt to detect and workaround this by rebuilding the selector instance, developers writing custom NIO engines must guard against spurious wakeups by checking if `selector.select()` returned > 0 or if selectedKeys is non-empty before processing, and manually recreating the Selector if a spin-loop is detected.
+- **Forgetting Iterator Removal (`ConcurrentModificationException` / Duplicate Processing):** When iterating through `selector.selectedKeys()`, failing to explicitly invoke `keyIterator.remove()` (or `iterator.remove()`) leaves the key in the selected key set. On the next iteration of the event loop, the selector will attempt to process the exact same ready key again, causing duplicate event handling or throwing exceptions (e.g., trying to read an already closed or handled channel).
+- **Blocking Operations on Non-Blocking Channels (`IllegalBlockingModeException`):** You cannot invoke blocking stream operations or synchronous methods on channels registered with a Selector unless they are configured as non-blocking (`configureBlocking(false)`). Conversely, performing blocking operations (like standard JDBC queries or blocking HTTP calls) directly inside the selector event-handling thread freezes the single reactor thread, starving all other multiplexed connections.
+- **Race Conditions in Multi-Threaded Registrations (`selector.wakeup()`):** When using a multi-reactor pattern or offloading work where background threads register new channels or modify interest ops on an active selector, calling `channel.register()` or `key.interestOps()` from a worker thread can block indefinitely because the main thread is blocked inside `selector.select()`. You **must** call `selector.wakeup()` immediately after modifying interest operations or registering from another thread to unblock the selector.
+- **Partial Writes (`OP_WRITE` Starvation Anti-Pattern):** Unlike reads, sockets are almost always writable when connected. If you register for `SelectionKey.OP_WRITE` permanently, the selector will fire on *every* loop iteration even when you have nothing to write, resulting in busy-looping and 100% CPU usage. You should only register for `OP_WRITE` when a write buffer has remaining bytes that couldn't be sent immediately, and cancel or remove `OP_WRITE` interest (`key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE)`) as soon as the buffer is fully flushed.
 
 ---
 

@@ -321,7 +321,7 @@ group.shutdownNow();                 // force close all channels
 | Complexity | Higher (manual event loop) | Lower (Future/callback) |
 | Frameworks | Netty, Vert.x, Java NIO | Built-in Java AIO |
 | Performance (Linux) | Better (epoll) | Good (but uses thread pool, not true AIO) |
-| Performance (Windows) | Good | Better (uses IOCP — true kernel AIO) |
+| Performance (Windows) | Good | Better (uses IOCP — true kernel async I/O) |
 
 ---
 
@@ -368,6 +368,16 @@ public void failed(Throwable exc, ByteBuffer buf) {
     try { channel.close(); } catch (IOException e) { /* log */ }
 }
 ```
+
+---
+
+## ⚠️ Gotchas
+
+- **Platform Disparity (IOCP on Windows vs Thread Pool on Linux):** Java AIO behavior and performance vary drastically across operating systems. On Windows, AIO is backed by true kernel-level asynchronous I/O (IOCP — I/O Completion Ports), making it extremely efficient. On Linux, however, Java's AIO implementation historically relied on a thread pool wrapper around synchronous system calls rather than true kernel AIO (like Linux `io_uring` or POSIX AIO), which can result in poorer scalability compared to `epoll`-based NIO Selectors.
+- **Buffer Lifetime and Concurrent Modification:** When initiating an async read or write operation with `AsynchronousFileChannel` or `AsynchronousSocketChannel`, the `ByteBuffer` passed as an argument is accessed asynchronously by background I/O threads. Modifying, flipping, or reusing the buffer immediately after initiating the call (before the `CompletionHandler` fires or the `Future` completes) causes severe data corruption because the buffer contents are mutated while the OS is still reading from or writing to them.
+- **Resource Leaks in `CompletionHandler` Error Paths:** When implementing `CompletionHandler<V, A>`, developers often remember to close channels inside `completed()`, but forget to close them inside `failed()`. If an I/O error occurs, the `failed()` callback is invoked; failing to close the underlying channel in `failed()` results in persistent socket or file handle leaks.
+- **Callback Hell and Thread Context Loss:** Deeply nesting multiple `CompletionHandler` callbacks (e.g., reading a request, parsing, writing response, reading next request) quickly leads to unmaintainable callback hell, making error handling, debugging, and maintaining thread-local context extremely difficult. Prefer wrapping async operations with `CompletableFuture` for clean composition.
+- **Immediate Blocking (`future.get()`) Anti-Pattern:** Initiating an async operation via `channel.read(buffer)` and immediately calling `future.get()` on the returned `Future` blocks the calling thread until completion, entirely defeating the asynchronous nature of AIO and introducing unnecessary thread-scheduling overhead compared to synchronous I/O.
 
 ---
 

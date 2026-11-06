@@ -310,6 +310,16 @@ buffer.force();  // ensures data reaches disk
 
 ---
 
+## ⚠️ Gotchas
+
+- **Windows File Locking (`AccessDeniedException` on Delete):** Unlike POSIX systems where an open file can be unlinked while descriptors remain active, Windows strictly locks memory-mapped files. Because `MappedByteBuffer` unmapping is non-deterministic (tied to JVM Garbage Collection), attempting to delete or overwrite a mapped file immediately after closing its `FileChannel` on Windows will frequently throw `AccessDeniedException` or `IOException`. Developers must either avoid deleting mapped files on Windows or use Java 19+ Foreign Function & Memory API (`MemorySegment`) for deterministic resource release.
+- **JVM Crash on Accessing Truncated Mapped Files (`SIGSEGV`):** If a memory-mapped file is truncated externally (e.g., another process shrinks the file while your JVM has it mapped), attempting to read or write past the new file boundary results in a native segmentation fault (`SIGSEGV`), crashing the entire JVM process instead of throwing a clean Java exception.
+- **Page Fault Latency / Disk Thrashing:** While memory-mapped I/O feels like accessing an in-memory array, the underlying data resides on disk. Accessing unmapped pages triggers synchronous OS page faults that block the calling thread while disk I/O occurs. For large files that exceed available RAM, random access across non-contiguous regions can cause severe disk thrashing and latency spikes.
+- **JVM 2GB Limit per Mapping (`IllegalArgumentException`):** `MappedByteBuffer` extends `ByteBuffer`, which uses signed 32-bit integers (`int`) for indexing. Consequently, a single `channel.map()` call cannot exceed `Integer.MAX_VALUE` bytes (~2GB). Attempting to map a larger file in one go throws an `IllegalArgumentException`. Large files must be sliced and mapped in 1GB–2GB chunks.
+- **Cache Coherency and `force()` Durability:** Writes to a `READ_WRITE` `MappedByteBuffer` modify virtual memory pages managed by the OS kernel. They are not guaranteed to be physically written to persistent storage immediately. If the OS crashes or loses power before the kernel flushes dirty pages, data is lost unless `buffer.force()` is explicitly invoked to force disk synchronization.
+
+---
+
 ## Key Takeaways
 
 1. **Memory-mapped files** map file contents directly into virtual memory — no explicit read/write syscalls

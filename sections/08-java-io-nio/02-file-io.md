@@ -5,15 +5,15 @@
 ---
 
 ## Question
-How does file I/O work in Java? Compare traditional `java.io.File` with the modern `java.nio.file` approach.
+How does file I/O work in Java? Compare traditional `java.io.File` with the modern `java.nio.file` (NIO.2) approach, and analyze why NIO.2 is superior for enterprise applications.
 
 ---
 
 ## Answer
 
 Java provides two APIs for file operations:
-- **Legacy**: `java.io.File` and stream classes.
-- **Modern (NIO.2)**: `java.nio.file.Path` and `java.nio.file.Files`. This approach is preferred since Java 7+.
+- **Legacy (`java.io`)**: Built around the `File` class and blocking stream hierarchies. Operations are synchronous, lack detailed error reporting, and have cumbersome path manipulation.
+- **Modern NIO.2 (`java.nio.file`)**: Introduced in Java 7 (`Path`, `Files`, `FileSystem`), offering comprehensive file metadata, asynchronous/symbolic link support, atomic file operations, rich exception reporting, and streamlined stream/string factories.
 
 ---
 
@@ -70,14 +70,14 @@ FileReader fr = new FileReader("data.txt"); // uses platform default encoding
 ### Path vs File
 
 ```java
-// Legacy java.io.File
+// Legacy java.io.File (represents file or directory path, often throws opaque security/IO exceptions)
 File file = new File("data/config.json");
 
-// Modern java.nio.file.Path (preferred)
+// Modern java.nio.file.Path (interface representing a hierarchical path, immutable and thread-safe)
 Path path = Path.of("data", "config.json");        // Java 11+
 Path path2 = Paths.get("data", "config.json");      // Java 7+
 
-// Converting between them
+// Converting between legacy and modern types
 Path fromFile = file.toPath();
 File fromPath = path.toFile();
 ```
@@ -104,7 +104,7 @@ try (Stream<String> lineStream = Files.lines(Path.of("huge-log.txt"))) {
         .forEach(System.out::println);
 }
 
-// ✅ BufferedReader via Files
+// ✅ BufferedReader via Files utility
 try (BufferedReader br = Files.newBufferedReader(Path.of("data.txt"), StandardCharsets.UTF_8)) {
     String line;
     while ((line = br.readLine()) != null) {
@@ -136,7 +136,7 @@ Files.write(Path.of("output.txt"), lines, StandardCharsets.UTF_8);
 byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};
 Files.write(Path.of("binary.dat"), data);
 
-// ✅ BufferedWriter via Files
+// ✅ BufferedWriter via Files utility
 try (BufferedWriter bw = Files.newBufferedWriter(
         Path.of("log.txt"), StandardCharsets.UTF_8,
         StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
@@ -152,16 +152,16 @@ try (BufferedWriter bw = Files.newBufferedWriter(
 ### Creating Files and Directories
 
 ```java
-// ✅ Create a new file
+// ✅ Create a new file (throws FileAlreadyExistsException if it exists)
 Path newFile = Files.createFile(Path.of("newfile.txt"));
 
 // ✅ Create a directory
 Path dir = Files.createDirectory(Path.of("logs"));
 
-// ✅ Create nested directories (like mkdir -p)
+// ✅ Create nested directories (equivalent to mkdir -p)
 Path dirs = Files.createDirectories(Path.of("data/cache/temp"));
 
-// ✅ Create a temporary file
+// ✅ Create a secure temporary file
 Path tempFile = Files.createTempFile("prefix-", ".tmp");
 
 // ✅ Create a temporary directory
@@ -171,7 +171,7 @@ Path tempDir = Files.createTempDirectory("myapp-");
 ### Copying, Moving, and Deleting
 
 ```java
-// ✅ Copy a file
+// ✅ Copy a file with overwrite option
 Files.copy(
     Path.of("source.txt"),
     Path.of("dest.txt"),
@@ -179,23 +179,22 @@ Files.copy(
 );
 
 // ✅ Copy from InputStream to file
-try (InputStream is = new URL("https://example.com/data").openStream()) {
+try (InputStream is = URI.create("https://example.com/data").toURL().openStream()) {
     Files.copy(is, Path.of("downloaded.dat"), StandardCopyOption.REPLACE_EXISTING);
 }
 
-// ✅ Move/rename a file
+// ✅ Move/rename a file atomically (guaranteed atomic operation on supported file systems)
 Files.move(
     Path.of("old-name.txt"),
     Path.of("new-name.txt"),
     StandardCopyOption.ATOMIC_MOVE
 );
 
-// ✅ Delete a file
-Files.delete(Path.of("unwanted.txt"));          // throws if missing
-Files.deleteIfExists(Path.of("maybe.txt"));      // returns boolean
+// ✅ Delete a file (throws NoSuchFileException if missing)
+Files.delete(Path.of("unwanted.txt"));
 
-// ❌ Anti-pattern: Not handling FileAlreadyExistsException on copy
-Files.copy(source, target); // throws if target exists
+// ✅ Delete if exists (returns boolean indicating deletion status)
+boolean deleted = Files.deleteIfExists(Path.of("maybe.txt"));
 ```
 
 ### Checking File Properties
@@ -220,7 +219,7 @@ long    size        = Files.size(path);
 ## Directory Traversal
 
 ```java
-// ✅ List directory contents (non-recursive)
+// ✅ List directory contents (non-recursive, lazy DirectoryStream)
 try (DirectoryStream<Path> stream = Files.newDirectoryStream(
         Path.of("src"), "*.java")) {
     for (Path entry : stream) {
@@ -228,21 +227,21 @@ try (DirectoryStream<Path> stream = Files.newDirectoryStream(
     }
 }
 
-// ✅ Walk a file tree recursively
+// ✅ Walk a file tree recursively (returns Stream<Path>, must be closed)
 try (Stream<Path> walk = Files.walk(Path.of("project"))) {
     walk.filter(Files::isRegularFile)
         .filter(p -> p.toString().endsWith(".java"))
         .forEach(System.out::println);
 }
 
-// ✅ Find files matching a condition
+// ✅ Find files matching a predicate with depth limit
 try (Stream<Path> found = Files.find(
         Path.of("project"), 10,
         (path, attrs) -> attrs.isRegularFile() && path.toString().endsWith(".log"))) {
     found.forEach(System.out::println);
 }
 
-// ✅ List immediate children
+// ✅ List immediate children (non-recursive Stream<Path>)
 try (Stream<Path> list = Files.list(Path.of("src"))) {
     list.forEach(System.out::println);
 }
@@ -250,14 +249,14 @@ try (Stream<Path> list = Files.list(Path.of("src"))) {
 
 ---
 
-## Complete Example: File Utility Class
+## Complete Example: Robust File Utility Class
 
 ```java
 public final class FileUtils {
 
     private FileUtils() {}
 
-    // ✅ Read JSON config file
+    // ✅ Read JSON config file with validation
     public static String readConfig(String fileName) throws IOException {
         Path configPath = Path.of("config", fileName);
         if (!Files.exists(configPath)) {
@@ -266,17 +265,18 @@ public final class FileUtils {
         return Files.readString(configPath, StandardCharsets.UTF_8);
     }
 
-    // ✅ Safe file write with backup
+    // ✅ Safe file write with atomic backup rotation
     public static void safeWrite(Path target, String content) throws IOException {
         Path backup = target.resolveSibling(target.getFileName() + ".bak");
         if (Files.exists(target)) {
+        	// Copy existing target to backup atomically or with replace
             Files.copy(target, backup, StandardCopyOption.REPLACE_EXISTING);
         }
         Files.writeString(target, content, StandardCharsets.UTF_8,
             StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    // ✅ Recursively delete a directory
+    // ✅ Recursively delete a directory safely (post-order traversal)
     public static void deleteRecursively(Path directory) throws IOException {
         if (!Files.exists(directory)) return;
         try (Stream<Path> walk = Files.walk(directory)) {
@@ -292,14 +292,24 @@ public final class FileUtils {
 
 ---
 
-## Key Takeaways
+## ⚠️ Gotchas
 
-1. **Prefer `java.nio.file.Path`** and `Files` over legacy `java.io.File`
-2. **`Files.readString()`** and **`Files.writeString()`** (Java 11+) are the simplest way to handle text files
-3. **`Files.lines()`** provides lazy, memory-efficient reading for large files
-4. **Always use try-with-resources** for streams and readers to prevent resource leaks
-5. **Specify `StandardCharsets.UTF_8`** explicitly when reading/writing text
+- **Resource Leaks from Unclosed File Streams / Streams**: Methods like `Files.lines()`, `Files.walk()`, `Files.list()`, and `Files.find()` return a `Stream<Path>` that wraps underlying native directory streams. Failing to wrap them in a try-with-resources block or calling `close()` causes open file descriptor leaks at the OS level, eventually leading to `Too many open files` errors.
+- **Race Conditions in `Files.exists()` Checks**: Checking `if (Files.exists(path))` followed by `Files.createFile(path)` is non-atomic. Between the existence check and creation, another thread or process may create the file, resulting in a `FileAlreadyExistsException`. Use `StandardOpenOption.CREATE_NEW` or handle exceptions defensively instead of pre-checking.
+- **Incomplete Exception Context in Legacy `java.io.File`**: Legacy `java.io.File` methods return `false` or `null` on failure (e.g., `file.delete()` or `file.mkdir()`) rather than throwing descriptive exceptions (`NoSuchFileException`, `AccessDeniedException`, `FileSystemException`). NIO.2 `Files` methods provide specific subclassed `IOException` instances containing exact OS error codes and path diagnostics.
+- **To-Path Conversion Quirks on Absolute/Relative Paths**: Converting between `java.io.File` and `java.nio.file.Path` via `file.toPath()` or `path.toFile()` works seamlessly, but `Path.toAbsolutePath()` resolves against the current working directory at runtime, which can cause subtle bugs in multi-threaded environments or unit tests that modify the working directory.
+- **Symbolic Link Traversal Traps**: When using `Files.walk()` or `Files.find()`, default options do not follow symbolic links. However, if configured with `FileVisitOption.FOLLOW_LINKS`, circular symbolic links (symlinks pointing to parent directories) cause infinite recursion and `StackOverflowError` or `OutOfMemoryError`.
 
 ---
 
-[← Previous: Q1 - Byte vs Character Streams](./q01-byte-vs-character-streams.md) | [Next: Q3 - BufferedReader and BufferedWriter →](./q03-buffered-reader-writer.md)
+## Key Takeaways
+
+1. **Prefer `java.nio.file.Path`** and `Files` over legacy `java.io.File` for all modern applications
+2. **`Files.readString()`** and **`Files.writeString()`** (Java 11+) provide the cleanest APIs for text file I/O
+3. **`Files.lines()`** and `Files.walk()` return streams that **must be closed** via try-with-resources to prevent file descriptor leaks
+4. **`StandardCopyOption.ATOMIC_MOVE`** guarantees zero-downtime file replacement on supported operating systems
+5. **Always specify `StandardCharsets.UTF_8`** explicitly when reading/writing text files
+
+---
+
+[← Previous: Q1 - Byte vs Character Streams](./01-byte-vs-character-streams.md) | [Next: Q3 - BufferedReader and BufferedWriter →](./03-buffered-reader-writer.md)

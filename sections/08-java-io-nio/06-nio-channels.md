@@ -5,26 +5,27 @@
 ---
 
 ## Question
-What are NIO Channels? How do they differ from traditional I/O streams?
+What are NIO Channels? How do they differ from traditional `java.io` streams, and how do components like `FileChannel`, `SocketChannel`, and zero-copy transfers operate?
 
 ---
 
 ## Answer
 
-**Channels** are the core abstraction of Java NIO (`java.nio.channels`). Unlike streams (which are unidirectional and blocking), channels are **bidirectional**, can be **non-blocking**, and work with **Buffers** for data transfer.
+**Channels** are the foundational high-performance abstraction introduced in Java NIO (`java.nio.channels`). Unlike traditional streams (which are unidirectional, stream-oriented, and strictly blocking), channels are **bidirectional**, operate directly with memory **Buffers**, and support both **non-blocking I/O** and **multiplexed selectors**.
 
 ---
 
 ## Streams vs Channels
 
-| Feature | Streams (java.io) | Channels (java.nio) |
-|---------|-------------------|---------------------|
-| Direction | Unidirectional (read OR write) | Bidirectional (read AND write) |
-| Blocking | Always blocking | Blocking or non-blocking |
-| Data transfer | Byte/char at a time | Buffer-based (bulk transfer) |
-| Scatter/Gather | Not supported | Supported |
-| Memory-mapped I/O | Not supported | Supported |
-| Selectors | Not supported | Supported (multiplexed I/O) |
+| Feature | Streams (`java.io`) | Channels (`java.nio`) |
+|---------|---------------------|-----------------------|
+| Direction | Unidirectional (either InputStream OR OutputStream) | Bidirectional (read AND write on the same channel) |
+| Blocking Model | Always blocking | Can be configured as blocking or non-blocking |
+| Data Unit | Byte-at-a-time or char-at-a-time | Bulk transfer via `ByteBuffer` |
+| Multiplexing | Not supported | Supported via `Selector` (Epoll/Kqueue underlying) |
+| Scatter / Gather | Not supported | Supported natively |
+| Zero-Copy OS Transfers | Not supported | Supported via `transferTo()` / `transferFrom()` |
+| File Locking | Limited/Native file locks | Fine-grained file and region locking (`FileLock`) |
 
 ---
 
@@ -35,10 +36,10 @@ Channel (interface)
 ├── ReadableByteChannel
 ├── WritableByteChannel
 ├── ByteChannel (read + write)
-│   ├── FileChannel           — file I/O
-│   ├── SocketChannel         — TCP client
-│   ├── ServerSocketChannel   — TCP server
-│   └── DatagramChannel       — UDP
+│   ├── FileChannel           — file I/O and memory mapping
+│   ├── SocketChannel         — TCP client socket
+│   ├── ServerSocketChannel   — TCP server socket
+│   └── DatagramChannel       — UDP datagram socket
 └── AsynchronousChannel
     ├── AsynchronousFileChannel
     └── AsynchronousSocketChannel
@@ -46,48 +47,36 @@ Channel (interface)
 
 ---
 
-## FileChannel
+## FileChannel Operations
 
 ```java
-// ✅ Read from a file using FileChannel
+// ✅ Read from a file using FileChannel and ByteBuffer
 try (FileChannel channel = FileChannel.open(
         Path.of("data.txt"), StandardOpenOption.READ)) {
 
     ByteBuffer buffer = ByteBuffer.allocate(1024);
     int bytesRead;
     while ((bytesRead = channel.read(buffer)) != -1) {
-        buffer.flip();  // switch to read mode
+        buffer.flip();  // switch buffer from write mode to read mode
         while (buffer.hasRemaining()) {
             System.out.print((char) buffer.get());
         }
-        buffer.clear();  // switch back to write mode
+        buffer.clear();  // reset buffer for next write cycle
     }
 }
 
-// ✅ Write to a file using FileChannel
-try (FileChannel channel = FileChannel.open(
-        Path.of("output.txt"),
-        StandardOpenOption.CREATE,
-        StandardOpenOption.WRITE,
-        StandardOpenOption.TRUNCATE_EXISTING)) {
-
-    String data = "Hello, NIO Channels!";
-    ByteBuffer buffer = ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8));
-    channel.write(buffer);
-}
-
-// ✅ Random access: read/write at specific positions
+// ✅ Random Access: read/write at precise file offsets
 try (FileChannel channel = FileChannel.open(
         Path.of("data.bin"), StandardOpenOption.READ, StandardOpenOption.WRITE)) {
 
     ByteBuffer buffer = ByteBuffer.allocate(4);
 
-    // Read 4 bytes at position 100
+    // Read 4 bytes starting exactly at position 100
     channel.read(buffer, 100);
     buffer.flip();
     int value = buffer.getInt();
 
-    // Write 4 bytes at position 200
+    // Write 4 bytes at position 200 without altering channel position pointer
     buffer.clear();
     buffer.putInt(42);
     buffer.flip();
@@ -99,133 +88,61 @@ try (FileChannel channel = FileChannel.open(
 
 ## Efficient File Copy: transferTo / transferFrom
 
+`FileChannel` leverages OS-level zero-copy mechanisms (such as `sendfile` on Linux/Unix) to transfer data directly between kernel space file descriptors without bouncing through user-space JVM memory buffers.
+
 ```java
-// ✅ Zero-copy file transfer (OS-level optimization)
+// ✅ Zero-copy file transfer with loop guard for partial transfers
 public static void copyFile(Path source, Path target) throws IOException {
     try (FileChannel srcChannel = FileChannel.open(source, StandardOpenOption.READ);
          FileChannel destChannel = FileChannel.open(target,
-             StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+             StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
 
         long transferred = 0;
         long size = srcChannel.size();
-        // transferTo may not transfer all bytes in one call
+        
+        // transferTo may not transfer all bytes in a single system call
         while (transferred < size) {
-            transferred += srcChannel.transferTo(transferred, size - transferred, destChannel);
+            long count = srcChannel.transferTo(transferred, size - transferred, destChannel);
+            if (count == 0) break;
+            transferred += count;
         }
-    }
-}
-
-// ✅ Alternative: transferFrom
-public static void copyFileFrom(Path source, Path target) throws IOException {
-    try (FileChannel srcChannel = FileChannel.open(source, StandardOpenOption.READ);
-         FileChannel destChannel = FileChannel.open(target,
-             StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-
-        destChannel.transferFrom(srcChannel, 0, srcChannel.size());
     }
 }
 ```
 
 ---
 
-## SocketChannel (TCP Client)
+## SocketChannel (Non-Blocking TCP Client)
 
 ```java
-// ✅ Non-blocking TCP client
-public static void tcpClient() throws IOException {
+public static void nonBlockingClient() throws IOException {
     try (SocketChannel channel = SocketChannel.open()) {
-        channel.configureBlocking(false);  // non-blocking mode
+        channel.configureBlocking(false);  // enable non-blocking mode
 
-        channel.connect(new InetSocketAddress("localhost", 8080));
+        // Initiation returns immediately; connection proceeds asynchronously
+        boolean connected = channel.connect(new InetSocketAddress("localhost", 8080));
 
-        // Wait for connection to complete (non-blocking)
-        while (!channel.finishConnect()) {
-            // do other work while connecting...
+        if (!connected) {
+            while (!channel.finishConnect()) {
+                // Perform other background tasks while TCP handshake completes
+                Thread.yield();
+            }
         }
 
-        // Send data
+        // Send HTTP request
         ByteBuffer writeBuffer = ByteBuffer.wrap(
-            "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes());
+            "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8));
         while (writeBuffer.hasRemaining()) {
             channel.write(writeBuffer);
         }
 
-        // Receive data
+        // Read response non-blockingly
         ByteBuffer readBuffer = ByteBuffer.allocate(4096);
         int bytesRead = channel.read(readBuffer);
         if (bytesRead > 0) {
             readBuffer.flip();
-            String response = StandardCharsets.UTF_8.decode(readBuffer).toString();
-            System.out.println(response);
+            System.out.println(StandardCharsets.UTF_8.decode(readBuffer));
         }
-    }
-}
-```
-
----
-
-## ServerSocketChannel (TCP Server)
-
-```java
-// ✅ Simple non-blocking TCP server
-public static void tcpServer() throws IOException {
-    try (ServerSocketChannel serverChannel = ServerSocketChannel.open()) {
-        serverChannel.bind(new InetSocketAddress(8080));
-        serverChannel.configureBlocking(false);
-
-        System.out.println("Server listening on port 8080");
-
-        while (true) {
-            SocketChannel clientChannel = serverChannel.accept();
-            if (clientChannel != null) {
-                // Handle client connection
-                clientChannel.configureBlocking(false);
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
-                int read = clientChannel.read(buffer);
-                if (read > 0) {
-                    buffer.flip();
-                    String request = StandardCharsets.UTF_8.decode(buffer).toString();
-                    System.out.println("Received: " + request);
-
-                    // Send response
-                    ByteBuffer response = ByteBuffer.wrap(
-                        "HTTP/1.1 200 OK\r\n\r\nHello!".getBytes());
-                    clientChannel.write(response);
-                }
-                clientChannel.close();
-            }
-            Thread.sleep(100); // avoid busy-wait (use Selector instead)
-        }
-    } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-    }
-}
-```
-
----
-
-## DatagramChannel (UDP)
-
-```java
-// ✅ UDP sender
-public static void udpSend() throws IOException {
-    try (DatagramChannel channel = DatagramChannel.open()) {
-        String message = "Hello, UDP!";
-        ByteBuffer buffer = ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8));
-        channel.send(buffer, new InetSocketAddress("localhost", 9999));
-    }
-}
-
-// ✅ UDP receiver
-public static void udpReceive() throws IOException {
-    try (DatagramChannel channel = DatagramChannel.open()) {
-        channel.bind(new InetSocketAddress(9999));
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-
-        SocketAddress sender = channel.receive(buffer);
-        buffer.flip();
-        String message = StandardCharsets.UTF_8.decode(buffer).toString();
-        System.out.println("From " + sender + ": " + message);
     }
 }
 ```
@@ -234,54 +151,22 @@ public static void udpReceive() throws IOException {
 
 ## Scatter/Gather I/O
 
-**Scatter** reads from one channel into multiple buffers. **Gather** writes from multiple buffers into one channel.
+- **Scatter Read**: Reads a single channel payload across multiple buffers in sequence (ideal for structured packets with fixed headers and variable bodies).
+- **Gather Write**: Writes multiple buffers into a single channel write operation atomically.
 
 ```java
-// ✅ Scatter read: read a message with fixed-length header + variable body
-try (FileChannel channel = FileChannel.open(Path.of("message.bin"), StandardOpenOption.READ)) {
-
-    ByteBuffer header = ByteBuffer.allocate(128);   // first 128 bytes → header
-    ByteBuffer body = ByteBuffer.allocate(4096);     // rest → body
-
-    ByteBuffer[] buffers = {header, body};
-    long bytesRead = channel.read(buffers);  // scatter into multiple buffers
-
-    header.flip();
-    body.flip();
-    // header contains first 128 bytes, body contains the rest
+// ✅ Scatter Read: Header (128 bytes) + Body (4096 bytes)
+try (FileChannel channel = FileChannel.open(Path.of("packet.bin"), StandardOpenOption.READ)) {
+    ByteBuffer headerBuffer = ByteBuffer.allocate(128);
+    ByteBuffer bodyBuffer = ByteBuffer.allocate(4096);
+    
+    ByteBuffer[] buffers = { headerBuffer, bodyBuffer };
+    
+    long totalBytesRead = channel.read(buffers);  // fills header fully before filling body
+    
+    headerBuffer.flip();
+    bodyBuffer.flip();
 }
-
-// ✅ Gather write: write header + body from separate buffers
-try (FileChannel channel = FileChannel.open(Path.of("output.bin"),
-        StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-
-    ByteBuffer header = ByteBuffer.wrap(new byte[128]);
-    ByteBuffer body = ByteBuffer.wrap("Body content".getBytes(StandardCharsets.UTF_8));
-
-    ByteBuffer[] buffers = {header, body};
-    long bytesWritten = channel.write(buffers);  // gather from multiple buffers
-}
-```
-
----
-
-## Blocking vs Non-Blocking Mode
-
-```java
-// ✅ Blocking mode (default) — thread blocks until I/O completes
-SocketChannel blocking = SocketChannel.open();
-blocking.configureBlocking(true);  // default
-blocking.read(buffer);  // blocks until data is available
-
-// ✅ Non-blocking mode — returns immediately
-SocketChannel nonBlocking = SocketChannel.open();
-nonBlocking.configureBlocking(false);
-int bytesRead = nonBlocking.read(buffer);
-// bytesRead == 0 if no data available (does NOT block)
-// bytesRead == -1 if connection closed
-
-// Note: FileChannel does NOT support non-blocking mode
-// FileChannel is always blocking
 ```
 
 ---
@@ -289,42 +174,27 @@ int bytesRead = nonBlocking.read(buffer);
 ## File Locking
 
 ```java
-// ✅ Exclusive file lock (prevents other processes from accessing)
+// ✅ Exclusive file region locking across OS processes
 try (FileChannel channel = FileChannel.open(
-        Path.of("shared.dat"), StandardOpenOption.WRITE);
-     FileLock lock = channel.lock()) {  // blocks until lock acquired
+        Path.of("app.lock"), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+     FileLock lock = channel.lock(0, Long.MAX_VALUE, false)) { // exclusive lock
 
-    ByteBuffer buffer = ByteBuffer.wrap("Exclusive data".getBytes());
-    channel.write(buffer);
-}  // lock released on close
-
-// ✅ Try-lock (non-blocking)
-try (FileChannel channel = FileChannel.open(
-        Path.of("shared.dat"), StandardOpenOption.WRITE)) {
-
-    FileLock lock = channel.tryLock();  // returns null if can't acquire
-    if (lock != null) {
-        try {
-            // write safely
-        } finally {
-            lock.release();
-        }
-    } else {
-        System.out.println("File is locked by another process");
-    }
-}
+    // Critical section: safely update state file
+    ByteBuffer buf = ByteBuffer.wrap("ACTIVE_LOCK".getBytes(StandardCharsets.UTF_8));
+    channel.write(buf, 0);
+    
+} // FileLock is AutoCloseable; closing channel or lock releases it automatically
 ```
 
 ---
 
-## Key Takeaways
+## ⚠️ Gotchas
 
-1. **Channels are bidirectional** — a single `FileChannel` can read and write
-2. **`transferTo`/`transferFrom`** enable zero-copy file transfers at the OS level
-3. **Non-blocking mode** allows channels to return immediately when no data is available
-4. **Scatter/Gather** enables reading/writing structured data with multiple buffers
-5. **`FileChannel`** is always blocking; use `SocketChannel` for non-blocking network I/O
-6. **File locking** prevents concurrent access from multiple processes
+1. **`FileChannel` Does Not Support Non-Blocking Mode**: Developers often assume all NIO channels are non-blocking. However, `FileChannel` is always tied to blocking file system operations. Attempting to call `fileChannel.configureBlocking(false)` throws an `IllegalBlockingModeException`.
+2. **Partial Transfers in `transferTo()`**: `FileChannel.transferTo()` is not guaranteed to transfer all requested bytes in a single invocation due to kernel buffer limits or OS limits (e.g., 2GB chunk ceilings). Failing to wrap `transferTo` in a `while` loop tracking total bytes transferred results in truncated files.
+3. **Busy-Wait CPU Spikes in Non-Blocking Loops**: When configuring `SocketChannel` or `ServerSocketChannel` to non-blocking mode without a `Selector`, checking `.accept()` or `.read()` in a tight `while (true)` loop causes 100% CPU core utilization. Always use a `Selector` or appropriate backoff/sleep timers.
+4. **Direct Buffer Memory Leaks and GC Pressure**: Allocating off-heap memory via `ByteBuffer.allocateDirect()` bypasses the JVM garbage collector heap. If direct buffers are allocated rapidly in high-throughput loops without explicit cleanup or relying on phantom references, native memory can leak, triggering native `OutOfMemoryError`.
+5. **Selector Epoll Bug (Busy Polling / 100% CPU)**: On older Linux kernels and JDK versions, Java's NIO `Selector` implementation can suffer from the epoll null-dereference / busy-poll bug where `selector.select()` returns immediately with zero selected keys even when no events occurred, spinning the CPU indefinitely. Explicitly setting `-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.PollSelectorProvider` acts as a fallback mitigation.
 
 ---
 

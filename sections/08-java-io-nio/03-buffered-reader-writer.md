@@ -5,13 +5,13 @@
 ---
 
 ## Question
-How do BufferedReader and BufferedWriter work? Why is buffering important for I/O performance?
+How do `BufferedReader` and `BufferedWriter` work under the hood? Why is buffering essential for I/O performance, and what are the architectural patterns used in stream chaining?
 
 ---
 
 ## Answer
 
-Buffered streams wrap unbuffered streams and maintain an internal buffer, reducing the number of native I/O calls. Instead of reading/writing one byte or character at a time, data is transferred in larger chunks.
+Buffered streams wrap unbuffered streams and maintain an internal memory buffer (defaulting to 8KB / 8192 units). Instead of performing a costly system call (context switch from user space to kernel space) for every single byte or character read/written from disk or network, data is transferred in large, efficient blocks.
 
 ---
 
@@ -19,25 +19,28 @@ Buffered streams wrap unbuffered streams and maintain an internal buffer, reduci
 
 ```
 Without Buffering:
-  App → OS call → Disk (per byte/char) → very slow
+  App ──(1 byte)──► OS Syscall ──► Disk / Network (per byte/char) ──► Extremely Slow
 
-With Buffering (default 8KB):
-  App → Internal Buffer (8192 bytes) → OS call → Disk (per chunk) → much faster
+With Buffering (Default 8KB Buffer):
+  App ──(1 char)──► Internal Memory Buffer (8192 slots) 
+                          │ (Flushes / Fills once buffer is exhausted)
+                          ▼
+                    OS Syscall ──► Disk / Network (per 8KB block) ──► High Throughput
 ```
 
 ```java
-// ❌ Anti-pattern: Unbuffered — one OS call per byte
+// ❌ Anti-pattern: Unbuffered — one OS syscall per byte read
 try (FileInputStream fis = new FileInputStream("large.dat")) {
     int b;
-    while ((b = fis.read()) != -1) {  // OS call for EVERY byte!
+    while ((b = fis.read()) != -1) {  // Triggers OS syscall for EVERY byte!
         // process byte
     }
 }
 
-// ✅ Best practice: Buffered — one OS call per 8KB chunk
+// ✅ Best practice: Buffered — one OS syscall per 8KB chunk
 try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream("large.dat"))) {
     int b;
-    while ((b = bis.read()) != -1) {  // reads from internal buffer
+    while ((b = bis.read()) != -1) {  // Reads from memory buffer, hits disk every 8KB
         // process byte
     }
 }
@@ -59,7 +62,7 @@ try (BufferedReader br = new BufferedReader(
     }
 }
 
-// ✅ Modern alternative: Files.newBufferedReader()
+// ✅ Modern alternative: Files.newBufferedReader() returning Stream<String>
 try (BufferedReader br = Files.newBufferedReader(
         Path.of("data.txt"), StandardCharsets.UTF_8)) {
     br.lines()  // returns Stream<String>
@@ -71,14 +74,14 @@ try (BufferedReader br = Files.newBufferedReader(
 ### Custom Buffer Size
 
 ```java
-// Default buffer size: 8192 characters (8KB)
-BufferedReader br = new BufferedReader(new FileReader("file.txt"));
+// Default buffer size: 8192 characters (16 KB in memory for chars)
+BufferedReader br1 = new BufferedReader(new FileReader("file.txt"));
 
-// ✅ Custom buffer size for very large files
-BufferedReader br = new BufferedReader(new FileReader("huge.txt"), 65536); // 64KB buffer
+// ✅ Custom buffer size for very large files or high-throughput log processing
+BufferedReader br2 = new BufferedReader(new FileReader("huge.txt"), 65536); // 64KB buffer
 
-// ✅ Smaller buffer for many small files
-BufferedReader br = new BufferedReader(new FileReader("small.txt"), 1024); // 1KB buffer
+// ✅ Smaller buffer for memory-constrained environments processing many small files
+BufferedReader br3 = new BufferedReader(new FileReader("small.txt"), 1024); // 1KB buffer
 ```
 
 ### Key Methods
@@ -87,28 +90,28 @@ BufferedReader br = new BufferedReader(new FileReader("small.txt"), 1024); // 1K
 try (BufferedReader br = new BufferedReader(
         new FileReader("data.txt", StandardCharsets.UTF_8))) {
 
-    // readLine() — reads one line (excludes line terminator), null at EOF
+    // readLine() — reads one line (excludes line terminator \n, \r\n), returns null at EOF
     String line = br.readLine();
 
-    // read() — reads a single character, -1 at EOF
+    // read() — reads a single character (returns int 0-65535, or -1 at EOF)
     int ch = br.read();
 
-    // read(char[], off, len) — reads chars into array
+    // read(char[], off, len) — reads chars into array portion
     char[] buffer = new char[256];
     int charsRead = br.read(buffer, 0, buffer.length);
 
-    // ready() — checks if stream is ready to be read
+    // ready() — checks if stream is guaranteed ready to be read without blocking
     boolean canRead = br.ready();
 
-    // skip(n) — skips n characters
+    // skip(n) — skips n characters in the stream
     long skipped = br.skip(100);
 
-    // mark(readAheadLimit) + reset() — for re-reading
-    br.mark(512);       // mark current position
+    // mark(readAheadLimit) + reset() — allows re-reading within buffer capacity
+    br.mark(512);       // mark current position with read-ahead limit
     br.readLine();      // read ahead
-    br.reset();         // go back to marked position
+    br.reset();         // rewind stream back to marked position
 
-    // lines() — returns Stream<String> (Java 8+)
+    // lines() — returns sequential Stream<String> (Java 8+)
     Stream<String> lineStream = br.lines();
 }
 ```
@@ -120,11 +123,11 @@ try (BufferedReader br = new BufferedReader(
 ### Basic Usage
 
 ```java
-// ✅ Write text to a file
+// ✅ Write text to a file with explicit charset
 try (BufferedWriter bw = new BufferedWriter(
         new FileWriter("output.txt", StandardCharsets.UTF_8))) {
     bw.write("First line");
-    bw.newLine();           // platform-independent line separator
+    bw.newLine();           // writes platform-independent line separator
     bw.write("Second line");
     bw.newLine();
 }
@@ -144,7 +147,7 @@ try (BufferedWriter bw = Files.newBufferedWriter(
 try (BufferedWriter bw = new BufferedWriter(
         new FileWriter("log.txt", StandardCharsets.UTF_8))) {
 
-    // write(String) — writes a string
+    // write(String) — writes a string to buffer
     bw.write("Log entry");
 
     // write(String, off, len) — writes a substring
@@ -157,10 +160,10 @@ try (BufferedWriter bw = new BufferedWriter(
     char[] data = {'H', 'i', '!'};
     bw.write(data, 0, data.length);
 
-    // newLine() — writes platform-specific line separator
-    bw.newLine();  // "\r\n" on Windows, "\n" on Unix
+    // newLine() — writes platform-specific line separator (\r\n on Windows, \n on Unix/macOS)
+    bw.newLine();
 
-    // flush() — forces buffered data to be written
+    // flush() — forces buffered content to be written to underlying stream and OS
     bw.flush();
 }
 ```
@@ -170,7 +173,7 @@ try (BufferedWriter bw = new BufferedWriter(
 ## BufferedInputStream / BufferedOutputStream
 
 ```java
-// ✅ Buffered byte stream copy
+// ✅ High-performance buffered byte stream file copy
 public static void copyFile(Path source, Path target) throws IOException {
     try (BufferedInputStream bis = new BufferedInputStream(
                 new FileInputStream(source.toFile()));
@@ -182,66 +185,66 @@ public static void copyFile(Path source, Path target) throws IOException {
         while ((bytesRead = bis.read(buffer)) != -1) {
             bos.write(buffer, 0, bytesRead);
         }
-    } // auto-flush and close
+    } // auto-flushes and closes underlying streams via try-with-resources
 }
 ```
 
 ---
 
-## Decorator Pattern (Stream Chaining)
+## Decorator Pattern & Stream Chaining
 
-Buffered streams use the **Decorator Pattern** — wrapping streams to add functionality.
+Buffered streams are classic examples of the **Decorator Pattern**. They wrap an underlying stream to add buffering and enhanced capabilities without modifying the underlying class hierarchy.
 
 ```java
-// ✅ Chaining streams: raw → buffered → data
-DataInputStream dis = new DataInputStream(      // adds typed reads
-    new BufferedInputStream(                     // adds buffering
-        new FileInputStream("data.bin")          // raw byte stream
+// ✅ Chaining streams: raw byte stream → buffered byte stream → data stream (typed primitives)
+DataInputStream dis = new DataInputStream(      
+    new BufferedInputStream(                     
+        new FileInputStream("data.bin")          
     )
 );
 
-// ✅ Chaining writers: raw → buffered → print
-PrintWriter pw = new PrintWriter(               // adds println/printf
-    new BufferedWriter(                          // adds buffering
-        new FileWriter("log.txt")               // raw char stream
+// ✅ Chaining writers: raw char stream → buffered char stream → print writer (formatting)
+PrintWriter pw = new PrintWriter(               
+    new BufferedWriter(                          
+        new FileWriter("log.txt")               
     )
 );
 
-// ✅ Bridge chain: byte stream → char stream → buffered
-BufferedReader br = new BufferedReader(          // adds buffering + readLine
-    new InputStreamReader(                       // byte-to-char bridge
-        new FileInputStream("data.txt"),         // raw byte stream
-        StandardCharsets.UTF_8                   // explicit encoding
+// ✅ Bridge chain: byte stream → charset decoder bridge → buffered character stream
+BufferedReader br = new BufferedReader(          
+    new InputStreamReader(                       
+        new FileInputStream("data.txt"),         
+        StandardCharsets.UTF_8                   
     )
 );
 
-// ✅ Console input reading
+// ✅ Standard console input reader chain
 BufferedReader console = new BufferedReader(
     new InputStreamReader(System.in, StandardCharsets.UTF_8)
 );
 String userInput = console.readLine();
 ```
 
-### Decorator Chain Diagram
+### Decorator Chain Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│  PrintWriter (formatting: println, printf)       │
-│  ┌────────────────────────────────────────────┐  │
-│  │  BufferedWriter (8KB buffer, newLine)       │  │
-│  │  ┌──────────────────────────────────────┐  │  │
-│  │  │  OutputStreamWriter (char → byte)     │  │  │
-│  │  │  ┌────────────────────────────────┐  │  │  │
-│  │  │  │  FileOutputStream (raw bytes)   │  │  │  │
-│  │  │  └────────────────────────────────┘  │  │  │
-│  │  └──────────────────────────────────────┘  │  │
-│  └────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  PrintWriter (Formatting: println, printf, auto-flush)          │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  BufferedWriter (8KB character buffer, newLine support)   │  │
+│  │  ┌─────────────────────────────────────────────────────┐  │  │
+│  │  │  OutputStreamWriter (Char ──► Byte character encoder)│  │  │
+│  │  │  ┌───────────────────────────────────────────────┐  │  │  │
+│  │  │  │  FileOutputStream (Raw OS byte stream)        │  │  │  │
+│  │  │  └───────────────────────────────────────────────┘  │  │  │
+│  │  └─────────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Performance Comparison
+## Performance Benchmark Comparison
 
 ```java
 public class BufferingBenchmark {
@@ -249,12 +252,12 @@ public class BufferingBenchmark {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("test-1mb.txt");
 
-        // Generate test file
+        // Generate 1MB test file
         byte[] data = new byte[1_000_000];
         Arrays.fill(data, (byte) 'A');
         Files.write(file, data);
 
-        // ❌ Unbuffered read: ~800ms for 1MB
+        // ❌ Unbuffered read: ~800ms for 1MB (1M individual OS context switches)
         long start = System.nanoTime();
         try (FileInputStream fis = new FileInputStream(file.toFile())) {
             while (fis.read() != -1) {}
@@ -262,7 +265,7 @@ public class BufferingBenchmark {
         System.out.printf("Unbuffered: %d ms%n",
             (System.nanoTime() - start) / 1_000_000);
 
-        // ✅ Buffered read: ~5ms for 1MB
+        // ✅ Buffered read: ~5ms for 1MB (~122 block reads)
         start = System.nanoTime();
         try (BufferedInputStream bis = new BufferedInputStream(
                 new FileInputStream(file.toFile()))) {
@@ -281,37 +284,46 @@ public class BufferingBenchmark {
 ## Common Anti-Patterns
 
 ```java
-// ❌ Double buffering — unnecessary
+// ❌ Double buffering — redundant and wastes memory (wrapping a BufferedReader inside another BufferedReader)
 BufferedReader br = new BufferedReader(
     new BufferedReader(new FileReader("file.txt")));
 
-// ❌ Forgetting to flush before close (auto-close handles this)
+// ❌ Forgetting to handle unflushed data when bypassing try-with-resources
 BufferedWriter bw = new BufferedWriter(new FileWriter("out.txt"));
 bw.write("data");
-// bw.flush();  — not needed if using try-with-resources
+// If exception occurs before close() without try-with-resources, data in the 8KB buffer is lost!
 
-// ❌ Not using try-with-resources
+// ❌ Not using try-with-resources on decorator chains
 BufferedReader br = new BufferedReader(new FileReader("file.txt"));
 String line = br.readLine();
-// forgot br.close() — resource leak!
+// Forgot br.close() — causes persistent file handle leaks in the OS process table
 
-// ✅ Always use try-with-resources
-try (BufferedReader br2 = new BufferedReader(new FileReader("file.txt"))) {
+// ✅ Correct approach: Always use try-with-resources
+try (BufferedReader br2 = new BufferedReader(new FileReader("file.txt", StandardCharsets.UTF_8))) {
     String line2 = br2.readLine();
 }
 ```
 
 ---
 
-## Key Takeaways
+## ⚠️ Gotchas
 
-1. **Buffering reduces OS calls** — internal buffer (default 8KB) dramatically improves performance
-2. **`readLine()`** is only available on `BufferedReader`, not basic `Reader`
-3. **`newLine()`** writes platform-independent line separators
-4. **Decorator pattern** enables flexible stream chaining (raw → buffered → formatted)
-5. **`Files.newBufferedReader()`** / **`Files.newBufferedWriter()`** are the modern preferred constructors
-6. **Always use try-with-resources** to prevent resource leaks
+- **Data Loss on BufferedWriter Without Flush/Close**: `BufferedWriter` accumulates written data in its internal memory buffer. If an application crashes, terminates abruptly, or fails to call `close()` or `flush()`, any data currently residing inside the buffer (less than 8KB) is never written to disk or network, resulting in truncated output files.
+- **`mark()` and `reset()` Buffer Limitations**: `BufferedReader.mark(int readAheadLimit)` relies on its internal buffer. If the number of characters read between `mark()` and `reset()` exceeds `readAheadLimit` (or exceeds the total capacity of the internal buffer), `mark` is invalidated and calling `reset()` throws an `IOException` (`Stream reset failed`).
+- **Memory Overhead of Excessive Buffer Sizes**: While setting a 1MB buffer (`new BufferedReader(reader, 1024 * 1024)`) can optimize high-throughput reads, allocating oversized buffers across thousands of concurrent network connections or file workers in a multi-threaded server causes severe heap memory pressure and frequent Garbage Collection (GC) pauses.
+- **Blocking Behavior of `readLine()` on Network Sockets**: When `BufferedReader.readLine()` is called on a socket input stream, the thread blocks indefinitely until a newline character (`\n` or `\r\n`) or EOF is received. If a malicious or hanging client sends data without a newline terminator, the server thread hangs forever, risking thread-pool exhaustion.
+- **Hidden Double Buffering in Framework Wrappers**: Wrapping an already-buffered stream (such as passing a `BufferedInputStream` into another `BufferedInputStream` or chaining multiple buffering decorators) creates redundant buffer allocations, wastes heap memory, and adds unnecessary pointer indirection overhead during every read operation.
 
 ---
 
-[← Previous: Q2 - File I/O](./q02-file-io.md) | [Next: Q4 - Serialization →](./q04-serialization.md)
+## Key Takeaways
+
+1. **Buffering minimizes OS system calls** — internal buffers (default 8KB) reduce expensive user/kernel mode switches
+2. **`readLine()`** is exclusively available on `BufferedReader` and `LineNumberReader`
+3. **`newLine()`** writes platform-agnostic line delimiters (`\r\n` on Windows, `\n` on Unix)
+4. **Decorator pattern** enables flexible, modular stream composition (raw → buffered → formatted)
+5. **Always use try-with-resources** to guarantee proper closure and flushing of all decorators in the chain
+
+---
+
+[← Previous: Q2 - File I/O](./02-file-io.md) | [Next: Q4 - Serialization →](./q04-serialization.md)

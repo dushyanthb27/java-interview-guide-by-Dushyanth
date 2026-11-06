@@ -317,6 +317,16 @@ public final class ProjectFiles {
 
 ---
 
+## ⚠️ Gotchas
+
+- **Resource Leak in Directory Streams (`Files.walk()`, `Files.list()`, `Files.find()`):** Methods like `Files.walk()`, `Files.list()`, and `Files.find()` return a lazy `Stream<Path>` backed by an open file descriptor or directory stream handle. Failing to wrap them in a `try-with-resources` block leaks underlying system file handles, eventually leading to `IOException: Too many open files`.
+- **Absolute vs Relative `resolve()` Trap:** When calling `path.resolve(other)`, if `other` is an absolute path (e.g., `base.resolve("/etc/passwd")`), `resolve()` completely ignores `base` and returns `other`. This is a common bug when concatenating paths dynamically from user-supplied input strings that might accidentally start with a slash (`/`).
+- **TOCTOU Race Conditions (Time-of-Check to Time-of-Use):** Checking `if (Files.exists(path))` before reading or writing is vulnerable to Time-of-Check to Time-of-Use race conditions where another thread or process deletes, moves, or replaces the file between the check and the operation. In modern NIO, prefer attempting the operation directly (e.g., catching `NoSuchFileException` or using `StandardOpenOption`) rather than pre-checking existence.
+- **Symlink Traversal and Infinite Loops:** When traversing directory trees using `Files.walk()`, symbolic links to directories are **not** followed by default unless `FileVisitOption.FOLLOW_LINKS` is explicitly specified. However, enabling `FOLLOW_LINKS` without cycle detection can cause infinite loops if a symbolic link points back to an ancestor directory.
+- **Platform-Specific Path Separators and Normalization:** Constructing paths via string concatenation (e.g., `dir + "/" + file`) breaks cross-platform compatibility between Windows (`\`) and Unix (`/`). Always use `Path.of(dir, file)` or `dir.resolve(file)`. Additionally, relative paths containing `.` or `..` will not match equality checks or resolve correctly until explicitly cleaned using `.normalize()`.
+
+---
+
 ## Key Takeaways
 
 1. **`Path.of()`** (Java 11+) is the preferred way to create paths — replaces `Paths.get()`
