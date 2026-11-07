@@ -15,7 +15,14 @@ Performance optimization requires understanding JVM internals, data structures, 
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | How to tune the JVM for performance? | 🟠 | [q01](./q01-jvm-tuning.md) |
 | 2 | How to optimize garbage collection? | 🟠 | [q02](./q02-gc-optimization.md) |
 | 3 | Memory management optimization techniques | 🟠 | [q03](./q03-memory-management-perf.md) |

@@ -14,7 +14,14 @@ Concurrency is arguably the most challenging topic in Java interviews. This sect
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | What is a thread and why do we need multithreading? | 🟢 | [01-thread-basics.md](./01-thread-basics.md) |
 | 2 | Explain the thread lifecycle and states | 🟢 | [02-thread-lifecycle.md](./02-thread-lifecycle.md) |
 | 3 | What are the different ways to create threads? | 🟢 | [03-creating-threads.md](./03-creating-threads.md) |

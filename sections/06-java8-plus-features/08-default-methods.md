@@ -259,7 +259,14 @@ Default methods are dispatched via `invokevirtual` (same as regular instance met
 
 When a class inherits a default method without overriding it, the JVM creates a **bridge** in the class's vtable (virtual method table) that points to the interface's default implementation. The resolution follows the **most specific** rule at the bytecode level — the compiler determines which default to use and encodes it in the class file. At runtime, `invokevirtual` dispatches just like a regular method call. The `InterfaceName.super.method()` syntax compiles to `invokespecial`, directly targeting the specific interface's default implementation.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

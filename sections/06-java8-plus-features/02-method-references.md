@@ -221,7 +221,14 @@ Method references and equivalent lambdas compile to the **same `invokedynamic` b
 
 Method references use the same `LambdaMetafactory` infrastructure as lambdas. The `invokedynamic` call site is linked to a bootstrap method that generates a lightweight class implementing the target functional interface. For non-capturing method references (static and unbound instance types), the JVM creates a **singleton instance** — no allocation on each use. For capturing references (bound instance like `obj::method`), a new instance is created each time to hold the captured object reference.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

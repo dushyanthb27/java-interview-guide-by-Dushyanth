@@ -280,7 +280,14 @@ Always prefer **primitive specializations** (`IntPredicate`, `LongFunction`, `To
 
 The `@FunctionalInterface` annotation is purely a **compile-time check** — it has no effect on runtime behavior. Any interface with a single abstract method can be used as a lambda target, with or without the annotation. However, the annotation prevents accidental addition of a second abstract method and serves as documentation. Note that methods from `Object` (`toString`, `equals`, `hashCode`) don't count as abstract methods in functional interfaces because every class already inherits their implementation from `Object`.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

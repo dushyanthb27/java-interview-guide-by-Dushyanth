@@ -379,6 +379,13 @@ Interviewers test these specific areas:
 - [Exception Best Practices →](./06-exception-best-practices.md)
 - [Exception Chaining →](./08-exception-chaining.md)
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 [← Back to Section Index](./README.md) · [Previous: Try-With-Resources ←](./04-try-with-resources.md) · [Next: Exception Best Practices →](./06-exception-best-practices.md)

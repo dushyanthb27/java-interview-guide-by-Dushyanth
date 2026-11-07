@@ -321,7 +321,14 @@ Use `Collectors.toUnmodifiableList()` or `Stream.toList()` (Java 16+) when you d
 
 The `Collector` interface is the bridge between the Stream API's `collect()` method and the reduction logic. For parallel streams, each thread gets its own accumulator from the supplier, fills it independently, and the combiner merges them. The `IDENTITY_FINISH` characteristic allows the JVM to skip the finisher step entirely — the accumulator itself is cast to the result type. This is why `Collectors.toList()` has `IDENTITY_FINISH` — the internal `ArrayList` accumulator is the final result, requiring no transformation.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

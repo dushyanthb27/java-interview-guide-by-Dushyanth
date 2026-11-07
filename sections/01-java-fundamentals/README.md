@@ -13,7 +13,14 @@ Core Java fundamentals form the foundation of every Java interview. This section
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | What are the key differences between Java and other popular languages? | 🟢 | [q01](./q01-java-vs-other-languages.md) |
 | 2 | Explain JVM, JRE, and JDK - how do they relate to each other? | 🟢 | [q02](./q02-jvm-jre-jdk.md) |
 | 3 | Explain Java's primitive data types and their wrapper classes | 🟢 | [q03](./q03-data-types-primitives.md) |

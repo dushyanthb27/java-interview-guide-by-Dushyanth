@@ -293,7 +293,14 @@ Each `Optional.of()` or `Optional.ofNullable()` with a non-null value allocates 
 
 `Optional` is a **value-based class** — its identity should not be relied upon. Do not use `==` to compare Optionals, do not synchronize on them, and do not serialize them. Java's Project Valhalla plans to make Optional a **value type** (inline class), which would eliminate the heap allocation overhead entirely. Until then, Optional has the same memory footprint as any small object: 16 bytes header + 8 bytes reference field = 24 bytes per instance.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

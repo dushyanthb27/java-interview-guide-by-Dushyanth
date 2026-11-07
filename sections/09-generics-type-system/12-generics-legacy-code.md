@@ -125,6 +125,13 @@ List<String> protectedList = Collections.checkedList(new ArrayList<>(), String.c
 - `Collections.checkedList()` enforces **runtime** type checks to catch heap pollution early.
 - `@SuppressWarnings("unchecked")` must always be scoped as narrowly as possible.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 [← Q11: Generic Arrays](./q11-generic-arrays.md) | [Next: Q13 - Covariance & Contravariance →](./q13-covariance-contravariance.md)

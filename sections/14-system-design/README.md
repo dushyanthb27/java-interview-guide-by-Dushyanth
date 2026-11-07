@@ -14,7 +14,14 @@ System design questions in Java interviews test your ability to apply Java conce
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | Design a Thread Pool | 🟠 | [01-design-thread-pool.md](./01-design-thread-pool.md) |
 | 2 | Design a Cache (LRU) | 🟠 | [02-design-cache.md](./02-design-cache.md) |
 | 3 | Design a Connection Pool | 🟠 | [03-design-connection-pool.md](./03-design-connection-pool.md) |

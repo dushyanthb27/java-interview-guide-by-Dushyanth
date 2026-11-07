@@ -215,7 +215,14 @@ Writing microbenchmarks without JIT warm-up. The first few thousand invocations 
 
 Monitor code cache usage (`jcmd <pid> Compiler.codecache`) — if the code cache fills up, the JIT stops compiling and performance degrades severely. Increase it with `-XX:ReservedCodeCacheSize=512m` for large applications. Also, very large methods (> 8000 bytes of bytecode) are never JIT-compiled — keep methods small and focused to enable JIT optimizations.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

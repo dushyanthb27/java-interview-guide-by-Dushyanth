@@ -375,6 +375,13 @@ StackWalker.getInstance().walk(frames ->
 - Discuss `-XX:-OmitStackTraceInFastThrow` JVM flag
 - State clearly: "Don't use exceptions for flow control" with performance justification
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 [<< Previous: Q10 - Exceptions in Streams](./q10-exceptions-in-streams.md) | [Next: Q12 - Multi-Catch and Rethrowing >>](./q12-multi-catch-rethrowing.md)

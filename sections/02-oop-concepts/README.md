@@ -15,7 +15,14 @@ Object-Oriented Programming is the backbone of Java. This section covers the fou
 ## Question Index
 
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | Q4 | What are classes and objects in Java? | 🟢 | [q01-classes-and-objects.md](./q01-classes-and-objects.md) |
 | Q5 | Explain constructors and their types | 🟢 | [q02-constructors.md](./q02-constructors.md) |
 | Q6 | How does inheritance work in Java? | 🟢 | [q03-inheritance.md](./q03-inheritance.md) |

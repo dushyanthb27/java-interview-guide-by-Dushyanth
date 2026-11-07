@@ -13,7 +13,14 @@ Input/Output operations are fundamental to any application. This section covers 
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | Byte streams vs character streams | 🟢 | [q01](./q01-byte-vs-character-streams.md) |
 | 2 | How does File I/O work in Java? | 🟢 | [q02](./q02-file-io.md) |
 | 3 | BufferedReader and BufferedWriter usage | 🟢 | [q03](./q03-buffered-reader-writer.md) |

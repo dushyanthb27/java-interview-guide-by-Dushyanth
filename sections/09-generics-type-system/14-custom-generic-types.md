@@ -126,6 +126,13 @@ public <T> T load(Class<T> clazz, long id) { ... }
 - Generic type parameters **cannot** be used in `static` contexts because parameters belong to instance instantiation.
 - Always apply **PECS** when designing consumer/producer generic method parameters.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 [← Q13: Covariance & Contravariance](./13-covariance-contravariance.md) | [Next: Q15 - Advanced Generics Patterns →](./15-advanced-generics-patterns.md)

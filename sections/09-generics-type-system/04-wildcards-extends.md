@@ -281,6 +281,13 @@ List<? extends Number> readOnly = Collections.unmodifiableList(integers);
 
 - Use type parameters instead of wildcards when you need to reference the type
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 [← Q3: Bounded Type Parameters](./q03-bounded-type-parameters.md) | [Next: Q5 - Lower-Bounded Wildcards →](./q05-wildcards-super.md)

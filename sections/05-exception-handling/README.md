@@ -13,7 +13,14 @@ Proper exception handling is critical for building robust Java applications. Thi
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | Explain the Java exception hierarchy | 🟢 | [q01](./q01-exception-hierarchy.md) |
 | 2 | What's the difference between checked and unchecked exceptions? | 🟢 | [q02](./q02-checked-vs-unchecked.md) |
 | 3 | How does try-catch-finally work? | 🟢 | [q03](./q03-try-catch-finally.md) |

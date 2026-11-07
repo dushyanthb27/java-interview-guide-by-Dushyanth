@@ -321,7 +321,14 @@ The default executor for `supplyAsync` and `*Async` variants is `ForkJoinPool.co
 
 Internally, `CompletableFuture` maintains a **Treiber stack** (lock-free concurrent stack) of dependent actions. When a future completes, it pops and executes all registered actions. The `*Async` variants submit actions to an executor rather than running them inline. `join()` vs `get()`: both block, but `join()` wraps exceptions in `CompletionException` (unchecked), while `get()` wraps in `ExecutionException` (checked). For parallel streams and `CompletableFuture`, the `ForkJoinPool.commonPool()` parallelism defaults to `Runtime.getRuntime().availableProcessors() - 1`.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

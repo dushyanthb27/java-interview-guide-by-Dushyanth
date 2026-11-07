@@ -250,7 +250,14 @@ Private interface methods compile to the same bytecode as private methods in cla
 
 At the bytecode level, private interface methods are stored in the interface's class file with the `ACC_PRIVATE` flag. Default methods calling private methods use `invokespecial` (Java 9+ adjusted this to allow `invokespecial` on interface private methods, which was previously restricted). The private method's bytecode is identical to a private method in a regular class. Since interfaces are loaded by the same classloader mechanism as classes, private methods have the same visibility enforcement at the JVM level.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

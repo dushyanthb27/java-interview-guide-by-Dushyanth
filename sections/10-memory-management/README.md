@@ -13,7 +13,14 @@ Understanding memory management is crucial for building performant, leak-free Ja
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | How does stack vs heap memory work? | 🟡 | [q01](./q01-stack-vs-heap.md) |
 | 2 | Explain the object lifecycle in Java | 🟡 | [q02](./q02-object-lifecycle.md) |
 | 3 | How do memory leaks occur in Java? | 🟠 | [q03](./q03-memory-leaks.md) |

@@ -290,7 +290,14 @@ public class ShortCircuitDemo {
 
 The Stream API uses **loop fusion** internally — multiple intermediate operations are merged into a single pass over the data rather than creating intermediate collections. The `Spliterator` interface underlies the splitting and traversal logic, enabling parallel decomposition. Stateful operations (`sorted`, `distinct`) introduce **pipeline barriers** that force buffering of upstream elements. The JVM can also optimize `stream().count()` on `ArrayList` to return `.size()` directly, bypassing the entire pipeline when no intermediate operations are present.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

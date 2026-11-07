@@ -304,6 +304,13 @@ System.out.println(ref.getType());  // java.util.List<java.lang.String>
 
 - Bridge methods are generated to preserve polymorphism after erasure (see Q10)
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 [← Q1: Generic Classes & Methods](./q01-generic-classes-methods.md) | [Next: Q3 - Bounded Type Parameters →](./q03-bounded-type-parameters.md)

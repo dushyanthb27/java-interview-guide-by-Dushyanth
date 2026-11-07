@@ -288,7 +288,14 @@ public class TimeBasedLeaderboard {
 | Asynchronous updates | Non-blocking score updates | Better throughput |
 | Sharding | Shard by game region | Horizontal scalability |
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## Interviewer Insight
 Interviewers want to see that you understand leaderboard design: data structures (sorted sets), ranking algorithms, and performance optimization. Strong candidates discuss Redis ZSET, batch processing, and time-based leaderboards.

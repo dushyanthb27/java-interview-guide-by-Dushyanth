@@ -13,7 +13,14 @@ Understanding JVM internals separates senior developers from juniors. This secti
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | Explain JVM architecture | 🟡 | [q01](./q01-jvm-architecture.md) |
 | 2 | How does class loading work? | 🟠 | [q02](./q02-class-loading-mechanism.md) |
 | 3 | What are the different class loaders? | 🟠 | [q03](./q03-class-loaders.md) |

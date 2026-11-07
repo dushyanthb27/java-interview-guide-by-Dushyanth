@@ -226,7 +226,14 @@ Non-capturing lambdas (those that don't reference any variables from the enclosi
 
 The `invokedynamic` approach was chosen over anonymous inner classes for three key reasons: (1) **deferred class generation** — the lambda implementation class is created at runtime, not compile time, enabling future JVM optimizations without recompilation; (2) **no extra .class files** — a project with 1,000 lambdas doesn't produce 1,000 additional class files; (3) **optimization potential** — the JVM can inline lambda bodies directly into call sites, eliminating virtual dispatch overhead entirely.
 
----
+\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n
 
 ## 🎯 Interviewer Insight
 

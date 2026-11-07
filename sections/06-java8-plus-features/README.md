@@ -13,7 +13,14 @@ Java has evolved dramatically since Java 8. This section covers the most importa
 
 ## Question Index
 | # | Question | Difficulty | File |
-|---|----------|------------|------|
+|---|----------|------------|---\n
+### ⚠️ Gotchas
+
+- **Memory Leaks & Object Reference Retention**: Unintentional object retention via static references, unclosed resource handles, or long-lived caches preventing Garbage Collection.
+- **Concurrency & Thread Safety**: Assuming thread safety on standard collections (`ArrayList`, `HashMap`) or primitives, leading to race conditions and data corruption.
+- **Exception Masking & Swallowing**: Catching generic `Exception` or `Throwable` without proper logging, rethrowing, or handling suppressed exceptions in try-with-resources.
+- **Performance Antipatterns**: Excessive object allocation in tight loops, improper stream boxing/unboxing overhead, or inefficient synchronization blocks causing thread contention.
+\n---\n|
 | 1 | How do lambda expressions work? | 🟡 | [01-lambda-expressions.md](./01-lambda-expressions.md) |
 | 2 | What are method references? | 🟡 | [02-method-references.md](./02-method-references.md) |
 | 3 | Deep dive into functional interfaces | 🟡 | [03-functional-interfaces-detail.md](./03-functional-interfaces-detail.md) |
